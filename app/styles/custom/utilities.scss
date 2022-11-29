@@ -1,0 +1,8 @@
+@layer utilities {
+  .dark .dark\:bg-dot-grid-dark {
+    background: linear-gradient(90deg, #151618 15px, transparent 1%) 50%,
+      linear-gradient(#151618 15px, #3e4146 1%) 0%,
+      hsla(0, 0%, 100%, 0.16) fixed;
+    background-size: 16px 16px !important;
+  }
+}

@@ -1,0 +1,10 @@
+@layer base {
+  html {
+    @apply font-inter;
+  }
+
+  body {
+    @apply relative font-inter;
+    @apply bg-dot-grid-light dark:bg-dot-grid-dark;
+  }
+}

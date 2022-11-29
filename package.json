@@ -1,0 +1,63 @@
+{
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "build": "remix build",
+    "dev": "remix build && run-p \"dev:*\"",
+    "dev:node": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.js --watch ./server.js",
+    "dev:remix": "remix watch",
+    "start": "cross-env NODE_ENV=production node ./server.js",
+    "sass": "sass --watch app/:app/",
+    "tailwind:dev": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --watch --postcss",
+    "serve": "concurrently \"npm run tailwind:dev\" \"npm run dev\""
+  },
+  "dependencies": {
+    "@markdoc/markdoc": "^0.2.1",
+    "@notionhq/client": "^2.2.2",
+    "@remix-run/express": "^1.7.6",
+    "@remix-run/node": "^1.7.6",
+    "@remix-run/react": "^1.7.6",
+    "@types/prismjs": "^1.26.0",
+    "clsx": "^1.2.1",
+    "compression": "^1.7.4",
+    "cross-env": "^7.0.3",
+    "dayjs": "^1.11.6",
+    "express": "^4.18.2",
+    "isbot": "^3.6.5",
+    "morgan": "^1.10.0",
+    "node-sass": "^8.0.0",
+    "notion-client": "^6.15.6",
+    "notion-to-md": "^2.5.5",
+    "prism-react-renderer": "^1.3.5",
+    "prismjs": "^1.29.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-notion-x": "^6.15.7",
+    "remix-utils": "^4.2.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^1.7.6",
+    "@remix-run/eslint-config": "^1.7.6",
+    "@tailwindcss/nesting": "0.0.0-insiders.565cd3e",
+    "@tailwindcss/typography": "^0.5.8",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "@types/react-icons": "^3.0.0",
+    "autoprefixer": "^10.4.13",
+    "concurrently": "^7.6.0",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
+    "nodemon": "^2.0.20",
+    "npm-run-all": "^4.1.5",
+    "postcss-import": "^15.0.0",
+    "postcss-nested": "^6.0.0",
+    "postcss-nesting": "^10.2.0",
+    "react-icons": "^4.6.0",
+    "sass": "^1.56.1",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.8.4"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
