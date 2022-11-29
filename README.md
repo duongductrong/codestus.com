@@ -1,6 +1,8 @@
-# Welcome to Remix!
+# Codestus.com - [Remix - Notion]
 
-- [Remix Docs](https://remix.run/docs)
+**Example**
+
+![example.gif](./app/assets/example.gif)
 
 ## Development
 
