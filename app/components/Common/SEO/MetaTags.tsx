@@ -34,7 +34,7 @@ const MetaTags = ({ rootMatch }: MetaTagsProps) => {
     if (handleMetaTagsFn && typeof handleMetaTagsFn === "function") {
       const customMetaTags = handleMetaTagsFn({
         location,
-        data: matcherDataOfRoute,
+        data: matcherDataOfRoute.data,
         params: matcherDataOfRoute.params,
         parentsData: matches,
       });
@@ -43,7 +43,9 @@ const MetaTags = ({ rootMatch }: MetaTagsProps) => {
         defaultMetaTags[key] = value;
       });
     }
-  } catch {}
+  } catch (e) {
+    console.log('error', e);
+  }
 
   const {
     charset,

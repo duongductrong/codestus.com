@@ -1,4 +1,5 @@
-import type { LoaderFunction, MetaFunction } from "@remix-run/node";
+import type { HeadersFunction, LoaderFunction } from "@remix-run/node";
+import { Response } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
 import "prismjs";
@@ -15,18 +16,37 @@ export interface ILoaderDataPostItem {
   content: ReturnType<typeof markdown>;
 }
 
-export const loader: LoaderFunction = async ({ params }) => {
-  const slug = params.slug ?? "";
-  const postItem = await postService.detail(slug);
-  const content = markdown(postItem.childrenMarkdown);
+export const headers: HeadersFunction = () => {
+  return {
+    "Cache-Control": "max-age=300, s-maxage=3600",
+  };
+};
 
-  return { post: postItem, content };
+export const loader: LoaderFunction = async ({ params }) => {
+  try {
+    const slug = params.slug ?? "";
+    const postItem = await postService.detail(slug);
+
+    const content = markdown(postItem.childrenMarkdown);
+
+    // Auto inc every loader blog
+    // Only run on production
+    if (process.env?.APP_ENV === "production") {
+      postService.incPageViews(postItem.id);
+    }
+
+    return { post: postItem, content };
+  } catch {
+    throw new Response("Not found", {
+      status: 404,
+    });
+  }
 };
 
 export const metaTags: MetaTagsFunction = ({ data, parentsData }) => {
   const { post }: ILoaderDataPostItem = data;
   return {
-    title: post.title,
+    title: post?.title,
   };
 };
 

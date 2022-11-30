@@ -117,6 +117,25 @@ class PostService {
       childrenMarkdown: blocksToMarkdown,
     };
   }
+
+  async incPageViews(pageId: string) {
+    const pageViews = ((
+      (await notionService.client().pages.retrieve({
+        page_id: pageId,
+      })) as { [x: string]: any }
+    ).properties?.views?.number ?? 0) as number;
+
+    const result = await notionService.client().pages.update({
+      page_id: pageId,
+      properties: {
+        views: {
+          number: pageViews + 1,
+        },
+      },
+    });
+
+    return result;
+  }
 }
 
 const postService = new PostService();

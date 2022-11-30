@@ -52,7 +52,7 @@ export default function App() {
   return (
     <html lang="vi">
       <head>
-        <Meta />
+        {/* <Meta /> */}
         <MetaTags rootMatch="root" />
         <Manifest rootMatch="root" />
         <Links />
