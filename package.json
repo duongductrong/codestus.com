@@ -2,6 +2,7 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
+    "prisma:generate": "prisma generate",
     "build": "remix build",
     "dev": "remix build && run-p \"dev:*\"",
     "dev:node": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.js --watch ./server.js",
@@ -14,6 +15,7 @@
   "dependencies": {
     "@markdoc/markdoc": "^0.2.1",
     "@notionhq/client": "^2.2.2",
+    "@prisma/client": "^4.7.1",
     "@remix-run/express": "^1.7.6",
     "@remix-run/node": "^1.7.6",
     "@remix-run/react": "^1.7.6",
@@ -52,6 +54,7 @@
     "postcss-import": "^15.0.0",
     "postcss-nested": "^6.0.0",
     "postcss-nesting": "^10.2.0",
+    "prisma": "^4.7.1",
     "react-icons": "^4.6.0",
     "sass": "^1.56.1",
     "tailwindcss": "^3.2.4",

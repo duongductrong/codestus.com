@@ -1,12 +1,8 @@
 import { useTransition } from "@remix-run/react";
-import type { FC } from "react";
-import { useState } from "react";
-import { useEffect } from "react";
-import React from "react";
-import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
-import { GENERAL_ROUTES } from "~/libs/constants/routes";
-import DynamicPortal from "../Portal/DynamicPortal";
 import clsx from "clsx";
+import type { FC } from "react";
+import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
+import DynamicPortal from "../Portal/DynamicPortal";
 
 export interface ToastLoadingProps {}
 
@@ -31,8 +27,10 @@ const ToastLoading: FC<ToastLoadingProps> = (props) => {
             "opacity-0 -translate-x-4": !isNavigating,
           },
         )}>
-        <div className="w-5 h-5 rounded-full border-2 border-t-white border-neutral-600 animate-spin"></div>
-        <span className="inline-block ml-3 text-white dark:text-black">Đang tải..</span>
+        <div className="w-5 h-5 rounded-full border-2 border-t-white border-r-blue-600 border-b-red-600 border-l-green-600 border-neutral-600 animate-spin"></div>
+        <span className="inline-block ml-3 text-white dark:text-black">
+          Loading...
+        </span>
       </div>
     </DynamicPortal>
   );

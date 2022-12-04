@@ -1,9 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import type { HTMLAttributes } from "react";
-import { useState } from "react";
-import { useEffect } from "react";
-import { useRef } from "react";
-import React from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export interface DynamicPortalProps

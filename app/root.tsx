@@ -1,10 +1,20 @@
 import type { LinksFunction, LoaderFunction } from "@remix-run/node";
-import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import {
+  Links,
+  LiveReload,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+} from "@remix-run/react";
 import { DynamicLinks, ExternalScripts } from "remix-utils";
 import tailwindCss from "~/styles/tailwindcss.css";
 import Manifest from "./components/Common/SEO/Manifest";
 import MetaTags from "./components/Common/SEO/MetaTags";
 import ToastLoading from "./components/Common/Toast/ToastLoading";
+
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 export interface ILoaderDataRoot {
   appUrl: string;
@@ -64,7 +74,7 @@ export default function App() {
         <LiveReload />
         <ToastLoading />
         <ExternalScripts />
-        <ScrollRestoration />
+        {/* <ScrollRestoration /> */}
       </body>
     </html>
   );

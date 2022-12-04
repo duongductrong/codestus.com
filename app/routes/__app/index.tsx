@@ -1,14 +1,12 @@
+import type { Post } from "@prisma/client";
 import type {
   ActionFunction,
   LoaderFunction,
-  MetaFunction,
   SerializeFrom,
 } from "@remix-run/node";
 import {
   useFetcher,
   useLoaderData,
-  useLocation,
-  useNavigate,
   useSearchParams,
   useTransition,
 } from "@remix-run/react";
@@ -20,19 +18,20 @@ import Card from "~/components/Common/Card/Card";
 import SimpleCard from "~/components/Common/Card/SimpleCard";
 import SimplePagination from "~/components/Common/Pagination/SimplePagination";
 import Section from "~/components/Common/Section/Section";
-import type { INotionPost } from "~/libs/@types/generalType";
-import { GENERAL_ROUTES } from "~/libs/constants/routes";
-import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
-import postService from "~/libs/services/post.service";
-import SimpleCardSkeleton from "~/components/Common/Skeleton/SimpleCardSkeleton";
-import { seoUtils } from "~/libs/utils/seoUtils";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
+import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
+import { GENERAL_ROUTES } from "~/libs/constants/routes";
+import { prisma } from "~/libs/services/db.server";
+import postService from "~/libs/services/post.service";
 
 export interface ILoaderDataResponse {
-  recentPosts: INotionPost[];
-  latestPosts: INotionPost[];
-  latestHasMore: boolean;
-  latestNextCursor: string;
+  recentPosts: Post[];
+  latestPosts: Post[];
+  pagination: {
+    currentPage: number;
+    nextPage: number | null;
+    prevPage: number | null;
+  };
 }
 
 const dynamicLinks: DynamicLinksFunction<SerializeFrom<typeof loader>> = ({
@@ -47,27 +46,36 @@ const dynamicLinks: DynamicLinksFunction<SerializeFrom<typeof loader>> = ({
 };
 
 export const loader: LoaderFunction = async ({ context, params, request }) => {
+  const perPageLatestPosts = 5;
   const url = new URL(request.url);
-  const startCursor = url.searchParams.get("startCursor");
+  const searchParamsPage = url.searchParams.get("page") ?? 1;
+  const page = Number.isNaN(Number(searchParamsPage))
+    ? 1
+    : Number(searchParamsPage);
 
-  const { data: recentPosts } = await postService.getMostViewsPostsPublished({
-    pageSize: 7,
-  });
+  const [latestPosts, recentPosts, totalPosts] = await prisma.$transaction([
+    postService.getLatestPostsPublished({
+      pageSize: perPageLatestPosts,
+      page: Number(page),
+    }),
+    postService.getMostViewsPostsPublished({
+      pageSize: 7,
+    }),
+    postService.countAllPublishedPosts(),
+  ]);
 
-  const {
-    data: latestPosts,
-    hasMore: latestHasMore,
-    nextCursor: latestNextCursor,
-  } = await postService.getLatestPostsPublished({
-    startCursor: startCursor ?? undefined,
-    pageSize: 5,
-  });
+  const totalPages = Math.ceil(totalPosts / perPageLatestPosts);
+  const nextPage = page + 1 <= totalPages ? page + 1 : null;
+  const prevPage = page - 1 > 0 ? page - 1 : null;
 
   return {
     recentPosts,
     latestPosts,
-    latestHasMore,
-    latestNextCursor,
+    pagination: {
+      currentPage: page,
+      nextPage,
+      prevPage,
+    },
   };
 };
 
@@ -87,27 +95,29 @@ export const handle = {
 };
 
 const Index = () => {
-  const { recentPosts, latestPosts, latestNextCursor } =
+  const { recentPosts, latestPosts, pagination } =
     useLoaderData<ILoaderDataResponse>();
   const fetcher = useFetcher();
   const transition = useTransition();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
-  const hasStartCursor = searchParams.get("startCursor");
   const isLoadingLatestPosts =
     transition.state === TRANSITION_STATE.LOADING &&
     transition.type === TRANSITION_TYPE.NORMAL_LOAD &&
     transition.location?.pathname === GENERAL_ROUTES.HOME;
 
-  const paginationNextTo = queryString.stringify({
-    startCursor: latestNextCursor,
-  });
-
-  const onPrevPagination = () => {
-    if (hasStartCursor) {
-      navigate(-1);
-    }
+  const uiPagination = {
+    next: {
+      query: queryString.stringify({
+        page: pagination.nextPage,
+      }),
+      disabled: !pagination.nextPage,
+    },
+    previous: {
+      query: queryString.stringify({
+        page: pagination.prevPage,
+      }),
+      disabled: !pagination.prevPage,
+    },
   };
 
   return (
@@ -117,8 +127,8 @@ const Index = () => {
           Hi the software engineers,
         </h2>
         <h3 className="text-black dark:text-white font-bold text-4xl sm:text-5xl md:text-6xl leading-snug mb-12">
-          Hey, I'm codestus. <br />
-          Providing knowledge software development.
+          Help people store and <br />
+          quality knowledge into software products
         </h3>
 
         <div className="space-x-4">
@@ -133,11 +143,12 @@ const Index = () => {
         <div className="grid md:grid-cols-12 gap-4">
           {recentPosts.map((post, index) => (
             <Card
-              key={post.id}
+              key={post.postId}
               title={post.title}
-              desc={post.description}
-              source={index < 3 ? post?.cover : undefined}
+              desc={post.description ?? ""}
+              source={index < 3 ? post?.thumbnail ?? "" : undefined}
               url={GENERAL_ROUTES.POST_DETAIL(post.slug)}
+              pageViews={post.views}
               className={clsx({
                 "col-span-4": index < 3,
                 "col-span-4 md:col-span-3": index >= 3,
@@ -149,9 +160,9 @@ const Index = () => {
       <Section title="Latest blog." subtitle="The latest posts recently.">
         {latestPosts.map((post, index) => (
           <SimpleCard
-            key={post.id}
+            key={post.postId}
             title={post.title}
-            desc={post.description}
+            desc={post.description ?? ""}
             url={GENERAL_ROUTES.POST_DETAIL(post.slug)}
             className={clsx("mb-4")}
             views={post.views}
@@ -160,10 +171,12 @@ const Index = () => {
         ))}
 
         <SimplePagination
-          nextTo={`.?${paginationNextTo}`}
-          onPrev={onPrevPagination}
-          prevDisabled={!hasStartCursor}
-          nextDisabled={!latestNextCursor}
+          prevText="Latest"
+          nextText="Oldest"
+          nextTo={`.?${uiPagination.next.query}`}
+          prevTo={`.?${uiPagination.previous.query}`}
+          nextDisabled={uiPagination.next.disabled}
+          prevDisabled={uiPagination.previous.disabled}
         />
       </Section>
     </fetcher.Form>

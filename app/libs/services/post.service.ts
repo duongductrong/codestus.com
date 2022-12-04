@@ -1,5 +1,8 @@
 import type { QueryDatabaseParameters } from "@notionhq/client/build/src/api-endpoints";
+import type { Post, PrismaPromise } from "@prisma/client";
 import type { INotionOriginalPost, INotionPost } from "../@types/generalType";
+import { POST_STATUS } from "../constants/model";
+import { prisma } from "./db.server";
 import notionService from "./notion.server";
 
 export interface IPSGetAllArgs {
@@ -9,113 +12,70 @@ export interface IPSGetAllArgs {
   query: Pick<QueryDatabaseParameters, "sorts" | "filter">;
 }
 
-export interface IPSGetMostViewsPostsPublishedArgs
-  extends Omit<IPSGetAllArgs, "query" | "startCursor"> {}
+export interface IPSGetMostViewsPostsPublishedArgs {
+  pageSize?: number;
+}
 
-export interface IPSGetLatestPostsPublishedArgs
-  extends Omit<IPSGetAllArgs, "query"> {}
+export interface IPSGetLatestPostsPublishedArgs {
+  pageSize?: number;
+  page?: number;
+}
 
 class PostService {
-  async getAll({ pageSize, startCursor, query }: IPSGetAllArgs) {
-    const { sorts, filter } = query;
-    const notionResponse = await notionService.client().databases.query({
-      database_id: notionService.databaseId(),
-      start_cursor: startCursor,
-      filter: filter,
-      sorts: sorts,
-      page_size: pageSize ?? 10,
-    });
-
-    const rawPosts = notionResponse.results as INotionOriginalPost[];
-
-    const posts = rawPosts.map((rawPost) => {
-      return {
-        createdAt: rawPost.properties.createdAt.created_time,
-        createdBy: rawPost.properties.createdBy.created_by,
-        lastUpdatedAt: rawPost.properties.lastUpdatedAt.last_edited_time,
-        lastUpdatedBy: rawPost.properties.lastUpdatedBy.last_edited_by,
-        publishAt: rawPost.properties.createdAt.created_time,
-        status: rawPost.properties.createdAt.created_time,
-        tags: rawPost.properties.tags,
-        cover: rawPost.cover?.file?.url ?? rawPost.cover?.external?.url,
-        title: rawPost?.properties?.Name.title[0].plain_text,
-        slug: rawPost.properties.slug.rich_text[0]?.plain_text,
-        description: rawPost.properties.description.rich_text[0]?.plain_text,
-        views: rawPost.properties?.views?.number ?? 0,
-        id: rawPost.id,
-      };
-    }) as INotionPost[];
-
-    return {
-      hasMore: notionResponse.has_more,
-      nextCursor: notionResponse.next_cursor,
-      data: posts,
-    };
-  }
-
-  async getMostViewsPostsPublished(args: IPSGetMostViewsPostsPublishedArgs) {
-    const { pageSize } = args;
-    return this.getAll({
-      pageSize: pageSize,
-      query: {
-        filter: {
-          property: "status",
-          status: {
-            equals: "Published",
-          },
+  getMostViewsPostsPublished(args: IPSGetMostViewsPostsPublishedArgs) {
+    return prisma.post.findMany({
+      take: args.pageSize,
+      where: {
+        status: {
+          equals: POST_STATUS.PUBLISHED,
         },
-        sorts: [
-          {
-            property: "views",
-            direction: "descending",
-          },
-        ],
+      },
+      orderBy: {
+        views: "desc",
       },
     });
   }
 
-  async getLatestPostsPublished(args: IPSGetLatestPostsPublishedArgs) {
-    const { pageSize, startCursor } = args;
-    return this.getAll({
-      pageSize: pageSize,
-      query: {
-        filter: {
-          property: "status",
-          status: {
-            equals: "Published",
-          },
-        },
-        sorts: [
-          {
-            property: "publishAt",
-            direction: "descending",
-          },
-        ],
+  getLatestPostsPublished(args: IPSGetLatestPostsPublishedArgs) {
+    const { pageSize = 12, page = 1 } = args;
+
+    const _page = page <= 1 ? 1 : page;
+    const skipRecords = (_page - 1) * pageSize;
+
+    return prisma.post.findMany({
+      orderBy: {
+        publish_at: "desc",
       },
-      startCursor,
+      take: pageSize,
+      skip: skipRecords,
+    }) as PrismaPromise<Post[]>;
+  }
+
+  countAllPublishedPosts() {
+    return prisma.post.count({
+      where: {
+        status: {
+          equals: POST_STATUS.PUBLISHED,
+        },
+      },
     });
   }
 
   async detail(slug: string) {
-    const result = await this.getAll({
-      pageSize: 1,
-      query: {
-        filter: {
-          property: "slug",
-          rich_text: {
-            equals: slug,
+    return prisma.post.findFirst({
+      where: {
+        AND: [
+          {
+            slug: {
+              equals: slug,
+            },
           },
-        },
+        ],
+      },
+      include: {
+        users: true,
       },
     });
-
-    const post = result.data[0];
-    const blocksToMarkdown = await notionService.n2mMarkdown(post.id);
-
-    return {
-      ...post,
-      childrenMarkdown: blocksToMarkdown,
-    };
   }
 
   async incPageViews(pageId: string) {

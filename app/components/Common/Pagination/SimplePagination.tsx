@@ -43,7 +43,7 @@ const SimplePagination: FC<SimplePaginationProps> = ({
           size={24}
           className="mr-2"
         />{" "}
-        {prevText ?? "Prev"}
+        {prevText ?? "Previous"}
       </Link>
 
       <Link
