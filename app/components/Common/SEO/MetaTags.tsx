@@ -15,7 +15,7 @@ const MetaTags = ({ rootMatch }: MetaTagsProps) => {
   const rootLoader = rootMatcher?.data as ILoaderDataRoot;
 
   const defaultMetaTags: { [x: string]: any } = {
-    url: `${rootLoader.appUrl}${location.pathname}`,
+    url: `${rootLoader?.appUrl}${location?.pathname}`,
     image: "https://codestus.com/uploads/images/seo/open-graph-image.png",
     title: "Bearce",
     description:

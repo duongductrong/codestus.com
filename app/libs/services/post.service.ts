@@ -61,7 +61,7 @@ class PostService {
     });
   }
 
-  async detail(slug: string) {
+  detail(slug: string) {
     return prisma.post.findFirst({
       where: {
         AND: [
@@ -74,27 +74,47 @@ class PostService {
       },
       include: {
         users: true,
+        post_tags: {
+          select: {
+            tag: {
+              select: {
+                name: true,
+                slug: true,
+                tagId: true,
+              },
+            },
+          },
+        },
       },
     });
   }
 
-  async incPageViews(pageId: string) {
-    const pageViews = ((
-      (await notionService.client().pages.retrieve({
-        page_id: pageId,
-      })) as { [x: string]: any }
-    ).properties?.views?.number ?? 0) as number;
+  incPageViews(slug: string) {
+    // const pageViews = ((
+    //   (await notionService.client().pages.retrieve({
+    //     page_id: pageId,
+    //   })) as { [x: string]: any }
+    // ).properties?.views?.number ?? 0) as number;
+    // const result = await notionService.client().pages.update({
+    //   page_id: pageId,
+    //   properties: {
+    //     views: {
+    //       number: pageViews + 1,
+    //     },
+    //   },
+    // });
+    // return result;
 
-    const result = await notionService.client().pages.update({
-      page_id: pageId,
-      properties: {
+    return prisma.post.update({
+      where: {
+        slug,
+      },
+      data: {
         views: {
-          number: pageViews + 1,
+          increment: 1,
         },
       },
     });
-
-    return result;
   }
 }
 

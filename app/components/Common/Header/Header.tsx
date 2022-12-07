@@ -32,11 +32,17 @@ const Header: FC<HeaderProps> = ({ className, ...props }) => {
           className="text-black dark:text-white font-semibold">
           Home
         </Link> */}
-        <Link
+        {/* <Link
           to={GENERAL_ROUTES.HOME}
           className="text-black dark:text-white font-semibold">
           Blog
-        </Link>
+        </Link> */}
+        <a
+          href="https://www.linkedin.com/in/duongductrong/"
+          target={"_blank"}
+          className="text-black dark:text-white font-semibold" rel="noreferrer">
+          Linked In
+        </a>
         <span
           role="button"
           className="inline-block cursor-pointer text-black dark:text-white"

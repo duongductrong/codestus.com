@@ -8,6 +8,7 @@ import {
 } from "@remix-run/react";
 import { DynamicLinks, ExternalScripts } from "remix-utils";
 import tailwindCss from "~/styles/tailwindcss.css";
+import { RootError } from "./components/CatchError/RootError";
 import Manifest from "./components/Common/SEO/Manifest";
 import MetaTags from "./components/Common/SEO/MetaTags";
 import ToastLoading from "./components/Common/Toast/ToastLoading";
@@ -70,6 +71,28 @@ export default function App() {
       </head>
       <body>
         <Outlet />
+        <Scripts />
+        <LiveReload />
+        <ToastLoading />
+        <ExternalScripts />
+        {/* <ScrollRestoration /> */}
+      </body>
+    </html>
+  );
+}
+
+export function CatchBoundary() {
+  return (
+    <html>
+      <head>
+        {/* <Meta /> */}
+        {/* <MetaTags rootMatch="root" /> */}
+        {/* <Manifest rootMatch="root" /> */}
+        <Links />
+        <DynamicLinks />
+      </head>
+      <body>
+        <RootError />
         <Scripts />
         <LiveReload />
         <ToastLoading />

@@ -1,6 +1,7 @@
 import { renderers, type RenderableTreeNodes } from "@markdoc/markdoc";
 import * as React from "react";
-import CodeBlock from "./Blocks/CodeBlock";
+import Fence from "./Blocks/Fence";
+import CodeSanBoxEmbed from "./Blocks/CodeSanBoxEmbed";
 
 export interface MarkdownProps {
   content: RenderableTreeNodes;
@@ -11,7 +12,8 @@ const Markdown = ({ content }: MarkdownProps) => {
     <>
       {renderers.react(content, React, {
         components: {
-          CodeBlock,
+          Fence,
+          CodeSanBoxEmbed,
         },
       })}
     </>

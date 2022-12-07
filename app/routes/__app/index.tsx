@@ -25,7 +25,7 @@ import { prisma } from "~/libs/services/db.server";
 import postService from "~/libs/services/post.service";
 
 export interface ILoaderDataResponse {
-  recentPosts: Post[];
+  // recentPosts: Post[];
   latestPosts: Post[];
   pagination: {
     currentPage: number;
@@ -53,14 +53,14 @@ export const loader: LoaderFunction = async ({ context, params, request }) => {
     ? 1
     : Number(searchParamsPage);
 
-  const [latestPosts, recentPosts, totalPosts] = await prisma.$transaction([
+  const [latestPosts, totalPosts] = await prisma.$transaction([
     postService.getLatestPostsPublished({
       pageSize: perPageLatestPosts,
       page: Number(page),
     }),
-    postService.getMostViewsPostsPublished({
-      pageSize: 7,
-    }),
+    // postService.getMostViewsPostsPublished({
+    //   pageSize: 7,
+    // }),
     postService.countAllPublishedPosts(),
   ]);
 
@@ -69,7 +69,6 @@ export const loader: LoaderFunction = async ({ context, params, request }) => {
   const prevPage = page - 1 > 0 ? page - 1 : null;
 
   return {
-    recentPosts,
     latestPosts,
     pagination: {
       currentPage: page,
@@ -95,8 +94,7 @@ export const handle = {
 };
 
 const Index = () => {
-  const { recentPosts, latestPosts, pagination } =
-    useLoaderData<ILoaderDataResponse>();
+  const { latestPosts, pagination } = useLoaderData<ILoaderDataResponse>();
   const fetcher = useFetcher();
   const transition = useTransition();
 
@@ -122,7 +120,7 @@ const Index = () => {
 
   return (
     <fetcher.Form>
-      <div className="py-[100px] mb-12">
+      {/* <div className="py-[100px] mb-12">
         <h2 className="text-gray-500 dark:text-gray-400 font-semibold mb-4">
           Hi the software engineers,
         </h2>
@@ -134,9 +132,9 @@ const Index = () => {
         <div className="space-x-4">
           <Button>Let's go</Button>
         </div>
-      </div>
+      </div> */}
 
-      <Section
+      {/* <Section
         title="Most views."
         subtitle="Many engineers care about some posts."
         className="mb-12">
@@ -155,9 +153,12 @@ const Index = () => {
               })}></Card>
           ))}
         </div>
-      </Section>
+      </Section> */}
 
-      <Section title="Latest blog." subtitle="The latest posts recently.">
+      <Section
+        className="mt-14"
+        title="Latest blog."
+        subtitle="The latest posts recently.">
         {latestPosts.map((post, index) => (
           <SimpleCard
             key={post.postId}
@@ -167,6 +168,8 @@ const Index = () => {
             className={clsx("mb-4")}
             views={post.views}
             loadingSkeleton={isLoadingLatestPosts}
+            estimateReadTime={Math.ceil((post.content?.length ?? 1) / 1250)}
+            lastUpdated={post.publish_at ?? ""}
           />
         ))}
 

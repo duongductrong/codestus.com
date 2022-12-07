@@ -1,8 +1,10 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import { Link } from "@remix-run/react";
 import clsx from "clsx";
+import dayjs from "dayjs";
 import type { FC, HTMLAttributes } from "react";
 import React from "react";
+import { MdRemove } from "react-icons/md";
 import SimpleCardSkeleton from "../Skeleton/SimpleCardSkeleton";
 
 export interface SimpleCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -11,6 +13,8 @@ export interface SimpleCardProps extends HTMLAttributes<HTMLDivElement> {
   url?: string;
   loadingSkeleton?: boolean;
   views?: number | string;
+  estimateReadTime: number;
+  lastUpdated?: string | Date;
 }
 
 const SimpleCard: FC<SimpleCardProps> = ({
@@ -20,14 +24,14 @@ const SimpleCard: FC<SimpleCardProps> = ({
   url,
   views = 0,
   loadingSkeleton,
+  lastUpdated,
+  estimateReadTime = 1,
   ...props
 }) => {
   return loadingSkeleton ? (
     <SimpleCardSkeleton className="mb-8" />
   ) : (
-    <div
-      {...props}
-      className={clsx(className, "")}>
+    <div {...props} className={clsx(className, "")}>
       <div
         {...props}
         className={clsx(
@@ -43,7 +47,19 @@ const SimpleCard: FC<SimpleCardProps> = ({
           {desc}
         </p>
 
-        <p className="font-normal text-sm text-gray-500 mb-4">{views ?? 0} views</p>
+        <div className="space-x-4 flex items-center mb-4">
+          <p className="font-normal text-sm text-gray-500">
+            {views ?? 0} views
+          </p>
+          <p className="font-normal text-sm text-gray-500">
+            {estimateReadTime} phút đọc
+          </p>
+          {lastUpdated && (
+            <p className="font-normal text-sm text-gray-500">
+              {dayjs(lastUpdated).format("MMM DD YYYY")}
+            </p>
+          )}
+        </div>
 
         <Link
           to={url ?? "/"}
