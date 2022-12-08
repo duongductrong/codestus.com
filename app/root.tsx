@@ -6,7 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-import { DynamicLinks, ExternalScripts } from "remix-utils";
+import { DynamicLinks, ExternalScripts, StructuredData } from "remix-utils";
 import tailwindCss from "~/styles/tailwindcss.css";
 import { RootError } from "./components/CatchError/RootError";
 import Manifest from "./components/Common/SEO/Manifest";
@@ -66,6 +66,7 @@ export default function App() {
         {/* <Meta /> */}
         <MetaTags rootMatch="root" />
         <Manifest rootMatch="root" />
+        <StructuredData />
         <Links />
         <DynamicLinks />
       </head>

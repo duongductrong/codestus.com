@@ -4,19 +4,20 @@ import clsx from "clsx";
 import { Link } from "@remix-run/react";
 import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import { MdNightlight, MdWbSunny } from "react-icons/md";
+import { useThemeMode } from "~/libs/hooks/useThemeMode";
 
 export interface HeaderProps extends HTMLAttributes<HTMLHeadElement> {
   className?: string;
 }
 
 const Header: FC<HeaderProps> = ({ className, ...props }) => {
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("light");
+  const { themeMode, toggleThemeMode } = useThemeMode();
 
   useEffect(() => {
     document.documentElement.classList.remove(
       themeMode === "dark" ? "light" : "dark",
     );
-    document.documentElement.classList.add(themeMode);
+    document.documentElement.classList.add(themeMode as string);
   }, [themeMode]);
 
   return (
@@ -40,13 +41,14 @@ const Header: FC<HeaderProps> = ({ className, ...props }) => {
         <a
           href="https://www.linkedin.com/in/duongductrong/"
           target={"_blank"}
-          className="text-black dark:text-white font-semibold" rel="noreferrer">
+          className="text-black dark:text-white font-semibold"
+          rel="noreferrer">
           Linked In
         </a>
         <span
           role="button"
           className="inline-block cursor-pointer text-black dark:text-white"
-          onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}>
+          onClick={toggleThemeMode}>
           {themeMode === "dark" ? (
             <MdWbSunny size={24} />
           ) : (

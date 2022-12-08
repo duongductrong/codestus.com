@@ -1,10 +1,17 @@
-import type { HeadersFunction, LoaderFunction } from "@remix-run/node";
+import type {
+  HeadersFunction,
+  LoaderFunction,
+  SerializeFrom,
+} from "@remix-run/node";
 import { Response } from "@remix-run/node";
 import { ScrollRestoration, useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
 import _compact from "lodash/compact";
 import "prismjs";
 import { MdRemove } from "react-icons/md";
+import type { StructuredDataFunction } from "remix-utils";
+import type { HandleConventionArguments } from "remix-utils/build/react/handle-conventions";
+import type { BlogPosting } from "schema-dts";
 import Markdown from "~/components/Common/Markdown/Markdown";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
 import Tag from "~/components/Common/Tag/Tag";
@@ -53,6 +60,39 @@ export const loader: LoaderFunction = async ({ params }) => {
   }
 };
 
+export const structuredData: StructuredDataFunction<
+  SerializeFrom<typeof loader>,
+  BlogPosting
+> = ({ data, parentsData }: HandleConventionArguments<ILoaderDataPostItem>) => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    name: data.post?.title,
+    headline: data.post?.title,
+    about: data.post?.title,
+    author: {
+      "@type": "Person",
+      "@id": data.post?.users.name,
+      address: data.post?.users.email,
+      alternateName: data.post?.users.name,
+      email: data.post?.users.email,
+      image: data.post?.users.avatar,
+    },
+    url: parentsData?.appHref,
+    image: data.post?.thumbnail,
+    articleBody: data.post?.description,
+    wordCount: data.post?.content?.length ?? 0,
+    dateCreated: data.post?.created_at,
+    thumbnailUrl: data.post?.thumbnail,
+    datePublished: data.post?.publish_at,
+    dateModified: data.post?.updated_at,
+    mainEntityOfPage: {
+      "@type": "WebContent",
+      "@id": parentsData?.appHref ?? `/posts/${data.post?.slug}`,
+    },
+  };
+};
+
 export const metaTags: MetaTagsFunction = ({ data, parentsData }) => {
   const { post }: ILoaderDataPostItem = data;
   return {
@@ -60,7 +100,7 @@ export const metaTags: MetaTagsFunction = ({ data, parentsData }) => {
   };
 };
 
-export const handle = { metaTags };
+export const handle = { metaTags, structuredData };
 
 const PostItem = (props: NotionPageItemProps) => {
   const { post, content } = useLoaderData<ILoaderDataPostItem>();
@@ -69,8 +109,10 @@ const PostItem = (props: NotionPageItemProps) => {
     <div className="mt-[60px] max-w-2xl mx-auto">
       <div className="mb-20">
         <div className="space-x-4 space-y-4 text-center mb-8">
-          {post?.post_tags.map((tag) => (
-            <Tag className="text-sm">#{tag.tag.name}</Tag>
+          {post?.post_tags.map((postTag) => (
+            <Tag key={postTag.tag.slug} className="text-md">
+              #{postTag.tag.name}
+            </Tag>
           ))}
         </div>
 
@@ -79,7 +121,7 @@ const PostItem = (props: NotionPageItemProps) => {
         </h2>
 
         <div className="flex items-center justify-center space-x-4 space-y-2 sm:space-y-0 flex-wrap break-words">
-          <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-sm">
+          <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-md">
             bởi{" "}
             <a
               href={`//github.com/bearce`}
@@ -91,7 +133,7 @@ const PostItem = (props: NotionPageItemProps) => {
 
           <MdRemove className="text-neutral-600 dark:text-neutral-400 m-0" />
 
-          <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-sm">
+          <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-md">
             {Intl.NumberFormat("vi-VN").format(post?.views ?? 0)} lượt xem
           </span>
         </div>

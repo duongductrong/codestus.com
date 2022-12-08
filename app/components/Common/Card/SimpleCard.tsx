@@ -49,11 +49,13 @@ const SimpleCard: FC<SimpleCardProps> = ({
 
         <div className="space-x-4 flex items-center mb-4">
           <p className="font-normal text-sm text-gray-500">
-            {views ?? 0} views
-          </p>
-          <p className="font-normal text-sm text-gray-500">
             {estimateReadTime} phút đọc
           </p>
+          <MdRemove className="text-gray-300 dark:text-gray-500" />
+          <p className="font-normal text-sm text-gray-500">
+            {views ?? 0} lượt xem
+          </p>
+          <MdRemove className="text-gray-300 dark:text-gray-500" />
           {lastUpdated && (
             <p className="font-normal text-sm text-gray-500">
               {dayjs(lastUpdated).format("MMM DD YYYY")}
