@@ -48,7 +48,14 @@ class PostService {
       },
       take: pageSize,
       skip: skipRecords,
-    }) as PrismaPromise<Post[]>;
+      include: {
+        post_tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
   }
 
   countAllPublishedPosts() {

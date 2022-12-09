@@ -25,6 +25,7 @@ const Header: FC<HeaderProps> = ({ className, ...props }) => {
       className={clsx(className, "container flex items-center mx-auto p-4")}>
       <h1 className="font-space font-extrabold text-2xl text-black dark:text-white">
         <Link to="/">Codestus</Link>
+        <sub className="ml-2 text-xs">Simple</sub>
       </h1>
 
       <div className="ml-auto space-x-6 flex items-center">

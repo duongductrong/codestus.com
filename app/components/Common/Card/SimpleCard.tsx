@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
+import type { Tag } from "@prisma/client";
 import { Link } from "@remix-run/react";
 import clsx from "clsx";
 import dayjs from "dayjs";
@@ -6,6 +7,7 @@ import type { FC, HTMLAttributes } from "react";
 import React from "react";
 import { MdRemove } from "react-icons/md";
 import SimpleCardSkeleton from "../Skeleton/SimpleCardSkeleton";
+import Chip from "../Tag/Tag";
 
 export interface SimpleCardProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;
@@ -15,6 +17,7 @@ export interface SimpleCardProps extends HTMLAttributes<HTMLDivElement> {
   views?: number | string;
   estimateReadTime: number;
   lastUpdated?: string | Date;
+  tags: Tag[];
 }
 
 const SimpleCard: FC<SimpleCardProps> = ({
@@ -26,6 +29,7 @@ const SimpleCard: FC<SimpleCardProps> = ({
   loadingSkeleton,
   lastUpdated,
   estimateReadTime = 1,
+  tags = [],
   ...props
 }) => {
   return loadingSkeleton ? (
@@ -40,24 +44,31 @@ const SimpleCard: FC<SimpleCardProps> = ({
           "overflow-hidden rounded-md",
           "hover:translate-x-2 duration-200 transition-all",
         )}>
+        <div className="space-x-2 mb-2">
+          {tags.map((tag, index) => (
+            <Chip key={"tag-" + index} className="text-sm font-normal">
+              #{tag.name}
+            </Chip>
+          ))}
+        </div>
         <h2 className="text-xl font-bold text-gray-700 dark:text-white mb-2">
           {title}
         </h2>
-        <p className="font-normal text-sm text-gray-500 line-clamp-3 mb-4">
+        <p className="font-normal text-md text-gray-500 line-clamp-3 mb-4">
           {desc}
         </p>
 
         <div className="space-x-4 flex items-center mb-4">
-          <p className="font-normal text-sm text-gray-500">
+          <p className="font-normal text-xs sm:text-sm text-gray-500">
             {estimateReadTime} phút đọc
           </p>
           <MdRemove className="text-gray-300 dark:text-gray-500" />
-          <p className="font-normal text-sm text-gray-500">
+          <p className="font-normal text-xs sm:text-sm text-gray-500">
             {views ?? 0} lượt xem
           </p>
           <MdRemove className="text-gray-300 dark:text-gray-500" />
           {lastUpdated && (
-            <p className="font-normal text-sm text-gray-500">
+            <p className="font-normal text-xs sm:text-sm text-gray-500">
               {dayjs(lastUpdated).format("MMM DD YYYY")}
             </p>
           )}

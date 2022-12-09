@@ -1,20 +1,13 @@
-import type { Post } from "@prisma/client";
+import type { Post, PostTag, Tag } from "@prisma/client";
 import type {
   ActionFunction,
   LoaderFunction,
   SerializeFrom,
 } from "@remix-run/node";
-import {
-  useFetcher,
-  useLoaderData,
-  useSearchParams,
-  useTransition,
-} from "@remix-run/react";
+import { useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 import clsx from "clsx";
 import queryString from "querystring";
 import type { DynamicLinksFunction } from "remix-utils";
-import Button from "~/components/Common/Button/Button";
-import Card from "~/components/Common/Card/Card";
 import SimpleCard from "~/components/Common/Card/SimpleCard";
 import SimplePagination from "~/components/Common/Pagination/SimplePagination";
 import Section from "~/components/Common/Section/Section";
@@ -26,7 +19,11 @@ import postService from "~/libs/services/post.service";
 
 export interface ILoaderDataResponse {
   // recentPosts: Post[];
-  latestPosts: Post[];
+  latestPosts: (Post & {
+    post_tags: PostTag & {
+      tag: Tag;
+    }[];
+  })[];
   pagination: {
     currentPage: number;
     nextPage: number | null;
@@ -118,6 +115,8 @@ const Index = () => {
     },
   };
 
+  console.log(latestPosts);
+
   return (
     <fetcher.Form>
       {/* <div className="py-[100px] mb-12">
@@ -170,6 +169,7 @@ const Index = () => {
             loadingSkeleton={isLoadingLatestPosts}
             estimateReadTime={Math.ceil((post.content?.length ?? 1) / 1250)}
             lastUpdated={post.publish_at ?? ""}
+            tags={post.post_tags.map((postTag) => postTag.tag) as Tag[]}
           />
         ))}
 
