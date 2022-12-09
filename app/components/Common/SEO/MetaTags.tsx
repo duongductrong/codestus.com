@@ -65,6 +65,7 @@ const MetaTags = ({ rootMatch }: MetaTagsProps) => {
       <meta name="theme-color" content="#ffffff" />
       <meta name="charset" content={charset} />
       <meta name="viewport" content={viewport} />
+      <meta name="google-site-verification" content="eXhMtN2gkr5bkyhvyTamHYNwGBBEQRkdPu5t7cgXqss" />
       <title>{`${title} - Codestus.com`}</title>
 
       <meta name="title" content={`${title} - Codestus.com`} />
