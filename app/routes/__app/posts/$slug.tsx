@@ -4,7 +4,7 @@ import type {
   SerializeFrom,
 } from "@remix-run/node";
 import { Response } from "@remix-run/node";
-import { ScrollRestoration, useLoaderData } from "@remix-run/react";
+import { Link, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
 import _compact from "lodash/compact";
 import "prismjs";
@@ -15,6 +15,7 @@ import type { BlogPosting } from "schema-dts";
 import Markdown from "~/components/Common/Markdown/Markdown";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
 import Tag from "~/components/Common/Tag/Tag";
+import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import { prisma } from "~/libs/services/db.server";
 import postService from "~/libs/services/post.service";
 import { markdown } from "~/libs/utils/markdown.server";
@@ -110,9 +111,13 @@ const PostItem = (props: NotionPageItemProps) => {
       <div className="mb-20">
         <div className="space-x-4 space-y-4 text-center mb-8">
           {post?.post_tags.map((postTag) => (
-            <Tag key={postTag.tag.slug} className="text-md">
-              #{postTag.tag.name}
-            </Tag>
+            <Link
+              key={postTag.tag.slug}
+              to={GENERAL_ROUTES.TAG_DETAIL(postTag.tag.slug)}>
+              <Tag key={postTag.tag.slug} className="text-md">
+                #{postTag.tag.name}
+              </Tag>
+            </Link>
           ))}
         </div>
 

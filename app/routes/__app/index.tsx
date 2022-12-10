@@ -126,6 +126,7 @@ const Index = () => {
             estimateReadTime={Math.ceil((post.content?.length ?? 1) / 1250)}
             lastUpdated={post.publish_at ?? ""}
             tags={post.post_tags.map((postTag) => postTag.tag) as Tag[]}
+            tagUrl={(slug) => GENERAL_ROUTES.TAG_DETAIL(slug ?? "")}
           />
         ))}
 

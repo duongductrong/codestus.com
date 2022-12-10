@@ -71,7 +71,10 @@ const TagPage = (props: TagPageProps) => {
   const { post: postPaginate } = paginate;
 
   return (
-    <Section title={tag.name} subtitle={tag.description ?? ""}>
+    <Section
+      title={tag.name}
+      subtitle={tag.description ?? ""}
+      className="mt-14">
       {posts.map((post) => (
         <SimpleCard
           key={post.slug}
