@@ -52,7 +52,6 @@ function handleBotRequest(
             })
           );
 
-          console.log('r', body)
           pipe(body);
         },
         onShellError(error: unknown) {
@@ -85,7 +84,7 @@ function handleBrowserRequest(
         onShellReady() {
           const body = new PassThrough();
 
-          responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Content-Type", "text/html; charset=utf-8");
 
           resolve(
             new Response(body, {
