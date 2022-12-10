@@ -52,6 +52,7 @@ function handleBotRequest(
             })
           );
 
+          console.log('r', body)
           pipe(body);
         },
         onShellError(error: unknown) {

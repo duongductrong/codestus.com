@@ -1125,12 +1125,12 @@ body{
   margin-right: 0.5rem;
 }
 
-.ml-auto{
-  margin-left: auto;
-}
-
 .ml-2{
   margin-left: 0.5rem;
+}
+
+.ml-auto{
+  margin-left: auto;
 }
 
 .mb-6{
@@ -1171,10 +1171,6 @@ body{
 
 .grid{
   display: grid;
-}
-
-.hidden{
-  display: none;
 }
 
 .h-screen{
@@ -1235,10 +1231,6 @@ body{
 
 .max-w-2xl{
   max-width: 42rem;
-}
-
-.max-w-\[700px\]{
-  max-width: 700px;
 }
 
 .-translate-x-1\/2{
@@ -1318,6 +1310,12 @@ body{
   margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
+.space-x-2 > :not([hidden]) ~ :not([hidden]){
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
 .space-x-6 > :not([hidden]) ~ :not([hidden]){
   --tw-space-x-reverse: 0;
   margin-right: calc(1.5rem * var(--tw-space-x-reverse));
@@ -1340,12 +1338,6 @@ body{
   --tw-space-y-reverse: 0;
   margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
-}
-
-.space-x-2 > :not([hidden]) ~ :not([hidden]){
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
 .overflow-hidden{
@@ -1515,14 +1507,14 @@ body{
   line-height: 1.75rem;
 }
 
-.text-lg{
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-}
-
 .text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.text-lg{
+  font-size: 1.125rem;
+  line-height: 1.75rem;
 }
 
 .font-extrabold{
@@ -1543,10 +1535,6 @@ body{
 
 .font-normal{
   font-weight: 400;
-}
-
-.font-extralight{
-  font-weight: 200;
 }
 
 .italic{
