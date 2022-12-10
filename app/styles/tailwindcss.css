@@ -1221,6 +1221,14 @@ body{
   width: 3rem;
 }
 
+.w-8\/12{
+  width: 66.666667%;
+}
+
+.w-4\/12{
+  width: 33.333333%;
+}
+
 .max-w-md{
   max-width: 28rem;
 }
@@ -1276,6 +1284,10 @@ body{
   cursor: pointer;
 }
 
+.grid-cols-2{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .flex-col{
   flex-direction: column;
 }
@@ -1302,6 +1314,10 @@ body{
 
 .gap-4{
   gap: 1rem;
+}
+
+.gap-5{
+  gap: 1.25rem;
 }
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]){
@@ -1598,6 +1614,11 @@ body{
 .\!text-orange-500{
   --tw-text-opacity: 1 !important;
   color: rgb(249 115 22 / var(--tw-text-opacity)) !important;
+}
+
+.text-teal-700{
+  --tw-text-opacity: 1;
+  color: rgb(15 118 110 / var(--tw-text-opacity));
 }
 
 .underline{

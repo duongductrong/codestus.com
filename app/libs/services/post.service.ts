@@ -43,6 +43,11 @@ class PostService {
     const skipRecords = (_page - 1) * pageSize;
 
     return prisma.post.findMany({
+      where: {
+        status: {
+          equals: POST_STATUS.PUBLISHED,
+        }
+      },
       orderBy: {
         publish_at: "desc",
       },
