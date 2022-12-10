@@ -115,8 +115,6 @@ const Index = () => {
     },
   };
 
-  console.log(latestPosts);
-
   return (
     <fetcher.Form>
       {/* <div className="py-[100px] mb-12">

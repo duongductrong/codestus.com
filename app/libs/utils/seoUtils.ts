@@ -25,8 +25,6 @@ export function seoUtils({
     keyword ||
     "javascript tips, lập trình javascript, php tips, lập trình php, code javascript hay, lập trình php, fullstack, cộng đồng lập trình";
 
-  console.log(_url, _title);
-
   return {
     // Browser schema
     "msapplication-TileColor": "#fff",
