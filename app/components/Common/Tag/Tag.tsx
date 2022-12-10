@@ -9,7 +9,7 @@ const Tag: FC<TagProps> = ({ children, className, ...props }) => {
     <div
       className={clsx(
         className,
-        "inline-block font-medium text-neutral-500",
+        "inline-block font-medium text-gray-500",
       )}>
       {children}
     </div>

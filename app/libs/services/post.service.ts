@@ -1,5 +1,6 @@
 import type { QueryDatabaseParameters } from "@notionhq/client/build/src/api-endpoints";
-import type { Post, PrismaPromise } from "@prisma/client";
+import type { Post, Prisma, PrismaPromise } from "@prisma/client";
+import { Response } from "@remix-run/node";
 import type { INotionOriginalPost, INotionPost } from "../@types/generalType";
 import { POST_STATUS } from "../constants/model";
 import { prisma } from "./db.server";
@@ -19,6 +20,12 @@ export interface IPSGetMostViewsPostsPublishedArgs {
 export interface IPSGetLatestPostsPublishedArgs {
   pageSize?: number;
   page?: number;
+}
+
+export interface IPSGetPostsPublishedByTagArg {
+  publishedAtSort?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
 }
 
 class PostService {
@@ -46,7 +53,7 @@ class PostService {
       where: {
         status: {
           equals: POST_STATUS.PUBLISHED,
-        }
+        },
       },
       orderBy: {
         publish_at: "desc",
@@ -63,12 +70,56 @@ class PostService {
     });
   }
 
-  countAllPublishedPosts() {
+  getPostsPublishedByTag(
+    tagId: number | bigint,
+    config: IPSGetPostsPublishedByTagArg = {
+      publishedAtSort: "desc",
+      page: 1,
+      pageSize: 12,
+    },
+  ) {
+    const { page, pageSize } = config;
+
+    const _page = (page ?? 1) <= 0 ? 1 : page ?? 1;
+    const _pageSize = pageSize ?? 12;
+
+    return (
+      // Get raw post tag
+      prisma.postTag
+        .findMany({
+          where: {
+            tagId: tagId,
+            post: {
+              status: {
+                equals: POST_STATUS.PUBLISHED,
+              },
+            },
+          },
+          orderBy: {
+            post: {
+              publish_at: config.publishedAtSort,
+            },
+          },
+          select: {
+            post: true,
+          },
+          skip: (_page - 1) * _pageSize,
+          take: _pageSize,
+        })
+        // Transform post tags to the posts list
+        .then((postTags) => {
+          return postTags.map((postTag) => postTag.post);
+        })
+    );
+  }
+
+  countAllPublishedPosts(conditions: Prisma.PostWhereInput) {
     return prisma.post.count({
       where: {
         status: {
           equals: POST_STATUS.PUBLISHED,
         },
+        ...conditions,
       },
     });
   }

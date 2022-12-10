@@ -17,7 +17,7 @@ export interface SimpleCardProps extends HTMLAttributes<HTMLDivElement> {
   views?: number | string;
   estimateReadTime: number;
   lastUpdated?: string | Date;
-  tags: Tag[];
+  tags?: Tag[];
 }
 
 const SimpleCard: FC<SimpleCardProps> = ({
@@ -44,13 +44,15 @@ const SimpleCard: FC<SimpleCardProps> = ({
           "overflow-hidden rounded-md",
           "hover:translate-x-2 duration-200 transition-all",
         )}>
-        <div className="space-x-2 mb-2">
-          {tags.map((tag, index) => (
-            <Chip key={"tag-" + index} className="text-sm font-normal">
-              #{tag.name}
-            </Chip>
-          ))}
-        </div>
+        {tags.length ? (
+          <div className="space-x-2 mb-2">
+            {tags.map((tag, index) => (
+              <Chip key={"tag-" + index} className="text-sm font-normal">
+                #{tag.name}
+              </Chip>
+            ))}
+          </div>
+        ) : null}
         <h2 className="text-xl font-bold text-gray-700 dark:text-white mb-2">
           {title}
         </h2>

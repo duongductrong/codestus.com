@@ -20,9 +20,10 @@ import postService from "~/libs/services/post.service";
 export interface ILoaderDataResponse {
   // recentPosts: Post[];
   latestPosts: (Post & {
-    post_tags: PostTag & {
-      tag: Tag;
-    }[];
+    post_tags: PostTag &
+      {
+        tag: Tag;
+      }[];
   })[];
   pagination: {
     currentPage: number;
@@ -34,12 +35,7 @@ export interface ILoaderDataResponse {
 const dynamicLinks: DynamicLinksFunction<SerializeFrom<typeof loader>> = ({
   location,
 }) => {
-  return [
-    {
-      rel: "canonical",
-      href: `${location.hash}`,
-    },
-  ];
+  return [];
 };
 
 export const loader: LoaderFunction = async ({ context, params, request }) => {
@@ -55,9 +51,6 @@ export const loader: LoaderFunction = async ({ context, params, request }) => {
       pageSize: perPageLatestPosts,
       page: Number(page),
     }),
-    // postService.getMostViewsPostsPublished({
-    //   pageSize: 7,
-    // }),
     postService.countAllPublishedPosts(),
   ]);
 
@@ -117,41 +110,6 @@ const Index = () => {
 
   return (
     <fetcher.Form>
-      {/* <div className="py-[100px] mb-12">
-        <h2 className="text-gray-500 dark:text-gray-400 font-semibold mb-4">
-          Hi the software engineers,
-        </h2>
-        <h3 className="text-black dark:text-white font-bold text-4xl sm:text-5xl md:text-6xl leading-snug mb-12">
-          Help people store and <br />
-          quality knowledge into software products
-        </h3>
-
-        <div className="space-x-4">
-          <Button>Let's go</Button>
-        </div>
-      </div> */}
-
-      {/* <Section
-        title="Most views."
-        subtitle="Many engineers care about some posts."
-        className="mb-12">
-        <div className="grid md:grid-cols-12 gap-4">
-          {recentPosts.map((post, index) => (
-            <Card
-              key={post.postId}
-              title={post.title}
-              desc={post.description ?? ""}
-              source={index < 3 ? post?.thumbnail ?? "" : undefined}
-              url={GENERAL_ROUTES.POST_DETAIL(post.slug)}
-              pageViews={post.views}
-              className={clsx({
-                "col-span-4": index < 3,
-                "col-span-4 md:col-span-3": index >= 3,
-              })}></Card>
-          ))}
-        </div>
-      </Section> */}
-
       <Section
         className="mt-14"
         title="Latest blog."
