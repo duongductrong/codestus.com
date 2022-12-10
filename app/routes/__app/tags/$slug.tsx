@@ -5,6 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import SimpleCard from "~/components/Common/Card/SimpleCard";
 import SimplePagination from "~/components/Common/Pagination/SimplePagination";
 import Section from "~/components/Common/Section/Section";
+import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import postService from "~/libs/services/post.service";
 import tagService from "~/libs/services/tag.service";
 
@@ -32,7 +33,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   if (!slug) throw new Response("Not found", { status: 404 });
 
   try {
-    const pageQueryParsed = Number(url.searchParams.get("page"));
+    const pageQueryParsed = Number(url.searchParams.get("page")) || 1;
     const pageSize = 5;
     const currentPage = Number.isNaN(pageQueryParsed) ? 1 : pageQueryParsed;
 
@@ -51,7 +52,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
     const postPaginate = {
       nextPage: currentPage + 1 <= totalPage ? currentPage + 1 : undefined,
-      previousPage: currentPage - 1 > 1 ? currentPage - 1 : undefined,
+      previousPage: currentPage - 1 >= 1 ? currentPage - 1 : undefined,
     };
 
     return json<ITagPageLoader>({
@@ -83,6 +84,7 @@ const TagPage = (props: TagPageProps) => {
           desc={post.description ?? ""}
           views={post.views}
           estimateReadTime={Math.ceil((post.content?.length ?? 0) / 1500)}
+          url={GENERAL_ROUTES.POST_DETAIL(post.slug)}
         />
       ))}
 
