@@ -16,3 +16,13 @@ export const codeSanBoxEmbed = {
     },
   },
 };
+
+export const callout = {
+  render: "Callout",
+  children: ["paragraph", "tag", "list"],
+  attributes: {
+    color: {
+      type: String,
+    }
+  },
+};
