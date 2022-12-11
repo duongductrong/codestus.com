@@ -8,6 +8,10 @@ class TagService {
       },
     });
   }
+
+  getTags() {
+    return prisma.tag.findMany();
+  }
 }
 
 const tagService = new TagService();

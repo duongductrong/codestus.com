@@ -4,27 +4,33 @@ import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import { otherRootRouteHandlers } from "./otherRootRoutes.server";
 
 const ABORT_DELAY = 5000;
 
-export default function handleRequest(
+export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
+  remixContext: EntryContext,
 ) {
+  for (const handler of otherRootRouteHandlers) {
+    const otherRouteResponse = await handler(request, remixContext);
+    if (otherRouteResponse) return otherRouteResponse;
+  }
+
   return isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       )
     : handleBrowserRequest(
         request,
         responseStatusCode,
         responseHeaders,
-        remixContext
+        remixContext,
       );
 }
 
@@ -32,7 +38,7 @@ function handleBotRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
+  remixContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let didError = false;
@@ -49,7 +55,7 @@ function handleBotRequest(
             new Response(body, {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
-            })
+            }),
           );
 
           pipe(body);
@@ -62,7 +68,7 @@ function handleBotRequest(
 
           console.error(error);
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);
@@ -73,7 +79,7 @@ function handleBrowserRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: EntryContext
+  remixContext: EntryContext,
 ) {
   return new Promise((resolve, reject) => {
     let didError = false;
@@ -90,7 +96,7 @@ function handleBrowserRequest(
             new Response(body, {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
-            })
+            }),
           );
 
           pipe(body);
@@ -103,7 +109,7 @@ function handleBrowserRequest(
 
           console.error(error);
         },
-      }
+      },
     );
 
     setTimeout(abort, ABORT_DELAY);

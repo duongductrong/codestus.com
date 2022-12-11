@@ -1,3 +1,4 @@
+import type { SEOHandle } from "@balavishnuvj/remix-seo";
 import type {
   HeadersFunction,
   LoaderFunction,
@@ -101,7 +102,22 @@ export const metaTags: MetaTagsFunction = ({ data, parentsData }) => {
   };
 };
 
-export const handle = { metaTags, structuredData };
+export const _seoHandle: SEOHandle = {
+  getSitemapEntries: async (request) => {
+    const posts = await postService.getLatestPostsPublished({
+      page: 1,
+      pageSize: 99999,
+    });
+    return posts.map((post) => ({
+      route: GENERAL_ROUTES.POST_DETAIL(post.slug),
+      priority: 1,
+      lastmod: new Date().toISOString(),
+      changefreq: "daily",
+    }));
+  },
+};
+
+export const handle = { metaTags, structuredData, ..._seoHandle };
 
 const PostItem = (props: NotionPageItemProps) => {
   const { post, content } = useLoaderData<ILoaderDataPostItem>();

@@ -1,3 +1,4 @@
+import type { SEOHandle } from "@balavishnuvj/remix-seo";
 import type { Post, Tag } from "@prisma/client";
 import type { LoaderFunction } from "@remix-run/node";
 import { json, Response } from "@remix-run/node";
@@ -66,6 +67,20 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     throw new Response("Not found", { status: 404 });
   }
 };
+
+export const _seoHandle: SEOHandle = {
+  getSitemapEntries: async () => {
+    console.log("call me");
+    return (await tagService.getTags()).map((tag) => ({
+      route: GENERAL_ROUTES.TAG_DETAIL(tag.slug),
+      priority: 0.8,
+      changefreq: "weekly",
+      lastmod: new Date().toISOString(),
+    }));
+  },
+};
+
+export const handle = { ..._seoHandle };
 
 const TagPage = (props: TagPageProps) => {
   const { tag, posts, paginate } = useLoaderData<ITagPageLoader>();

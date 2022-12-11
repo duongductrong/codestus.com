@@ -4,3 +4,6 @@ node_modules
 /build
 /public/build
 .env
+
+# ignore tailwindcss built
+/app/styles/tailwindcss.css

@@ -3,16 +3,18 @@
   "sideEffects": false,
   "scripts": {
     "prisma:generate": "prisma generate",
-    "build": "remix build",
     "dev": "remix build && run-p \"dev:*\"",
     "dev:node": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.js --watch ./server.js",
     "dev:remix": "remix watch",
-    "start": "cross-env NODE_ENV=production node ./server.js",
-    "sass": "sass --watch app/:app/",
     "tailwind:dev": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --watch --postcss",
-    "serve": "concurrently \"npm run tailwind:dev\" \"npm run dev\""
+    "serve": "concurrently \"npm run tailwind:dev\" \"npm run dev\"",
+    "build:css": "npx tailwindcss -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --minify",
+    "build:remix": "remix build",
+    "build": "npm run build:css && npm run build:remix",
+    "start": "cross-env NODE_ENV=production node ./server.js"
   },
   "dependencies": {
+    "@balavishnuvj/remix-seo": "^1.0.2",
     "@markdoc/markdoc": "^0.2.1",
     "@notionhq/client": "^2.2.2",
     "@prisma/client": "^4.7.1",
