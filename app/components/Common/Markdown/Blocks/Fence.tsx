@@ -48,14 +48,7 @@ const Fence: FC<FenceProps> = ({ language, children }) => {
                     true && (
                       <span
                         {...tokenProps}
-                        className={clsx(
-                          {
-                            "!text-neutral-200":
-                              isKeyword || isPlain || isOperator,
-                            "!text-orange-500": isProperty,
-                          },
-                          tokenProps.className,
-                        )}
+                        className={clsx(tokenProps.className)}
                       />
                     )
                   );

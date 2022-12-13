@@ -7,11 +7,13 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import { DynamicLinks, ExternalScripts, StructuredData } from "remix-utils";
-import tailwindCss from "~/styles/tailwindcss.css";
 import { RootError } from "./components/CatchError/RootError";
 import Manifest from "./components/Common/SEO/Manifest";
 import MetaTags from "./components/Common/SEO/MetaTags";
 import ToastLoading from "./components/Common/Toast/ToastLoading";
+
+import tailwindCss from "~/styles/tailwindcss.css";
+import prismCss from "~/styles/prism.css";
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -43,6 +45,10 @@ export const links: LinksFunction = () => [
   {
     rel: "stylesheet",
     href: tailwindCss,
+  },
+  {
+    rel: "stylesheet",
+    href: prismCss,
   },
   {
     rel: "alternate",
