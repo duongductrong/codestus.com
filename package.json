@@ -3,14 +3,13 @@
   "sideEffects": false,
   "scripts": {
     "prisma:generate": "prisma generate",
-    "dev": "remix build && run-p \"dev:*\"",
-    "dev:node": "cross-env NODE_ENV=development nodemon --require dotenv/config ./server.js --watch ./server.js",
+    "dev:css": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --watch --postcss",
+    "dev:node": "cross-env NODE_ENV=development PORT=3000 nodemon --require dotenv/config ./server.js --watch ./server.js",
     "dev:remix": "remix watch",
-    "tailwind:dev": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --watch --postcss",
-    "serve": "concurrently \"npm run tailwind:dev\" \"npm run dev\"",
+    "dev": "remix build && run-p \"dev:*\"",
     "build:css": "npx tailwindcss -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --minify",
     "build:remix": "remix build",
-    "build": "npm run build:css && npm run build:remix",
+    "build": "run-p build:*",
     "start": "cross-env NODE_ENV=production node ./server.js"
   },
   "dependencies": {
