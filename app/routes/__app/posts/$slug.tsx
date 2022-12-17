@@ -14,6 +14,7 @@ import type { StructuredDataFunction } from "remix-utils";
 import type { HandleConventionArguments } from "remix-utils/build/react/handle-conventions";
 import type { BlogPosting } from "schema-dts";
 import Markdown from "~/components/Common/Markdown/Markdown";
+import Script from "~/components/Common/ExternalScript/Script";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
 import Tag from "~/components/Common/Tag/Tag";
 import { GENERAL_ROUTES } from "~/libs/constants/routes";
@@ -164,25 +165,25 @@ const PostItem = (props: NotionPageItemProps) => {
         <Markdown content={content} />
       </div>
 
-      {/* <div className="max-w-2xl mx-auto flex justify-between flex-wrap">
-        <a
-          rel="norefer noreferrer"
-          target={"_blank"}
-          href="https://github.com/bearce"
-          className="inline-flex items-center font-normal text-neutral-600 dark:text-neutral-400">
-          <img
-            className="w-12 h-12 rounded-lg mr-4"
-            src={post?.users?.avatar ?? ""}
-            alt={post?.users.name}
-          />
-          <div>
-            <p className="font-bold text-neutral-700 dark:text-neutral-400">
-              {post?.users.name}
-            </p>
-            <p className="text-sm text-neutral-500">Frontend Developer</p>
-          </div>
-        </a>
-      </div> */}
+      <div className="giscus max-w-2xl"></div>
+      {/* preferred_color_scheme */}
+      <Script
+        src="https://giscus.app/client.js"
+        data-repo="bearce/codestus.com"
+        data-repo-id="R_kgDOIhp2kQ"
+        data-category="Comments"
+        data-category-id="DIC_kwDOIhp2kc4CTID8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="1"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="en"
+        data-loading="lazy"
+        crossOrigin="anonymous"
+        async
+      />
       <ScrollRestoration />
     </div>
   );
