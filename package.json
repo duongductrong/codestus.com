@@ -7,9 +7,9 @@
     "dev:node": "cross-env NODE_ENV=development PORT=3000 nodemon --require dotenv/config ./server.js --watch ./server.js",
     "dev:remix": "remix watch",
     "dev": "remix build && run-p \"dev:*\"",
-    "build:css": "npx tailwindcss -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --minify",
+    "tailwindcss:minify": "npx tailwindcss -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --minify",
     "build:remix": "remix build",
-    "build": "run-p build:*",
+    "build": "npm run tailwindcss:minify && run-p build:*",
     "start": "cross-env NODE_ENV=production node ./server.js"
   },
   "dependencies": {
