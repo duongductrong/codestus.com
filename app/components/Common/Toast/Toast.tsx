@@ -28,8 +28,8 @@ const Toast: FC<ToastProps> = ({
         "flex items-start",
         " transition-all duration-300",
         {
-          "translate-x-0": open,
-          "opacity-0 -translate-x-4": !open,
+          "sm:translate-x-0": open,
+          "opacity-0 sm:-translate-x-4": !open,
         },
       )}>
       <div>{prefixIcon}</div>

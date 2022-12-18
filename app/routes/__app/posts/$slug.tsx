@@ -138,7 +138,7 @@ const PostItem = (props: NotionPageItemProps) => {
           ))}
         </div>
 
-        <h2 className="text-black dark:text-white text-4xl mb-8 font-bold max-w-2xl text-center mx-auto">
+        <h2 className="text-black dark:text-white text-3xl sm:text-4xl mb-8 font-bold max-w-2xl text-center mx-auto break-words">
           {post?.title}
         </h2>
 
