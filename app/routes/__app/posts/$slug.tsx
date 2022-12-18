@@ -146,7 +146,7 @@ const PostItem = (props: NotionPageItemProps) => {
           <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-md">
             bởi{" "}
             <a
-              href={`//github.com/bearce`}
+              href={`//github.com/lucapaguroo`}
               className="hover:text-blue-600 font-bold underline underline-offset-2">
               {post?.users.name}
             </a>{" "}
@@ -169,7 +169,7 @@ const PostItem = (props: NotionPageItemProps) => {
       {/* preferred_color_scheme */}
       <Script
         src="https://giscus.app/client.js"
-        data-repo="bearce/codestus.com"
+        data-repo="lucapaguroo/codestus.com"
         data-repo-id="R_kgDOIhp2kQ"
         data-category="Comments"
         data-category-id="DIC_kwDOIhp2kc4CTID8"

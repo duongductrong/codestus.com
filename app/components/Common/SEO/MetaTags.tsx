@@ -17,7 +17,7 @@ const MetaTags = ({ rootMatch }: MetaTagsProps) => {
   const defaultMetaTags: { [x: string]: any } = {
     url: `${rootLoader?.appUrl}${location?.pathname}`,
     image: "https://codestus.com/uploads/images/seo/open-graph-image.png",
-    title: "Bearce",
+    title: "Codestus",
     description:
       "Blog, Chia sẻ kinh nghiệm Frontend về React.js, Vue.js và những kinh nghiệm về lập trình",
     keywords:
