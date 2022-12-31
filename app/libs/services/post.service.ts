@@ -113,13 +113,13 @@ class PostService {
     );
   }
 
-  countAllPublishedPosts(conditions: Prisma.PostWhereInput) {
+  countAllPublishedPosts(conditions?: Prisma.PostWhereInput) {
     return prisma.post.count({
       where: {
         status: {
           equals: POST_STATUS.PUBLISHED,
         },
-        ...conditions,
+        ...(conditions ?? {}),
       },
     });
   }

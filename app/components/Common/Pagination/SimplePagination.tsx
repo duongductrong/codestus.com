@@ -24,25 +24,22 @@ const SimplePagination: FC<SimplePaginationProps> = ({
   nextTo,
   onNext,
   onPrev,
+  className,
   ...props
 }) => {
   return (
-    <nav
-      {...props}
-      className="flex items-center space-x-10">
+    <nav {...props} className={clsx(className, "flex items-center space-x-10")}>
       <Link
         to={prevTo ?? "/"}
         onClick={onPrev}
         className={clsx(
-          "inline-flex items-center font-semibold hover:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-600 transition-all duration-300",
+          "inline-flex items-center",
+          "hover:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-600",
+          "font-semibold  transition-all duration-300",
           {
             "pointer-events-none opacity-50": prevDisabled,
           },
         )}>
-        <MdKeyboardArrowLeft
-          size={24}
-          className="mr-2"
-        />{" "}
         {prevText ?? "Previous"}
       </Link>
 
@@ -50,16 +47,14 @@ const SimplePagination: FC<SimplePaginationProps> = ({
         to={nextTo ?? "/"}
         onClick={onNext}
         className={clsx(
-          "inline-flex items-center font-semibold hover:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-600 transition-all duration-300",
+          "inline-flex items-center",
+          "hover:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-600",
+          "font-semibold  transition-all duration-300",
           {
             "pointer-events-none opacity-50": nextDisabled,
           },
         )}>
-        {nextText ?? "Next"}{" "}
-        <MdKeyboardArrowRight
-          size={24}
-          className="ml-2"
-        />
+        {nextText ?? "Next"}
       </Link>
     </nav>
   );

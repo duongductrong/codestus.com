@@ -113,14 +113,14 @@ const Index = () => {
       <Section
         className="mt-14"
         title="Latest blog."
-        subtitle="The latest posts recently.">
+        subtitle="The latest posts recently."
+        direction="center">
         {latestPosts.map((post, index) => (
           <SimpleCard
             key={post.postId}
             title={post.title}
             desc={post.description ?? ""}
             url={GENERAL_ROUTES.POST_DETAIL(post.slug)}
-            className={clsx("mb-4")}
             views={post.views}
             loadingSkeleton={isLoadingLatestPosts}
             estimateReadTime={Math.ceil((post.content?.length ?? 1) / 1250)}
@@ -130,14 +130,17 @@ const Index = () => {
           />
         ))}
 
-        <SimplePagination
-          prevText="Latest"
-          nextText="Oldest"
-          nextTo={`.?${uiPagination.next.query}`}
-          prevTo={`.?${uiPagination.previous.query}`}
-          nextDisabled={uiPagination.next.disabled}
-          prevDisabled={uiPagination.previous.disabled}
-        />
+        <div className="flex items-center justify-center">
+          <SimplePagination
+            className="mt-24"
+            prevText="Latest"
+            nextText="Oldest"
+            nextTo={`.?${uiPagination.next.query}`}
+            prevTo={`.?${uiPagination.previous.query}`}
+            nextDisabled={uiPagination.next.disabled}
+            prevDisabled={uiPagination.previous.disabled}
+          />
+        </div>
       </Section>
     </fetcher.Form>
   );

@@ -37,28 +37,51 @@ const SimpleCard: FC<SimpleCardProps> = ({
   return loadingSkeleton ? (
     <SimpleCardSkeleton className="mb-8" />
   ) : (
-    <div {...props} className={clsx(className, "")}>
+    <div
+      {...props}
+      className={clsx(
+        className,
+        "relative",
+        "flex items-start flex-col md:flex-row",
+      )}>
+      {/* Timestamp */}
+      <div className="absolute bottom-8 md:bottom-0 md:relative w-[180px] pl-8 md:pl-0">
+        <span className="text-gray-500 text-xs sm:text-sm">
+          {dayjs(lastUpdated).format("MMMM DD, YYYY")}
+        </span>
+      </div>
+
       <div
         {...props}
         className={clsx(
           className,
-          "relative ",
-          "overflow-hidden rounded-md",
-          "hover:translate-x-2 duration-200 transition-all",
+          "relative pl-8 md:pl-12",
+          "flex-1",
+          "border-l border-l-gray-300 dark:border-l-gray-700",
+          "duration-200 transition-all",
         )}>
-        {tags.length ? (
-          <div className="space-x-2 mb-2">
-            {tags.map((tag, index) => (
-              <Link key={tag.slug} to={tagUrl ? tagUrl(tag.slug) : "#"}>
-                <Chip key={"tag-" + index} className="text-sm font-normal">
-                  #{tag.name}
-                </Chip>
-              </Link>
-            ))}
-          </div>
-        ) : null}
+        {/* Milestone circle */}
+        <div
+          className={clsx(
+            "w-4 h-4 rounded-full",
+            "absolute top-0 left-0 -translate-x-1/2",
+            "bg-white border-gray-300 border-2",
+          )}></div>
 
-        <div className="relative">
+        {/* Content */}
+        <div className="relative pb-12">
+          {tags.length ? (
+            <div className="space-x-2 mb-2">
+              {tags.map((tag, index) => (
+                <Link key={tag.slug} to={tagUrl ? tagUrl(tag.slug) : "#"}>
+                  <Chip key={"tag-" + index} className="text-sm font-normal">
+                    #{tag.name}
+                  </Chip>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+
           <h2 className="text-xl font-bold text-gray-700 dark:text-white mb-2">
             {title}
           </h2>
@@ -74,12 +97,6 @@ const SimpleCard: FC<SimpleCardProps> = ({
             <p className="font-normal text-xs sm:text-sm text-gray-500">
               {views ?? 0} lượt xem
             </p>
-            <MdRemove className="text-gray-300 dark:text-gray-500" />
-            {lastUpdated && (
-              <p className="font-normal text-xs sm:text-sm text-gray-500">
-                {dayjs(lastUpdated).format("MMM DD YYYY")}
-              </p>
-            )}
           </div>
 
           <Link

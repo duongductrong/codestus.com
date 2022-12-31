@@ -2,12 +2,14 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
+    "tailwindcss:build": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --postcss",
+    "tailwindcss:watch": "npm run tailwindcss:build -- --watch",
+    "tailwindcss:minify": "npm run tailwindcss:build -- --minify",
     "prisma:generate": "prisma generate",
-    "dev:css": "npx tailwind -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --watch --postcss",
+    "dev:css": "npm run tailwindcss:watch",
     "dev:node": "cross-env NODE_ENV=development PORT=3000 nodemon --require dotenv/config ./server.js --watch ./server.js",
     "dev:remix": "remix watch",
-    "dev": "remix build && run-p \"dev:*\"",
-    "tailwindcss:minify": "npx tailwindcss -i app/styles/tailwindcss.scss -o app/styles/tailwindcss.css --minify",
+    "dev": "npm run tailwindcss:build && remix build && run-p \"dev:*\"",
     "build:remix": "remix build",
     "build": "npm run tailwindcss:minify && run-p build:*",
     "start": "cross-env NODE_ENV=production node ./server.js"

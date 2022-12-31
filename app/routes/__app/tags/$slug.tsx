@@ -94,7 +94,6 @@ const TagPage = (props: TagPageProps) => {
       {posts.map((post) => (
         <SimpleCard
           key={post.slug}
-          className="mb-4"
           title={post.title}
           desc={post.description ?? ""}
           views={post.views}
