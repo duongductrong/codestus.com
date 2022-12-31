@@ -20,6 +20,7 @@ export interface IPSGetMostViewsPostsPublishedArgs {
 export interface IPSGetLatestPostsPublishedArgs {
   pageSize?: number;
   page?: number;
+  searchQuery?: string;
 }
 
 export interface IPSGetPostsPublishedByTagArg {
@@ -44,16 +45,34 @@ class PostService {
   }
 
   getLatestPostsPublished(args: IPSGetLatestPostsPublishedArgs) {
-    const { pageSize = 12, page = 1 } = args;
+    const { pageSize = 12, page = 1, searchQuery = "" } = args;
 
     const _page = page <= 1 ? 1 : page;
     const skipRecords = (_page - 1) * pageSize;
+    const _searchQuery = searchQuery.toLowerCase();
 
     return prisma.post.findMany({
       where: {
         status: {
           equals: POST_STATUS.PUBLISHED,
         },
+        OR: [
+          {
+            title: {
+              contains: _searchQuery,
+            },
+          },
+          {
+            description: {
+              contains: _searchQuery,
+            },
+          },
+          {
+            slug: {
+              contains: _searchQuery,
+            },
+          },
+        ],
       },
       orderBy: {
         publish_at: "desc",

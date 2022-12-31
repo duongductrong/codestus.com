@@ -1,7 +1,6 @@
 import { Link } from "@remix-run/react";
 import clsx from "clsx";
 import type { FC, HTMLAttributes } from "react";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 export interface SimplePaginationProps extends HTMLAttributes<HTMLElement> {
   prevDisabled?: boolean;
@@ -10,6 +9,7 @@ export interface SimplePaginationProps extends HTMLAttributes<HTMLElement> {
   nextDisabled?: boolean;
   nextText?: string;
   nextTo?: string;
+  currentPage?: string | number;
 
   onNext?: () => void;
   onPrev?: () => void;
@@ -25,10 +25,19 @@ const SimplePagination: FC<SimplePaginationProps> = ({
   onNext,
   onPrev,
   className,
+  currentPage,
   ...props
 }) => {
   return (
-    <nav {...props} className={clsx(className, "flex items-center space-x-10")}>
+    <nav
+      {...props}
+      className={clsx(
+        className,
+        "relative",
+        "flex items-center",
+        "bg-neutral-100/75 dark:bg-neutral-800/50",
+        "space-x-10 px-4 py-2 rounded-md",
+      )}>
       <Link
         to={prevTo ?? "/"}
         onClick={onPrev}
@@ -42,6 +51,12 @@ const SimplePagination: FC<SimplePaginationProps> = ({
         )}>
         {prevText ?? "Previous"}
       </Link>
+
+      {currentPage && (
+        <span className="font-semibold dark:text-neutral-400 dark:hover:text-neutral-600">
+          {currentPage}
+        </span>
+      )}
 
       <Link
         to={nextTo ?? "/"}
