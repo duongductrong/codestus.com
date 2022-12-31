@@ -102,12 +102,14 @@ const TagPage = (props: TagPageProps) => {
         />
       ))}
 
-      <SimplePagination
-        nextDisabled={!postPaginate.nextPage}
-        nextTo={`.?page=${postPaginate.nextPage?.toString()}`}
-        prevDisabled={!postPaginate.previousPage}
-        prevTo={`.?page=${postPaginate.previousPage?.toString()}`}
-      />
+      <div className="flex items-center justify-center sticky bottom-3 mt-12">
+        <SimplePagination
+          nextDisabled={!postPaginate.nextPage}
+          nextTo={`.?page=${postPaginate.nextPage?.toString()}`}
+          prevDisabled={!postPaginate.previousPage}
+          prevTo={`.?page=${postPaginate.previousPage?.toString()}`}
+        />
+      </div>
     </Section>
   );
 };

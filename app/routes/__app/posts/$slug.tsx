@@ -150,7 +150,7 @@ const PostItem = (props: NotionPageItemProps) => {
               className="hover:text-blue-600 font-bold underline underline-offset-2">
               {post?.users.name}
             </a>{" "}
-            từ {dayjs(post?.updated_at).format("MMM DD YYYY")}
+            từ {dayjs(post?.updated_at).format("MMMM DD YYYY")}
           </span>
 
           <MdRemove className="text-neutral-600 dark:text-neutral-400 m-0" />

@@ -200,9 +200,8 @@ const Index = () => {
         )}
 
         {hasPosts && (
-          <div className="flex items-center justify-center sticky bottom-3">
+          <div className="flex items-center justify-center sticky bottom-3 mt-12">
             <SimplePagination
-              className="mt-24"
               prevText="Latest"
               nextText="Oldest"
               currentPage={currentPage}
