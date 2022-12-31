@@ -29,6 +29,8 @@
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.6",
     "express": "^4.18.2",
+    "flowbite": "^1.5.5",
+    "flowbite-react": "^0.3.7",
     "isbot": "^3.6.5",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
