@@ -1,9 +1,5 @@
 import type { SEOHandle } from "@balavishnuvj/remix-seo";
-import type {
-  HeadersFunction,
-  LoaderFunction,
-  SerializeFrom,
-} from "@remix-run/node";
+import type { HeadersFunction, LoaderFunction, SerializeFrom } from "@remix-run/node";
 import { Response } from "@remix-run/node";
 import { Link, ScrollRestoration, useLoaderData } from "@remix-run/react";
 import dayjs from "dayjs";
@@ -12,7 +8,7 @@ import "prismjs";
 import { MdRemove } from "react-icons/md";
 import type { StructuredDataFunction } from "remix-utils";
 import type { HandleConventionArguments } from "remix-utils/build/react/handle-conventions";
-import type { BlogPosting } from "schema-dts";
+import type { BlogPosting, LiveBlogPosting } from "schema-dts";
 import Markdown from "~/components/Common/Markdown/Markdown";
 import Script from "~/components/Common/ExternalScript/Script";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
@@ -21,19 +17,18 @@ import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import { prisma } from "~/libs/services/db.server";
 import postService from "~/libs/services/post.service";
 import { markdown } from "~/libs/utils/markdown.server";
+import clsx from "clsx";
 
-export interface NotionPageItemProps {}
+export interface PostItemProps {}
 
 export interface ILoaderDataPostItem {
   post: Awaited<ReturnType<typeof postService.detail>>;
   content: ReturnType<typeof markdown>;
 }
 
-export const headers: HeadersFunction = () => {
-  return {
-    "Cache-Control": "max-age=300, s-maxage=3600",
-  };
-};
+export const headers: HeadersFunction = () => ({
+  "Cache-Control": "max-age=300, s-maxage=3600",
+});
 
 export const loader: LoaderFunction = async ({ params }) => {
   try {
@@ -41,10 +36,7 @@ export const loader: LoaderFunction = async ({ params }) => {
     const slug = params.slug ?? "";
 
     const [post] = await prisma.$transaction(
-      _compact([
-        postService.detail(slug),
-        isProduction ? postService.incPageViews(slug) : null,
-      ]),
+      _compact([postService.detail(slug), isProduction ? postService.incPageViews(slug) : null]),
     );
 
     if (!post) {
@@ -63,38 +55,36 @@ export const loader: LoaderFunction = async ({ params }) => {
   }
 };
 
-export const structuredData: StructuredDataFunction<
-  SerializeFrom<typeof loader>,
-  BlogPosting
-> = ({ data, parentsData }: HandleConventionArguments<ILoaderDataPostItem>) => {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    name: data.post?.title,
-    headline: data.post?.title,
-    about: data.post?.title,
-    author: {
-      "@type": "Person",
-      "@id": data.post?.users.name,
-      address: data.post?.users.email,
-      alternateName: data.post?.users.name,
-      email: data.post?.users.email,
-      image: data.post?.users.avatar,
-    },
-    url: parentsData?.appHref,
-    image: data.post?.thumbnail,
-    articleBody: data.post?.description,
-    wordCount: data.post?.content?.length ?? 0,
-    dateCreated: data.post?.created_at,
-    thumbnailUrl: data.post?.thumbnail,
-    datePublished: data.post?.publish_at,
-    dateModified: data.post?.updated_at,
-    mainEntityOfPage: {
-      "@type": "WebContent",
-      "@id": parentsData?.appHref ?? `/posts/${data.post?.slug}`,
-    },
-  };
-};
+export const structuredData: StructuredDataFunction<SerializeFrom<typeof loader>, BlogPosting> = ({
+  data,
+  parentsData,
+}: HandleConventionArguments<ILoaderDataPostItem>) => ({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  name: data.post?.title,
+  headline: data.post?.title,
+  about: data.post?.title,
+  author: {
+    "@type": "Person",
+    "@id": data.post?.users.name,
+    address: data.post?.users.email,
+    alternateName: data.post?.users.name,
+    email: data.post?.users.email,
+    image: data.post?.users.avatar,
+  },
+  url: parentsData?.appHref,
+  image: data.post?.thumbnail,
+  articleBody: data.post?.description,
+  wordCount: data.post?.content?.length ?? 0,
+  dateCreated: data.post?.created_at,
+  thumbnailUrl: data.post?.thumbnail,
+  datePublished: data.post?.publish_at,
+  dateModified: data.post?.updated_at,
+  mainEntityOfPage: {
+    "@type": "WebContent",
+    "@id": parentsData?.appHref ?? `/posts/${data.post?.slug}`,
+  },
+});
 
 export const metaTags: MetaTagsFunction = ({ data, parentsData }) => {
   const { post }: ILoaderDataPostItem = data;
@@ -120,7 +110,7 @@ export const _seoHandle: SEOHandle = {
 
 export const handle = { metaTags, structuredData, ..._seoHandle };
 
-const PostItem = (props: NotionPageItemProps) => {
+const PostItem = (props: PostItemProps) => {
   const { post, content } = useLoaderData<ILoaderDataPostItem>();
 
   return (
@@ -128,9 +118,7 @@ const PostItem = (props: NotionPageItemProps) => {
       <div className="mb-20">
         <div className="space-x-4 space-y-4 text-center mb-8">
           {post?.post_tags.map((postTag) => (
-            <Link
-              key={postTag.tag.slug}
-              to={GENERAL_ROUTES.TAG_DETAIL(postTag.tag.slug)}>
+            <Link key={postTag.tag.slug} to={GENERAL_ROUTES.TAG_DETAIL(postTag.tag.slug)}>
               <Tag key={postTag.tag.slug} className="text-md">
                 #{postTag.tag.name}
               </Tag>
@@ -138,16 +126,19 @@ const PostItem = (props: NotionPageItemProps) => {
           ))}
         </div>
 
-        <h2 className="text-black dark:text-white text-3xl sm:text-4xl mb-8 font-bold max-w-2xl text-center mx-auto break-words">
+        <h2
+          className={clsx(
+            "max-w-2xl mb-8 font-bold mx-auto",
+            "text-black dark:text-white text-3xl sm:text-4xl text-center",
+            "break-words",
+          )}>
           {post?.title}
         </h2>
 
         <div className="flex items-center justify-center space-x-4 space-y-2 sm:space-y-0 flex-wrap break-words">
           <span className="inline-block font-normal text-neutral-600 dark:text-neutral-400 text-md">
             bởi{" "}
-            <a
-              href={`//github.com/duongductrong`}
-              className="hover:text-blue-600 font-bold underline underline-offset-2">
+            <a href="//github.com/duongductrong" className="hover:text-blue-600 font-bold underline underline-offset-2">
               {post?.users.name}
             </a>{" "}
             từ {dayjs(post?.updated_at).format("MMMM DD YYYY")}
@@ -165,7 +156,7 @@ const PostItem = (props: NotionPageItemProps) => {
         <Markdown content={content} />
       </div>
 
-      <div className="giscus max-w-2xl"></div>
+      <div className="giscus max-w-2xl" />
       {/* preferred_color_scheme */}
       <Script
         src="https://giscus.app/client.js"

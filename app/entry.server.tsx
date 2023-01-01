@@ -14,7 +14,9 @@ export default async function handleRequest(
   responseHeaders: Headers,
   remixContext: EntryContext,
 ) {
+  // eslint-disable-next-line no-restricted-syntax
   for (const handler of otherRootRouteHandlers) {
+    // eslint-disable-next-line no-await-in-loop
     const otherRouteResponse = await handler(request, remixContext);
     if (otherRouteResponse) return otherRouteResponse;
   }

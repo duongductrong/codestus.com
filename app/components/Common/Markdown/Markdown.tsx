@@ -8,8 +8,7 @@ export interface MarkdownProps {
   content: RenderableTreeNodes;
 }
 
-const Markdown = ({ content }: MarkdownProps) => {
-  return (
+const Markdown = ({ content }: MarkdownProps) => (
     <>
       {renderers.react(content, React, {
         components: {
@@ -20,6 +19,5 @@ const Markdown = ({ content }: MarkdownProps) => {
       })}
     </>
   );
-};
 
 export default Markdown;

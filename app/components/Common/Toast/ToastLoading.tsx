@@ -20,7 +20,7 @@ const ToastLoading: FC<ToastLoadingProps> = (props) => {
         open={isNavigating}
         title="Thông báo"
         describe="Đang điều hướng đến trang yêu cầu."
-        prefixIcon={<SpinIcon />}></Toast>
+        prefixIcon={<SpinIcon />} />
     </DynamicPortal>
   );
 };

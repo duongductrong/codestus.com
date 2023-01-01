@@ -1,16 +1,6 @@
 import type { Post, PostTag, Tag } from "@prisma/client";
-import type {
-  ActionFunction,
-  LoaderFunction,
-  SerializeFrom,
-} from "@remix-run/node";
-import {
-  Form,
-  Link,
-  useLoaderData,
-  useLocation,
-  useTransition,
-} from "@remix-run/react";
+import type { ActionFunction, LoaderFunction, SerializeFrom } from "@remix-run/node";
+import { Form, Link, useLoaderData, useLocation, useTransition } from "@remix-run/react";
 import { Button } from "flowbite-react";
 import queryString from "querystring";
 import { MdHome } from "react-icons/md";
@@ -42,20 +32,14 @@ export interface ILoaderDataResponse {
   queryParams: { [x: string]: string };
 }
 
-const dynamicLinks: DynamicLinksFunction<SerializeFrom<typeof loader>> = ({
-  location,
-}) => {
-  return [];
-};
+const dynamicLinks: DynamicLinksFunction<SerializeFrom<typeof loader>> = ({ location }) => [];
 
 export const loader: LoaderFunction = async ({ context, params, request }) => {
   const perPageLatestPosts = 5;
   const url = new URL(request.url);
   const q = url.searchParams.get("q") ?? "";
   const searchParamsPage = url.searchParams.get("page") ?? 1;
-  const page = Number.isNaN(Number(searchParamsPage))
-    ? 1
-    : Number(searchParamsPage);
+  const page = Number.isNaN(Number(searchParamsPage)) ? 1 : Number(searchParamsPage);
 
   const [latestPosts, totalPosts] = await prisma.$transaction([
     postService.getLatestPostsPublished({
@@ -100,15 +84,11 @@ export const loader: LoaderFunction = async ({ context, params, request }) => {
   };
 };
 
-export const action: ActionFunction = () => {
-  return {};
-};
+export const action: ActionFunction = () => ({});
 
-export const metaTags: MetaTagsFunction = (data: any) => {
-  return {
-    title: "Trang chủ",
-  };
-};
+export const metaTags: MetaTagsFunction = (data: any) => ({
+  title: "Trang chủ",
+});
 
 export const handle = {
   dynamicLinks,
@@ -116,20 +96,17 @@ export const handle = {
 };
 
 const Index = () => {
-  const { latestPosts, pagination, queryParams } =
-    useLoaderData<ILoaderDataResponse>();
+  const { latestPosts, pagination, queryParams } = useLoaderData<ILoaderDataResponse>();
   const transition = useTransition();
   const location = useLocation();
 
   const isLoadingLatestPosts =
-    transition.state === TRANSITION_STATE.LOADING &&
-    transition.type === TRANSITION_TYPE.NORMAL_LOAD &&
+    [TRANSITION_STATE.LOADING, TRANSITION_STATE.SUBMITTING].includes(transition.state) &&
+    [TRANSITION_TYPE.NORMAL_LOAD, TRANSITION_TYPE.LOADER_SUBMISSION].includes(transition.type) &&
     transition.location?.pathname === GENERAL_ROUTES.HOME;
   const hasPosts = !!latestPosts.length;
 
-  const clientSearchParams = queryString.parse(
-    location.search?.replace("?", ""),
-  ) as any;
+  const clientSearchParams = queryString.parse(location.search?.replace("?", "")) as any;
   const currentPage = queryParams?.page ?? 1;
 
   const uiPagination = {
@@ -149,15 +126,9 @@ const Index = () => {
     },
   };
 
-  console.log("clientSearchParams", clientSearchParams);
-
   return (
     <Form method="get">
-      <Section
-        className="mt-14"
-        title="Latest blog."
-        subtitle="The latest posts recently."
-        direction="center">
+      <Section className="mt-14" title="Latest blog." subtitle="The latest posts recently." direction="center">
         <SearchInput
           name="q"
           searchButtonType="submit"
@@ -193,9 +164,7 @@ const Index = () => {
               </Button>
             </Link>
 
-            <span className="inline-block mt-4 text-xl">
-              No matching posts found
-            </span>
+            <span className="inline-block mt-4 text-xl">No matching posts found</span>
           </div>
         )}
 

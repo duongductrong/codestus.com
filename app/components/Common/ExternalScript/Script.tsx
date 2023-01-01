@@ -2,7 +2,7 @@ import type { FC, ScriptHTMLAttributes } from "react";
 import { useEffect } from "react";
 import { useHydrated } from "remix-utils";
 
-export interface ScriptProps extends ScriptHTMLAttributes<HTMLScriptElement> {}
+export type ScriptProps = ScriptHTMLAttributes<HTMLScriptElement>
 
 const Script: FC<ScriptProps> = (props) => {
   const hydrated = useHydrated();

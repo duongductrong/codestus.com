@@ -3,6 +3,7 @@ import { NotionToMarkdown } from "notion-to-md";
 
 class NotionService {
   _client: Client | undefined;
+
   _n2m: NotionToMarkdown | undefined;
 
   client() {

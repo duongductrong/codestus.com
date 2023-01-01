@@ -21,15 +21,12 @@ const Callout: FC<CalloutProps> = ({ color = "info", children }) => {
   }[color] as any;
 
   return (
-    <div
-      className={clsx("flex p-4", "rounded-lg text-[15px]", calloutThemeColor)}>
+    <div className={clsx("flex p-4", "rounded-lg text-[15px]", calloutThemeColor)}>
       <div className="mr-2 leading-normal">
         <CalloutIcons size={20} />
       </div>
       <div className="!m-0 leading-normal">
-        {Children.toArray(children).map((children: any) =>
-          cloneElement(children, { className: "!m-0" }),
-        )}
+        {Children.toArray(children).map((child: any) => cloneElement(child, { className: "!m-0" }))}
       </div>
     </div>
   );

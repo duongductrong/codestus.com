@@ -4,8 +4,7 @@ import Header from "~/components/Common/Header/Header";
 
 export interface AppProps {}
 
-const App = (props: AppProps) => {
-  return (
+const App = (props: AppProps) => (
     <div id="app">
       <Header />
       <main className="container py-5 mb-32">
@@ -14,6 +13,5 @@ const App = (props: AppProps) => {
       <Footer className="container" />
     </div>
   );
-};
 
 export default App;

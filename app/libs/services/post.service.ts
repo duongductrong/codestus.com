@@ -107,7 +107,7 @@ class PostService {
       prisma.postTag
         .findMany({
           where: {
-            tagId: tagId,
+            tagId,
             post: {
               status: {
                 equals: POST_STATUS.PUBLISHED,
@@ -126,9 +126,7 @@ class PostService {
           take: _pageSize,
         })
         // Transform post tags to the posts list
-        .then((postTags) => {
-          return postTags.map((postTag) => postTag.post);
-        })
+        .then((postTags) => postTags.map((postTag) => postTag.post))
     );
   }
 

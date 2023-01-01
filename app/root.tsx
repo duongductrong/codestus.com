@@ -1,19 +1,14 @@
+/* eslint-disable react/no-danger */
+
 import type { LinksFunction, LoaderFunction } from "@remix-run/node";
-import {
-  Links,
-  LiveReload,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import { Links, LiveReload, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import { DynamicLinks, ExternalScripts, StructuredData } from "remix-utils";
+import tailwindCss from "~/styles/tailwindcss.css";
+import prismCss from "~/styles/prism.css";
 import { RootError } from "./components/CatchError/RootError";
 import Manifest from "./components/Common/SEO/Manifest";
 import MetaTags from "./components/Common/SEO/MetaTags";
 import ToastLoading from "./components/Common/Toast/ToastLoading";
-
-import tailwindCss from "~/styles/tailwindcss.css";
-import prismCss from "~/styles/prism.css";
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -83,11 +78,10 @@ export default function App() {
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-5GTSSXK');`,
-          }}></script>
+          }}
+        />
 
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-W5HXEXS0SF"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-W5HXEXS0SF" />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
@@ -95,29 +89,30 @@ export default function App() {
         gtag('js', new Date());
     
         gtag('config', 'G-W5HXEXS0SF');`,
-          }}></script>
+          }}
+        />
 
         {/* <!-- UA- Global site tag (gtag.js) - Google Analytics --> */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=UA-148416370-3"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-148416370-3" />
         <script
           dangerouslySetInnerHTML={{
             __html: ` window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'UA-148416370-3');`,
-          }}></script>
+          }}
+        />
       </head>
       <body>
-        <div id="fb-root"></div>
+        <div id="fb-root" />
 
         {/* <!-- Google Tag Manager (noscript) --> */}
         <noscript
           dangerouslySetInnerHTML={{
             __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5GTSSXK" height="0" width="0"
             style="display:none;visibility:hidden"></iframe>`,
-          }}></noscript>
+          }}
+        />
         {/* <!-- End Google Tag Manager (noscript) --> */}
 
         <Outlet />
@@ -133,7 +128,7 @@ export default function App() {
 
 export function CatchBoundary() {
   return (
-    <html>
+    <html lang="vi">
       <head>
         {/* <Meta /> */}
         {/* <MetaTags rootMatch="root" />

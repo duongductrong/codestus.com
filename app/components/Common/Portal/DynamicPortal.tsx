@@ -3,8 +3,7 @@ import type { HTMLAttributes } from "react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-export interface DynamicPortalProps
-  extends Pick<HTMLAttributes<HTMLElement>, "children" | "id"> {}
+export type DynamicPortalProps = Pick<HTMLAttributes<HTMLElement>, "children" | "id">
 
 const DynamicPortal = ({ id, children, ...props }: DynamicPortalProps) => {
   const el = useRef<HTMLElement | null>(null);

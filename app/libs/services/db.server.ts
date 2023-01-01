@@ -1,8 +1,10 @@
+/* eslint-disable import/no-mutable-exports */
 import { PrismaClient } from "@prisma/client";
 
 let prisma: PrismaClient;
 
 declare global {
+  // eslint-disable-next-line vars-on-top, no-var
   var __db__: PrismaClient;
 }
 
