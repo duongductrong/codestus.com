@@ -47,7 +47,7 @@ const ReadListIndex: FC<ReadListIndexProps> = (props) => {
   const [hasOverPosts, setHasOverPosts] = useState<boolean>(loaderData.isOverPosts);
 
   const onLoadMore = () => {
-    const prefetchUrl = `${GENERAL_ROUTES.READ_LIST}?index&page=${1}`;
+    const prefetchUrl = `${GENERAL_ROUTES.FEED}?index&page=${1}`;
     fetcher.load(prefetchUrl);
   };
 
@@ -67,8 +67,8 @@ const ReadListIndex: FC<ReadListIndexProps> = (props) => {
 
   return (
     <fetcher.Form>
-      <Section className="mt-14" title="Collection" subtitle="My read list" direction="center">
-        <div className="grid grid-cols-3 gap-4">
+      <Section className="mt-14" title="News Feed" subtitle="Feed list" direction="center">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {posts?.map((post) => (
             <div
               className={clsx(

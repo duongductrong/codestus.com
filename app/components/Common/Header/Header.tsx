@@ -32,21 +32,21 @@ const Header: FC<HeaderProps> = ({ className, ...props }) => {
           Home
         </Link> */}
         <Link
-          to={GENERAL_ROUTES.READ_LIST}
+          to={GENERAL_ROUTES.FEED}
           className="text-black dark:text-white font-semibold inline-flex items-center">
           <MdBookmark size={18} className="mr-2" />
-          Read list{" "}
+          Feed{" "}
           <Badge color="failure" className="!inline-flex ml-2">
             new
           </Badge>
         </Link>
-        <a
+        {/* <a
           href="https://www.linkedin.com/in/duongductrong/"
           target="_blank"
           className="text-black dark:text-white font-semibold"
           rel="noreferrer">
           Linked In
-        </a>
+        </a> */}
         <span
           role="button"
           className="inline-block cursor-pointer text-black dark:text-white"
