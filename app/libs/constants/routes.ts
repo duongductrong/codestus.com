@@ -5,4 +5,6 @@ export const GENERAL_ROUTES = {
 
   TAG_DETAIL_STRING: "tags/:slug",
   TAG_DETAIL: (slug: string) => `/tags/${slug}`,
+
+  READ_LIST: "/read-list",
 };

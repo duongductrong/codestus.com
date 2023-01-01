@@ -1,6 +1,6 @@
 import { useTransition } from "@remix-run/react";
 import type { FC } from "react";
-import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
+import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remix-hooks";
 import SpinIcon from "../Icon/SpinIcon";
 import DynamicPortal from "../Portal/DynamicPortal";
 import Toast from "./Toast";

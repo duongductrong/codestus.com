@@ -10,7 +10,7 @@ import SimplePagination from "~/components/Common/Pagination/SimplePagination";
 import SearchInput from "~/components/Common/SearchInput/SearchInput";
 import Section from "~/components/Common/Section/Section";
 import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
-import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remixHook";
+import { TRANSITION_STATE, TRANSITION_TYPE } from "~/libs/constants/remix-hooks";
 import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import { prisma } from "~/libs/services/db.server";
 import postService from "~/libs/services/post.service";

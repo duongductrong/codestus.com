@@ -1,17 +1,6 @@
-import type { QueryDatabaseParameters } from "@notionhq/client/build/src/api-endpoints";
-import type { Post, Prisma, PrismaPromise } from "@prisma/client";
-import { Response } from "@remix-run/node";
-import type { INotionOriginalPost, INotionPost } from "../@types/generalType";
+import type { Prisma } from "@prisma/client";
 import { POST_STATUS } from "../constants/model";
 import { prisma } from "./db.server";
-import notionService from "./notion.server";
-
-export interface IPSGetAllArgs {
-  pageSize?: number;
-  startCursor?: string;
-
-  query: Pick<QueryDatabaseParameters, "sorts" | "filter">;
-}
 
 export interface IPSGetMostViewsPostsPublishedArgs {
   pageSize?: number;

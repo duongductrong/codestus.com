@@ -2,9 +2,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { Link } from "@remix-run/react";
 import clsx from "clsx";
+import { Badge } from "flowbite-react";
 import type { FC, HTMLAttributes } from "react";
 import { useEffect } from "react";
-import { MdNightlight, MdWbSunny } from "react-icons/md";
+import { MdBookmark, MdNightlight, MdReadMore, MdWbSunny } from "react-icons/md";
+import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import { useThemeMode } from "~/libs/hooks/useThemeMode";
 
 export type HeaderProps = HTMLAttributes<HTMLHeadElement>;
@@ -29,11 +31,15 @@ const Header: FC<HeaderProps> = ({ className, ...props }) => {
           className="text-black dark:text-white font-semibold">
           Home
         </Link> */}
-        {/* <Link
-          to={GENERAL_ROUTES.HOME}
-          className="text-black dark:text-white font-semibold">
-          Blog
-        </Link> */}
+        <Link
+          to={GENERAL_ROUTES.READ_LIST}
+          className="text-black dark:text-white font-semibold inline-flex items-center">
+          <MdBookmark size={18} className="mr-2" />
+          Read list{" "}
+          <Badge color="failure" className="!inline-flex ml-2">
+            new
+          </Badge>
+        </Link>
         <a
           href="https://www.linkedin.com/in/duongductrong/"
           target="_blank"
