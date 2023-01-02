@@ -9,6 +9,7 @@ import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { MdLink } from "react-icons/md";
 import Section from "~/components/Common/Section/Section";
+import type { MetaTagsFunction } from "~/components/Common/SEO/MetaTags";
 import { HTTP_CODE } from "~/libs/constants/http-response-code";
 import { GENERAL_ROUTES } from "~/libs/constants/routes";
 import type { Item, RaindropData } from "~/libs/services/raindrop.service";
@@ -38,6 +39,12 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json(error.cause, HTTP_CODE.SERVER_ERROR.INTERNAL_SERVER);
   }
 };
+
+export const metaTags: MetaTagsFunction = () => ({
+  title: "Feed",
+});
+
+export const handle = { metaTags }
 
 const ReadListIndex: FC<ReadListIndexProps> = (props) => {
   const fetcher = useFetcher<ReadListLoaderData>();
