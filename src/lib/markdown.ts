@@ -1,3 +1,4 @@
+import nord from "@/lib/shiki/themes/nord.json"
 import rehypePrettyCode from "rehype-pretty-code"
 import rehypeSanitize from "rehype-sanitize"
 import rehypeStringify from "rehype-stringify"
@@ -16,7 +17,7 @@ export const processMarkdown = (content: string | null | undefined) =>
     .use(rehypeSanitize)
     .use(rehypePrettyCode, {
       // See Options section below.
-      theme: "nord",
+      theme: nord as any,
     })
     .use(rehypeStringify)
     .process(content || "")
