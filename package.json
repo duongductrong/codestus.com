@@ -1,10 +1,10 @@
 {
-  "name": "codestus-gen",
+  "name": "codestus.com",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx prisma generate & next build",
     "start": "next start",
     "lint": "next lint"
   },
