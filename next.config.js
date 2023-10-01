@@ -3,6 +3,7 @@ const nextConfig = {
   experimental: {
     mdxRs: true,
     serverActions: true,
+    serverComponentsExternalPackages: ["shiki", "vscode-oniguruma"],
   },
 }
 
