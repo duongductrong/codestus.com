@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Command {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  shell_command String
+  payload       String    @db.MediumText
+  status        String
+  type          String
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  command_id    String
+
+  @@map("commands")
+}
+
+model FailedJob {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique")
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+
+  @@map("failed_jobs")
+}
+
+model Job {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+  @@map("jobs")
+}
+
+model Migration {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String
+  batch     Int
+
+  @@map("migrations")
+}
+
+model PasswordReset {
+  email      String    @id
+  token      String
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@map("password_resets")
+}
+
+model PostTag {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  postId     BigInt    @db.UnsignedBigInt
+  tagId      BigInt    @db.UnsignedBigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  post       Post      @relation(fields: [postId], references: [postId], onUpdate: Restrict, map: "post_tags_postid_foreign")
+  tag        Tag       @relation(fields: [tagId], references: [tagId], onUpdate: Restrict, map: "post_tags_tagid_foreign")
+
+  @@index([postId], map: "post_tags_postid_foreign")
+  @@index([tagId], map: "post_tags_tagid_foreign")
+  @@map("post_tags")
+}
+
+model Post {
+  postId      BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  title       String
+  views       Int       @db.UnsignedMediumInt
+  thumbnail   String?   @db.Text
+  slug        String    @unique(map: "posts_slug_unique")
+  description String?   @db.Text
+  content     String?   @db.Text
+  userId      BigInt    @db.UnsignedBigInt
+  status      Int       @default(1) @db.UnsignedTinyInt
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  publish_at  DateTime? @db.Timestamp(0)
+  post_tags   PostTag[]
+  users       User      @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "posts_userid_foreign")
+  love        Int       @default(0) @db.UnsignedMediumInt
+  unlove      Int       @default(0) @db.UnsignedMediumInt
+
+  @@index([userId], map: "posts_userid_foreign")
+  @@map("posts")
+}
+
+model Statistic {
+  statistic_id BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  ed_views     Int       @default(0) @db.MediumInt
+  ed_new_users Int       @default(0) @db.MediumInt
+  ed_traffics  Int       @default(0) @db.MediumInt
+  created_at   DateTime? @db.Timestamp(0)
+  updated_at   DateTime? @db.Timestamp(0)
+
+  @@map("statistics")
+}
+
+model Tag {
+  tagId       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String
+  slug        String    @unique(map: "tags_slug_unique")
+  description String?   @db.Text
+  created_at  DateTime? @db.Timestamp(0)
+  updated_at  DateTime? @db.Timestamp(0)
+  post_tags   PostTag[]
+
+  @@map("tags")
+}
+
+model User {
+  userId            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String
+  email             String    @unique(map: "users_email_unique")
+  email_verified_at DateTime? @db.Timestamp(0)
+  password          String
+  remember_token    String?   @db.VarChar(100)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
+  provider          String?
+  provider_id       String?
+  avatar            String?   @db.Text
+  posts             Post[]
+
+  @@map("users")
+}
