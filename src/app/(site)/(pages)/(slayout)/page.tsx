@@ -4,7 +4,7 @@ import { PAGE_URLS } from "@/constants/urls"
 import { prisma } from "@/lib/prisma"
 import { Metadata } from "next"
 
-export const metadata : Metadata = {
+export const metadata: Metadata = {
   title: "Trang chủ",
 }
 
@@ -16,7 +16,7 @@ const Blog = async () => {
   })
 
   return (
-    <section className="w-full flex flex-col border-r border-border">
+    <section className="w-full flex flex-col">
       {posts.map((post) => (
         <BlogCard
           as={Link}

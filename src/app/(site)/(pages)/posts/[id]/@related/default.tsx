@@ -12,7 +12,7 @@ const RelatedPosts = async (props: RelatedPostsProps) => {
   })
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 max-w-[672px] mx-auto">
+    <div className="grid md:grid-cols-2 gap-4 mx-auto">
       <h2 className="text-xl font-semibold col-span-2 flex items-center gap-2">
         <MousePointerClick className="w-5 h-5" /> Maybe you are interested
       </h2>

@@ -35,7 +35,7 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
   const content = await generateHtmlFromMarkdownVFile(processMarkdown(post.content))
 
   return (
-    <div className="mx-auto mb-20 max-w-[672px]">
+    <div className="mx-auto mb-20">
       <Text variant="h1" as="h1" className="mt-20 mb-8 text-center ml-auto mr-auto">
         {post.title}
       </Text>

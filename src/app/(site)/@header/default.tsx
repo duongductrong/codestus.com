@@ -1,5 +1,7 @@
-import { Button } from "@/components/ui/button"
+"use client"
+
 import dynamic from "next/dynamic"
+import { usePathname } from "next/navigation"
 
 const ToggleThemeButton = dynamic(
   () =>
@@ -11,12 +13,20 @@ const ToggleThemeButton = dynamic(
 
 export interface SiteHeaderProps {}
 
-const SiteHeader = (props: SiteHeaderProps) => (
-  <div className="p-5 border-b border-border flex items-center gap-3">
-    <p className="text-2xl font-semibold">Blog</p>
+const SiteHeader = (props: SiteHeaderProps) => {
+  const pathname = usePathname()
 
-    <ToggleThemeButton className="ml-auto" />
-  </div>
-)
+  const checkBlogDetails = /^\/posts\/(.*)/
+
+  const Heading = checkBlogDetails.test(pathname) ? "p" : "h1"
+
+  return (
+    <div className="p-5 border-b border-border flex items-center gap-3">
+      <Heading className="text-2xl font-semibold">Codestus.com</Heading>
+
+      <ToggleThemeButton className="ml-auto" />
+    </div>
+  )
+}
 
 export default SiteHeader
