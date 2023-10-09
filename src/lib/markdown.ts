@@ -1,4 +1,4 @@
-import nord from "@/lib/shiki/themes/nord.json"
+import nord from "@/lib/shiki/themes/custom-nord.json"
 import { join as pathJoin } from "path"
 import rehypePrettyCode, { Options as RehypeCodeOptions } from "rehype-pretty-code"
 import rehypeSanitize from "rehype-sanitize"

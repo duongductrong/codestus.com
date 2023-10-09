@@ -5,6 +5,11 @@ const nextConfig = {
     serverActions: true,
     serverComponentsExternalPackages: ["shiki", "vscode-oniguruma"],
   },
+  images: {
+    domains: [
+      "avatars.githubusercontent.com"
+    ]
+  }
 }
 
 const withMDX = require("@next/mdx")()

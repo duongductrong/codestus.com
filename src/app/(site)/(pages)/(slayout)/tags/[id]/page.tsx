@@ -22,7 +22,7 @@ const PostsTag = async ({ params: { id } }: PostsTagProps) => {
   })
 
   return (
-    <section className="w-full flex flex-col border-r border-border">
+    <section className="w-full flex flex-col">
       {posts.map((post) => (
         <BlogCard
           as={Link}

@@ -9,7 +9,7 @@ export interface SiteLayoutProps extends LayoutProps<"sidebar" | "header"> {}
 const SiteLayout = ({ children, sidebar, header }: SiteLayoutProps) => (
   <>
     {/* {sidebar} */}
-    <main className="max-w-[800px] mx-auto border border-border">
+    <main className="max-w-[800px] mx-auto">
       {header}
       {children}
 
