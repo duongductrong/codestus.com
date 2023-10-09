@@ -1,7 +1,8 @@
 import GoogleAnalyticsBody from "@/components/google-analytics/google-analytics-body"
 import GoogleAnalyticsHead from "@/components/google-analytics/google-analytics-head"
 import { LayoutProps } from "@/types/utilities"
-import React from "react"
+
+const isProduction = process.env.APP_ENV === "production"
 
 export interface SiteLayoutProps extends LayoutProps<"sidebar" | "header"> {}
 
@@ -12,8 +13,8 @@ const SiteLayout = ({ children, sidebar, header }: SiteLayoutProps) => (
       {header}
       {children}
 
-      <GoogleAnalyticsBody />
-      <GoogleAnalyticsHead />
+      <GoogleAnalyticsBody active={isProduction} />
+      <GoogleAnalyticsHead active={isProduction} />
     </main>
   </>
 )
