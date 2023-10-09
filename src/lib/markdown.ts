@@ -10,6 +10,7 @@ import remarkToc from "remark-toc"
 import { unified } from "unified"
 import * as shiki from "shiki"
 import fs from "fs"
+import RehypeVideo from "rehype-video"
 
 // Shiki loads languages and themes using "fs" instead of "import", so Next.js
 // doesn't bundle them into production build. To work around, we manually copy
@@ -54,6 +55,7 @@ export const processMarkdown = (content: string | null | undefined) =>
     .use(remarkParse)
     .use(remarkRehype)
     .use(rehypeSanitize)
+    .use(RehypeVideo, { details: false })
     .use(rehypePrettyCode, {
       // See Options section below.
       theme: nord as any,

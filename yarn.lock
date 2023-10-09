@@ -5235,6 +5235,14 @@ rehype-stringify@^10.0.0:
     hast-util-to-html "^9.0.0"
     unified "^11.0.0"
 
+rehype-video@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/rehype-video/-/rehype-video-2.0.0.tgz#be3fedec46d0fdcf3ce32b36bda8f4c87e9eacea"
+  integrity sha512-NRtkwmA8MmH5psBH23+QZhT1OxFfEVq129/on+lVseew76ZbrBRMB/XwSjft+zt83GXvtQPeMMOElGGp8OHqWA==
+  dependencies:
+    unified "^11.0.0"
+    unist-util-visit "^5.0.0"
+
 remark-gfm@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/remark-gfm/-/remark-gfm-4.0.0.tgz#aea777f0744701aa288b67d28c43565c7e8c35de"
