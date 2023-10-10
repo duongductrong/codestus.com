@@ -4,11 +4,14 @@ import { Text } from "@/components/ui/text"
 import { PAGE_URLS } from "@/constants/urls"
 import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
 import { prisma } from "@/lib/prisma"
+import postService from "@/services/post-service"
 import { ParamsProps, SearchParamsProps } from "@/types/utilities"
 import { getSpeedReading } from "@/utils/speed-reading"
 import dayjs from "dayjs"
 import { Metadata, ResolvingMetadata } from "next"
 import { notFound } from "next/navigation"
+
+export const revalidate = 3600
 
 export interface PostDetailProps extends ParamsProps<"id">, SearchParamsProps {}
 
@@ -16,7 +19,7 @@ export async function generateMetadata(
   { params: { id } }: PostDetailProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const post = await prisma.post.findFirst({ where: { slug: id } })
+  const post = await postService.detail(id)
 
   return {
     title: post?.title,
@@ -28,7 +31,7 @@ export async function generateMetadata(
 }
 
 const PostDetail = async ({ params: { id } }: PostDetailProps) => {
-  const post = await prisma.post.findFirst({ where: { slug: id } })
+  const post = await postService.detail(id)
 
   if (!post) notFound()
 

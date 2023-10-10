@@ -1,7 +1,7 @@
 import { BlogCard } from "@/components/custom-cards/blog-card"
 import { Link } from "@/components/ui/router"
 import { PAGE_URLS } from "@/constants/urls"
-import { prisma } from "@/lib/prisma"
+import postService from "@/services/post-service"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -9,11 +9,7 @@ export const metadata: Metadata = {
 }
 
 const Blog = async () => {
-  const posts = await prisma.post.findMany({
-    orderBy: {
-      created_at: "desc",
-    },
-  })
+  const posts = await postService.getAllPosts()
 
   return (
     <section className="w-full flex flex-col">
