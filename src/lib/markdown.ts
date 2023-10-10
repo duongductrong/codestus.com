@@ -55,12 +55,12 @@ export const processMarkdown = (content: string | null | undefined) =>
     .use(remarkParse)
     .use(remarkRehype)
     .use(rehypeSanitize)
-    .use(RehypeVideo, { details: false })
     .use(rehypePrettyCode, {
       // See Options section below.
       theme: nord as any,
       getHighlighter,
     })
+    .use(RehypeVideo, { details: false })
     .use(rehypeStringify)
     .process(content || "")
 
