@@ -3,17 +3,21 @@ import Icon from "@/components/ui/icon"
 import { Text } from "@/components/ui/text"
 import { PAGE_URLS } from "@/constants/urls"
 import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
-import { prisma } from "@/lib/prisma"
 import postService from "@/services/post-service"
 import { ParamsProps, SearchParamsProps } from "@/types/utilities"
 import { getSpeedReading } from "@/utils/speed-reading"
 import dayjs from "dayjs"
+import compact from "lodash/compact"
 import { Metadata, ResolvingMetadata } from "next"
 import { notFound } from "next/navigation"
+import Script from "next/script"
+import OpenGraphImage from "@/assets/images/open-graph-image.png"
 
 export const revalidate = 3600
 
 export interface PostDetailProps extends ParamsProps<"id">, SearchParamsProps {}
+
+const generateUrlFormSlug = (slug?: string) => `${PAGE_URLS.POST_DETAIL.replace(":id", slug || "")}`
 
 export async function generateMetadata(
   { params: { id } }: PostDetailProps,
@@ -21,11 +25,35 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const post = await postService.detail(id)
 
+  const url = generateUrlFormSlug(post?.slug)
+
   return {
     title: post?.title,
     description: post?.description,
     alternates: {
-      canonical: `${PAGE_URLS.POST_DETAIL.replace(":id", post?.slug || "")}`,
+      canonical: url,
+    },
+    openGraph: {
+      url,
+      type: "article",
+      title: post?.title || "",
+      description: post?.description || "",
+      countryName: "Viet Nam",
+      locale: "vi",
+      siteName: "Codestus.com",
+      images: compact([post?.thumbnail, OpenGraphImage.src]),
+      publishedTime: post?.publish_at?.toDateString(),
+      emails: ["duongductrong06@gmail.com"],
+      modifiedTime: post?.updated_at?.toDateString(),
+      authors: ["Duong Duc Trong"],
+    },
+    twitter: {
+      title: post?.title || "",
+      description: post?.description || "",
+      images: compact([post?.thumbnail]),
+      card: "summary_large_image",
+      creatorId: "duongductrong_",
+      creator: "Duong Duc Trong",
     },
   }
 }
@@ -34,6 +62,36 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
   const post = await postService.detail(id)
 
   if (!post) notFound()
+
+  const url = generateUrlFormSlug(post.slug)
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    name: post?.title,
+    headline: post?.title,
+    about: post?.title,
+    author: {
+      "@type": "Person",
+      "@id": post?.users.name,
+      address: post?.users.email,
+      alternateName: post?.users.name,
+      email: post?.users.email,
+      image: post?.users.avatar,
+    },
+    url,
+    image: post?.thumbnail,
+    articleBody: post?.description,
+    wordCount: post?.content?.length ?? 0,
+    dateCreated: post?.created_at,
+    thumbnailUrl: post?.thumbnail,
+    datePublished: post?.publish_at,
+    dateModified: post?.updated_at,
+    mainEntityOfPage: {
+      "@type": "WebContent",
+      "@id": generateUrlFormSlug(post?.slug),
+    },
+  }
 
   const content = await generateHtmlFromMarkdownVFile(processMarkdown(post.content))
 
@@ -57,6 +115,12 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
       </div>
 
       <BlogRenderer content={content} />
+
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
     </div>
   )
 }
