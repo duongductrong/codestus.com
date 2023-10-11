@@ -19,7 +19,7 @@ class PostService {
         created_at: "desc",
       },
       where: {
-        post_tags: { every: { tagId } },
+        post_tags: { some: { tagId } },
       },
     })
   }
