@@ -18,14 +18,14 @@ import RehypeVideo from "rehype-video"
 //
 // Note that they are only referenced on server side
 // See: https://github.com/shikijs/shiki/issues/138
-const getShikiPath = (): string => pathJoin(process.cwd(), "src/lib/shiki")
+export const getShikiPath = (): string => pathJoin(process.cwd(), "src/lib/shiki")
 
 const touched = { current: false }
 
 // "Touch" the shiki assets so that Vercel will include them in the production
 // bundle. This is required because shiki itself dynamically access these files,
 // so Vercel doesn't know about them by default
-const touchShikiPath = (): void => {
+export const touchShikiPath = (): void => {
   if (touched.current) return // only need to do once
   fs.readdir(getShikiPath(), () => null) // fire and forget
   touched.current = true
