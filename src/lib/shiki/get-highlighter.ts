@@ -48,22 +48,18 @@ function fromDir(startPath: string, filter: RegExp, callback: any) {
 const getHighlighter: Options["getHighlighter"] = async (options) => {
   // touchShikiPath()
 
-  fromDir(process.cwd(), /\.tmLanguage.json$/, (filename: string) => {
+  fromDir(path.join(process.cwd(), "../.."), /\.tmLanguage.json$/, (filename: string) => {
     console.log("-- found: ", filename)
-  })
-
-  fs.readdirSync(path.join(process.cwd(), "/.next/server/pages")).forEach((file) => {
-    console.log("Level 4 (pages):", file)
   })
 
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("/.next/server/pages")}/languages/`
+        ? `${getShikiPublicPath("")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("/.next/server/pages")}/themes/`
+        ? `${getShikiPublicPath("")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
