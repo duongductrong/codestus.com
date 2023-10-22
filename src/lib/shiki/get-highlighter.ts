@@ -27,17 +27,20 @@ const touchShikiPath = (): void => {
 }
 
 const getHighlighter: Options["getHighlighter"] = async (options) => {
-  console.log(process.cwd())
+  fs.readdirSync(path.join(process.cwd(), "node_modules/shiki")).forEach((file) => {
+    console.log("Level 1:", file)
+  })
+
   return shiki.getHighlighter({
     ...(options as any),
-    // paths: {
-    //   languages: environmentMode.production()
-    //     ? `${getShikiPublicPath("")}/languages/`
-    //     : `${getShikiPublicPath()}/public/languages/`,
-    //   themes: environmentMode.production()
-    //     ? `${getShikiPublicPath("")}/themes/`
-    //     : `${getShikiPublicPath()}/public/themes/`,
-    // },
+    paths: {
+      languages: environmentMode.production()
+        ? `${getShikiPublicPath("node_modules")}/languages/`
+        : `${getShikiPublicPath()}/public/languages/`,
+      themes: environmentMode.production()
+        ? `${getShikiPublicPath("node_modules")}/themes/`
+        : `${getShikiPublicPath()}/public/themes/`,
+    },
   })
 }
 
