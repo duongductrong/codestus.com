@@ -30,14 +30,14 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
   console.log(process.cwd())
   return shiki.getHighlighter({
     ...(options as any),
-    paths: {
-      languages: environmentMode.production()
-        ? `${getShikiPublicPath("")}/languages/`
-        : `${getShikiPublicPath()}/public/languages/`,
-      themes: environmentMode.production()
-        ? `${getShikiPublicPath("")}/themes/`
-        : `${getShikiPublicPath()}/public/themes/`,
-    },
+    // paths: {
+    //   languages: environmentMode.production()
+    //     ? `${getShikiPublicPath("")}/languages/`
+    //     : `${getShikiPublicPath()}/public/languages/`,
+    //   themes: environmentMode.production()
+    //     ? `${getShikiPublicPath("")}/themes/`
+    //     : `${getShikiPublicPath()}/public/themes/`,
+    // },
   })
 }
 

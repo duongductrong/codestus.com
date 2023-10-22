@@ -4,6 +4,9 @@ const nextConfig = {
     mdxRs: true,
     serverActions: true,
     serverComponentsExternalPackages: ["shiki", "vscode-oniguruma"],
+    outputFileTracingIncludes: {
+      "/posts/[id]": ["node_modules/shiki/**/*"],
+    },
   },
   env: {
     APP_URL: process.env.APP_URL,
