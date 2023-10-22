@@ -27,18 +27,26 @@ const touchShikiPath = (): void => {
 }
 
 const getHighlighter: Options["getHighlighter"] = async (options) => {
-  fs.readdirSync(path.join(process.cwd(), "node_modules/shiki/dist")).forEach((file) => {
-    console.log("Level 1:", file)
+  fs.readdirSync(path.join(process.cwd(), "../")).forEach((file) => {
+    if (file.includes("vercel") || file.includes("output")) {
+      console.log("Level 1:", file)
+    }
+  })
+  
+  fs.readdirSync(path.join(process.cwd(), "../../")).forEach((file) => {
+    if (file.includes("vercel") || file.includes("output")) {
+      console.log("Level 2:", file)
+    }
   })
 
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("node_modules/shiki/dist")}/languages/`
+        ? `${getShikiPublicPath("../../vercel/output")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("node_modules/shiki/dist")}/themes/`
+        ? `${getShikiPublicPath("../../vercel/output")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
