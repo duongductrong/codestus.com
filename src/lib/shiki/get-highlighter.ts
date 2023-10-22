@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import { Options } from "rehype-pretty-code"
 import shiki from "shiki"
+import { environmentMode } from "../env"
 
 // Shiki loads languages and themes using "fs" instead of "import", so Next.js
 // doesn't bundle them into production build. To work around, we manually copy
@@ -10,6 +11,7 @@ import shiki from "shiki"
 // Note that they are only referenced on server side
 // See: https://github.com/shikijs/shiki/issues/138
 const getShikiPath = (): string => path.join(process.cwd(), "src/lib/shiki")
+const getShikiPublicPath = (): string => path.join(process.cwd(), "")
 
 const touched = { current: false }
 
@@ -24,17 +26,19 @@ const touchShikiPath = (): void => {
   touched.current = true
 }
 
-const getHighlighter: Options["getHighlighter"] = async (options) => {
+const getHighlighter: Options["getHighlighter"] = async (options) =>
   // touchShikiPath()
 
-  shiki.setCDN("https://codestus.com")
-  return shiki.getHighlighter({
+  shiki.getHighlighter({
     ...(options as any),
     paths: {
-      languages: `https://codestus.com/languages/`,
-      themes: `https://codestus.com/themes/`,
+      languages: environmentMode.production()
+        ? `${getShikiPublicPath()}/languages/`
+        : `${getShikiPublicPath()}/public/languages/`,
+      themes: environmentMode.production()
+        ? `${getShikiPublicPath()}/themes/`
+        : `${getShikiPublicPath()}/public/themes/`,
     },
   })
-}
 
 export default getHighlighter
