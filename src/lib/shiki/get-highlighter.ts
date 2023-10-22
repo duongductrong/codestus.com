@@ -26,36 +26,8 @@ const touchShikiPath = (): void => {
   touched.current = true
 }
 
-function fromDir(startPath: string, filter: RegExp, callback: any) {
-  try {
-    // console.log('Starting from dir '+startPath+'/');
-
-    if (!fs.existsSync(startPath)) {
-      console.log("no dir ", startPath)
-      return
-    }
-
-    const files = fs.readdirSync(startPath)
-    // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < files.length; i++) {
-      const filename = path.join(startPath, files[i])
-      const stat = fs.lstatSync(filename)
-      if (stat.isDirectory()) {
-        fromDir(filename, filter, callback) // recurse
-      } else if (filter.test(filename)) callback(filename)
-    }
-  } catch {
-    //
-  }
-}
-
 const getHighlighter: Options["getHighlighter"] = async (options) => {
-  // touchShikiPath()
-
-  fromDir(path.join(process.cwd(), "../.."), /\.tmLanguage.json$/, (filename: string) => {
-    console.log("-- found: ", filename)
-  })
-
+  console.log(process.cwd())
   return shiki.getHighlighter({
     ...(options as any),
     paths: {

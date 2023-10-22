@@ -60,6 +60,7 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  console.log(process.cwd())
   return (
     <PreferredHTML lang="vi" className={cn(inter.variable, "font-inter")}>
       <PreferredBody ifRegexMatch="" then={{ className: "" }} otherwise={{ className: "" }}>
