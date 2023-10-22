@@ -30,10 +30,10 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
   shiki.setCDN((process.env.APP_URL as string) || "https://codestus.com")
   return shiki.getHighlighter({
     ...(options as any),
-    paths: {
-      languages: `${getShikiPath()}/languages/`,
-      themes: `${getShikiPath()}/themes/`,
-    },
+    // paths: {
+    //   languages: `${getShikiPath()}/languages/`,
+    //   themes: `${getShikiPath()}/themes/`,
+    // },
   })
 }
 
