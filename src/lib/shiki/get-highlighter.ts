@@ -31,8 +31,8 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
-      languages: `/languages/`,
-      themes: `/themes/`,
+      languages: `https://codestus.com/languages/`,
+      themes: `https://codestus.com/themes/`,
     },
   })
 }
