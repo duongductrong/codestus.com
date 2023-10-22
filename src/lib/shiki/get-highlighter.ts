@@ -35,10 +35,10 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("node_modules")}/languages/`
+        ? `${getShikiPublicPath("node_modules/shiki")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("node_modules")}/themes/`
+        ? `${getShikiPublicPath("node_modules/shiki")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
