@@ -26,19 +26,24 @@ const touchShikiPath = (): void => {
   touched.current = true
 }
 
-const getHighlighter: Options["getHighlighter"] = async (options) =>
+const getHighlighter: Options["getHighlighter"] = async (options) => {
   // touchShikiPath()
-  
-  shiki.getHighlighter({
+
+  fs.readdirSync(process.cwd()).forEach((file) => {
+    console.log(file)
+  })
+
+  return shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("..")}/languages/`
+        ? `${getShikiPublicPath("/output")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("..")}/themes/`
+        ? `${getShikiPublicPath("/output")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
+}
 
 export default getHighlighter
