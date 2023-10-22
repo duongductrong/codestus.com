@@ -36,15 +36,19 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
   fs.readdirSync(path.join(process.cwd(), "/.next")).forEach((file) => {
     console.log("Level 2 (.next):", file)
   })
+  
+  fs.readdirSync(path.join(process.cwd(), "/.next/server")).forEach((file) => {
+    console.log("Level 3 (server):", file)
+  })
 
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("/.next")}/languages/`
+        ? `${getShikiPublicPath("/.next/server")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("/.next")}/themes/`
+        ? `${getShikiPublicPath("/.next/server")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
