@@ -26,36 +26,17 @@ const touchShikiPath = (): void => {
   touched.current = true
 }
 
-const getHighlighter: Options["getHighlighter"] = async (options) => {
-  fs.readdirSync(path.join(process.cwd(), "../")).forEach((file) => {
-    if (file.includes("vercel") || file.includes("output")) {
-      console.log("Level 1:", file)
-    }
-  })
-  
-  fs.readdirSync(path.join(process.cwd(), "../../")).forEach((file) => {
-    if (file.includes("vercel") || file.includes("output")) {
-      console.log("Level 2:", file)
-    }
-  })
-  
-  fs.readdirSync(path.join(process.cwd(), "../../../")).forEach((file) => {
-    if (file.includes("vercel") || file.includes("output")) {
-      console.log("Level 3:", file)
-    }
-  })
-
-  return shiki.getHighlighter({
+const getHighlighter: Options["getHighlighter"] = async (options) =>
+  shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("../../vercel/output")}/languages/`
+        ? `${getShikiPublicPath()}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("../../vercel/output")}/themes/`
+        ? `${getShikiPublicPath()}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
-}
 
 export default getHighlighter
