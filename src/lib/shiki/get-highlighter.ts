@@ -40,15 +40,27 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
   fs.readdirSync(path.join(process.cwd(), "/.next/server")).forEach((file) => {
     console.log("Level 3 (server):", file)
   })
+  
+  fs.readdirSync(path.join(process.cwd(), "/.next/server/pages")).forEach((file) => {
+    console.log("Level 4 (pages):", file)
+  })
+  
+  fs.readdirSync(path.join(process.cwd(), "../")).forEach((file) => {
+    console.log("Level 0 (pages):", file)
+  })
+  
+  fs.readdirSync(path.join(process.cwd(), "../../")).forEach((file) => {
+    console.log("Level -1 (pages):", file)
+  })
 
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath("/.next/server")}/languages/`
+        ? `${getShikiPublicPath("/.next/server/pages")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath("/.next/server")}/themes/`
+        ? `${getShikiPublicPath("/.next/server/pages")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
