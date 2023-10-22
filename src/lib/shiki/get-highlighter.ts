@@ -38,6 +38,12 @@ const getHighlighter: Options["getHighlighter"] = async (options) => {
       console.log("Level 2:", file)
     }
   })
+  
+  fs.readdirSync(path.join(process.cwd(), "../../../")).forEach((file) => {
+    if (file.includes("vercel") || file.includes("output")) {
+      console.log("Level 3:", file)
+    }
+  })
 
   return shiki.getHighlighter({
     ...(options as any),
