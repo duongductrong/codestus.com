@@ -1,5 +1,3 @@
-// import nord from "@/lib/shiki/themes/custom-nord.json"
-// import rehypePrettyCode from "rehype-pretty-code"
 import rehypeSanitize from "rehype-sanitize"
 import rehypeStringify from "rehype-stringify"
 import RehypeVideo from "rehype-video"
@@ -9,10 +7,6 @@ import remarkRehype from "remark-rehype"
 import remarkToc from "remark-toc"
 import { unified } from "unified"
 import rehypeHighlight from "rehype-highlight"
-// import getHighlighter from "./shiki/get-highlighter"
-
-// import "highlight.js/scss/github-dark.scss"
-import "highlight.js/scss/nord.scss"
 
 export const processMarkdown = (content: string | null | undefined) =>
   unified()
@@ -21,11 +15,6 @@ export const processMarkdown = (content: string | null | undefined) =>
     .use(remarkParse)
     .use(remarkRehype)
     .use(rehypeSanitize)
-    // .use(rehypePrettyCode, {
-    //   // See Options section below.
-    //   theme: nord as any,
-    //   getHighlighter,
-    // })
     .use(rehypeHighlight)
     .use(RehypeVideo, { details: false })
     .use(rehypeStringify)

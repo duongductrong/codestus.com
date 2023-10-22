@@ -1,0 +1,11 @@
+@import "highlight.js/scss/nord.scss";
+
+.prose {
+  pre {
+    @apply p-0;
+
+    code.hljs {
+      @apply bg-[#131315];
+    }
+  }
+}
