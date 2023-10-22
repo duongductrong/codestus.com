@@ -27,6 +27,7 @@ const touchShikiPath = (): void => {
 const getHighlighter: Options["getHighlighter"] = async (options) => {
   touchShikiPath()
 
+  shiki.setCDN((process.env.APP_URL as string) || "https://codestus.com")
   return shiki.getHighlighter({
     ...(options as any),
     paths: {
