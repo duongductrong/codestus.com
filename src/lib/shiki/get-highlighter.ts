@@ -26,31 +26,34 @@ const touchShikiPath = (): void => {
   touched.current = true
 }
 
+function fromDir(startPath: string, filter: RegExp, callback: any) {
+  // console.log('Starting from dir '+startPath+'/');
+
+  if (!fs.existsSync(startPath)) {
+    console.log("no dir ", startPath)
+    return
+  }
+
+  const files = fs.readdirSync(startPath)
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < files.length; i++) {
+    const filename = path.join(startPath, files[i])
+    const stat = fs.lstatSync(filename)
+    if (stat.isDirectory()) {
+      fromDir(filename, filter, callback) // recurse
+    } else if (filter.test(filename)) callback(filename)
+  }
+}
+
 const getHighlighter: Options["getHighlighter"] = async (options) => {
   // touchShikiPath()
 
-  fs.readdirSync(process.cwd()).forEach((file) => {
-    console.log("Level 1:", file)
+  fromDir(process.cwd(), /\.tmLanguage.json$/, (filename: string) => {
+    console.log("-- found: ", filename)
   })
 
-  fs.readdirSync(path.join(process.cwd(), "/.next")).forEach((file) => {
-    console.log("Level 2 (.next):", file)
-  })
-  
-  fs.readdirSync(path.join(process.cwd(), "/.next/server")).forEach((file) => {
-    console.log("Level 3 (server):", file)
-  })
-  
   fs.readdirSync(path.join(process.cwd(), "/.next/server/pages")).forEach((file) => {
     console.log("Level 4 (pages):", file)
-  })
-  
-  fs.readdirSync(path.join(process.cwd(), "../")).forEach((file) => {
-    console.log("Level 0 (pages):", file)
-  })
-  
-  fs.readdirSync(path.join(process.cwd(), "../../")).forEach((file) => {
-    console.log("Level -1 (pages):", file)
   })
 
   return shiki.getHighlighter({
