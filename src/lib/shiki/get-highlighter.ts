@@ -11,7 +11,7 @@ import { environmentMode } from "../env"
 // Note that they are only referenced on server side
 // See: https://github.com/shikijs/shiki/issues/138
 const getShikiPath = (): string => path.join(process.cwd(), "src/lib/shiki")
-const getShikiPublicPath = (): string => path.join(process.cwd(), "")
+const getShikiPublicPath = (paths: string = ""): string => path.join(process.cwd(), paths)
 
 const touched = { current: false }
 
@@ -28,15 +28,15 @@ const touchShikiPath = (): void => {
 
 const getHighlighter: Options["getHighlighter"] = async (options) =>
   // touchShikiPath()
-
+  
   shiki.getHighlighter({
     ...(options as any),
     paths: {
       languages: environmentMode.production()
-        ? `${getShikiPublicPath()}/languages/`
+        ? `${getShikiPublicPath("..")}/languages/`
         : `${getShikiPublicPath()}/public/languages/`,
       themes: environmentMode.production()
-        ? `${getShikiPublicPath()}/themes/`
+        ? `${getShikiPublicPath("..")}/themes/`
         : `${getShikiPublicPath()}/public/themes/`,
     },
   })
