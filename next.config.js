@@ -2,7 +2,6 @@
 const nextConfig = {
   experimental: {
     mdxRs: true,
-    serverActions: true,
     serverComponentsExternalPackages: ["shiki", "vscode-oniguruma"],
     outputFileTracingIncludes: {
       "/posts/[id]": ["node_modules/shiki/**/*"],
