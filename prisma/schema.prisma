@@ -123,7 +123,7 @@ model Tag {
 
 model User {
   userId            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  name              String
+  name              String?
   email             String    @unique(map: "users_email_unique")
   email_verified_at DateTime? @db.Timestamp(0)
   password          String
