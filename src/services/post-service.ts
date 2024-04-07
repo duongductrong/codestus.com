@@ -22,7 +22,7 @@ class PostService {
   detail(id: string) {
     return prisma.post.findFirst({
       where: { slug: id, status: this.status.publish },
-      include: { users: true },
+      include: { user: true },
     })
   }
 

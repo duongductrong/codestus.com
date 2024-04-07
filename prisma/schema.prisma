@@ -105,7 +105,7 @@ model Post {
   unlove      Int           @default(0) @db.UnsignedMediumInt
   post_tags   PostTag[]
   // post_to_tag post_to_tag[]
-  users       User?         @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "posts_userid_foreign")
+  user       User?         @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "posts_userid_foreign")
 
   @@index([userId], map: "posts_userid_foreign")
   @@map("posts")
