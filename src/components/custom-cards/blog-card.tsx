@@ -14,7 +14,7 @@ export interface BlogCardProps {
 
 export const BlogCard = forwardRef(
   ({ title, description, content, publishedAt, className, as: Comp = "div", ...props }, ref) => (
-    <Comp {...props} ref={ref} className={cn("p-6 border-b border-border", className)}>
+    <Comp {...props} ref={ref} className={cn("p-6 ", className)}>
       <h2 className="text-xl font-semibold mb-2">{title}</h2>
       {description && (
         <p className="text-md font-normal text-muted-foreground mb-4 line-clamp-3">{description}</p>

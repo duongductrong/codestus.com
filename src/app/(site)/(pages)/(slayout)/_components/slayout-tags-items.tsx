@@ -29,7 +29,7 @@ const SLayoutTagsItems = ({ tags }: SLayoutTagsItemsProps) => {
         as={Link}
         href={PAGE_URLS.HOME}
         size="sm"
-        variant={isActiveAll ? "default" : "muted"}
+        variant={isActiveAll ? "default" : "outline"}
         className="rounded-full"
       >
         All
@@ -40,7 +40,7 @@ const SLayoutTagsItems = ({ tags }: SLayoutTagsItemsProps) => {
           as={Link}
           href={PAGE_URLS.TAG_DETAIL.replace(":id", tag.slug)}
           size="sm"
-          variant={getIsTagActive(tag.slug) ? "default" : "muted"}
+          variant={getIsTagActive(tag.slug) ? "default" : "outline"}
           className="rounded-full"
         >
           {tag.name}
