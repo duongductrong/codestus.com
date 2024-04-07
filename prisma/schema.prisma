@@ -62,37 +62,50 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-model PostTag {
-  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
-  postId     BigInt    @db.UnsignedBigInt
-  tagId      BigInt    @db.UnsignedBigInt
-  created_at DateTime? @db.Timestamp(0)
-  updated_at DateTime? @db.Timestamp(0)
-  post       Post      @relation(fields: [postId], references: [postId], onUpdate: Restrict, map: "post_tags_postid_foreign")
-  tag        Tag       @relation(fields: [tagId], references: [tagId], onUpdate: Restrict, map: "post_tags_tagid_foreign")
+// model PostTag {
+//   id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+//   postId     BigInt    @db.UnsignedBigInt
+//   tagId      BigInt    @db.UnsignedBigInt
+//   created_at DateTime? @db.Timestamp(0)
+//   updated_at DateTime? @db.Timestamp(0)
+//   post       Post      @relation(fields: [postId], references: [postId], onUpdate: Restrict, map: "post_tags_postid_foreign")
+//   tag        Tag       @relation(fields: [tagId], references: [tagId], onUpdate: Restrict, map: "post_tags_tagid_foreign")
 
-  @@index([postId], map: "post_tags_postid_foreign")
-  @@index([tagId], map: "post_tags_tagid_foreign")
-  @@map("post_tags")
+//   @@index([postId], map: "post_tags_postid_foreign")
+//   @@index([tagId], map: "post_tags_tagid_foreign")
+//   @@map("post_tags")
+// }
+
+model PostTag {
+  tagId  BigInt @db.UnsignedBigInt
+  postId BigInt @db.UnsignedBigInt
+  posts  Post   @relation(fields: [postId], references: [postId], onDelete: Cascade, map: "FK_524a7e518392c4d5ca1cdf4fa86")
+  tags   Tag    @relation(fields: [tagId], references: [tagId], onDelete: Cascade, map: "FK_9b387372f0d3dc529fc066eb38d")
+
+  @@id([tagId, postId])
+  @@index([postId], map: "IDX_524a7e518392c4d5ca1cdf4fa8")
+  @@index([tagId], map: "IDX_9b387372f0d3dc529fc066eb38")
+  @@map("post_to_tag")
 }
 
 model Post {
-  postId      BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  postId      BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
   title       String
-  views       Int       @db.UnsignedMediumInt
-  thumbnail   String?   @db.Text
-  slug        String    @unique(map: "posts_slug_unique")
-  description String?   @db.Text
-  content     String?   @db.Text
-  userId      BigInt    @db.UnsignedBigInt
-  status      Int       @default(1) @db.UnsignedTinyInt
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
-  publish_at  DateTime? @db.Timestamp(0)
+  views       Int           @default(0) @db.UnsignedMediumInt
+  thumbnail   String?       @db.Text
+  slug        String        @unique(map: "IDX_54ddf9075260407dcfdd724857")
+  description String?       @db.Text
+  content     String?       @db.Text
+  userId      BigInt?       @db.UnsignedBigInt
+  status      Int           @default(1) @db.UnsignedTinyInt
+  created_at  DateTime      @default(now()) @db.Timestamp(6)
+  updated_at  DateTime      @default(now()) @db.Timestamp(6)
+  publish_at  DateTime?     @default(now()) @db.Timestamp(0)
+  love        Int           @default(0) @db.UnsignedMediumInt
+  unlove      Int           @default(0) @db.UnsignedMediumInt
   post_tags   PostTag[]
-  users       User      @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "posts_userid_foreign")
-  love        Int       @default(0) @db.UnsignedMediumInt
-  unlove      Int       @default(0) @db.UnsignedMediumInt
+  // post_to_tag post_to_tag[]
+  users       User?         @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "posts_userid_foreign")
 
   @@index([userId], map: "posts_userid_foreign")
   @@map("posts")
@@ -110,13 +123,14 @@ model Statistic {
 }
 
 model Tag {
-  tagId       BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tagId       BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
   name        String
-  slug        String    @unique(map: "tags_slug_unique")
-  description String?   @db.Text
-  created_at  DateTime? @db.Timestamp(0)
-  updated_at  DateTime? @db.Timestamp(0)
+  slug        String        @unique(map: "tags_slug_unique")
+  description String?       @db.Text
+  created_at  DateTime      @default(now()) @db.Timestamp(6)
+  updated_at  DateTime      @default(now()) @db.Timestamp(6)
   post_tags   PostTag[]
+  // post_to_tag post_to_tag[]
 
   @@map("tags")
 }
@@ -124,16 +138,29 @@ model Tag {
 model User {
   userId            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
   name              String?
-  email             String    @unique(map: "users_email_unique")
+  email             String    @unique(map: "IDX_97672ac88f789774dd47f7c8be")
   email_verified_at DateTime? @db.Timestamp(0)
   password          String
   remember_token    String?   @db.VarChar(100)
-  created_at        DateTime? @db.Timestamp(0)
-  updated_at        DateTime? @db.Timestamp(0)
+  created_at        DateTime  @default(now()) @db.Timestamp(6)
+  updated_at        DateTime  @default(now()) @db.Timestamp(6)
   provider          String?
   provider_id       String?
-  avatar            String?   @db.Text
+  avatar            String?   @db.VarChar(255)
   posts             Post[]
+  roles             roles?
 
   @@map("users")
+}
+
+model roles {
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  id          String   @id @db.VarChar(36)
+  name        String   @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  privileges  String   @db.LongText
+  active      Int      @default(1) @db.TinyInt
+  createdById BigInt?  @unique(map: "REL_cec119ce18936c7b6c24142be3") @db.UnsignedBigInt
+  users       User?    @relation(fields: [createdById], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "FK_cec119ce18936c7b6c24142be3e")
 }

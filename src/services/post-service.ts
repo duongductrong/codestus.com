@@ -1,11 +1,10 @@
 import { prisma } from "@/lib/prisma"
 
 class PostService {
-
   get status() {
     return {
       publish: 1,
-      draft: 0
+      draft: 0,
     }
   }
 
@@ -21,7 +20,10 @@ class PostService {
   }
 
   detail(id: string) {
-    return prisma.post.findFirst({ where: { slug: id, status: this.status.publish }, include: { users: true } })
+    return prisma.post.findFirst({
+      where: { slug: id, status: this.status.publish },
+      include: { users: true },
+    })
   }
 
   getPostsFromTag(tagId: bigint | number) {
@@ -30,7 +32,11 @@ class PostService {
         created_at: "desc",
       },
       where: {
-        post_tags: { some: { tagId } },
+        post_tags: {
+          some: {
+            tagId,
+          },
+        },
       },
     })
   }
