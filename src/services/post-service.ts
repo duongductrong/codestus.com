@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma"
 
 class PostService {
+
+  get status() {
+    return {
+      publish: 1,
+      draft: 0
+    }
+  }
+
   getAllPosts() {
     return prisma.post.findMany({
       orderBy: {
@@ -10,7 +18,7 @@ class PostService {
   }
 
   detail(id: string) {
-    return prisma.post.findFirst({ where: { slug: id }, include: { users: true } })
+    return prisma.post.findFirst({ where: { slug: id, status: this.status.publish }, include: { users: true } })
   }
 
   getPostsFromTag(tagId: bigint | number) {
