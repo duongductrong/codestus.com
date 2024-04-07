@@ -11,6 +11,9 @@ class PostService {
 
   getAllPosts() {
     return prisma.post.findMany({
+      where: {
+        status: this.status.publish,
+      },
       orderBy: {
         created_at: "desc",
       },
