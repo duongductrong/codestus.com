@@ -1,3 +1,4 @@
+import OpenGraphImage from "@/assets/images/open-graph-image.png"
 import BlogRenderer from "@/components/custom-markdowns/blog-renderer"
 import Icon from "@/components/ui/icon"
 import { Text } from "@/components/ui/text"
@@ -11,7 +12,7 @@ import compact from "lodash/compact"
 import { Metadata, ResolvingMetadata } from "next"
 import { notFound } from "next/navigation"
 import Script from "next/script"
-import OpenGraphImage from "@/assets/images/open-graph-image.png"
+import { HitPageViews } from "./_components/page-views"
 
 export const revalidate = 3600
 
@@ -97,6 +98,7 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
 
   return (
     <div className="mx-auto mb-20">
+      <HitPageViews id={id} />
       <Text variant="h1" as="h1" className="mt-20 mb-8 text-center ml-auto mr-auto">
         {post.title}
       </Text>

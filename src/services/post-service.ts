@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
 
 class PostService {
   get status() {
@@ -6,6 +7,23 @@ class PostService {
       publish: 1,
       draft: 0,
     }
+  }
+
+  get cookieKeys() {
+    return {
+      views: (id: string) => `${id}_views`,
+    }
+  }
+
+  hitPageViews(id: string) {
+    const cacheKey = this.cookieKeys.views(id)
+
+    if (cookies().get(cacheKey)) return Promise.resolve()
+
+    cookies().set(this.cookieKeys.views(id), new Date().getTime().toString(), {
+      expires: new Date(Date.now() + 1000 * 30),
+    })
+    return prisma.post.update({ where: { slug: id }, data: { views: { increment: 1 } } })
   }
 
   getAllPosts() {
