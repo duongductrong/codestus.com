@@ -4,7 +4,6 @@ import Icon from "@/components/ui/icon"
 import { Text } from "@/components/ui/text"
 import { PAGE_URLS } from "@/constants/urls"
 import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
-import postService from "@/services/post-service"
 import { ParamsProps, SearchParamsProps } from "@/types/utilities"
 import { getSpeedReading } from "@/utils/speed-reading"
 import { allPosts } from "content-collections"
@@ -13,7 +12,6 @@ import compact from "lodash/compact"
 import { Metadata, ResolvingMetadata } from "next"
 import { notFound } from "next/navigation"
 import Script from "next/script"
-import { HitPageViews } from "./_components/page-views"
 
 export const revalidate = 3600
 
@@ -134,7 +132,25 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
       <BlogRenderer content={content} />
 
       {/* <article className="prose dark:prose-invert leading-8 max-w-full mx-auto">
-        <MDXContent code={post.mdx} />
+        <MDXContent
+          code={post.mdx}
+          components={{
+            code: ({ children, className }) => {
+              const language = className?.replace("language-", "")
+              return (
+                <SyntaxHighlighter
+                  showLineNumbers
+                  wrapLines
+                  wrapLongLines
+                  style={dark}
+                  language={language}
+                  // eslint-disable-next-line react/no-children-prop
+                  children={children as unknown as string}
+                />
+              )
+            },
+          }}
+        />
       </article> */}
 
       <Script

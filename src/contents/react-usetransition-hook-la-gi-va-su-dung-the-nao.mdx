@@ -90,7 +90,7 @@ export function FilterList({ names }) {
 }
 ```
 
-{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-urgent-forked-opd5gi?fontsize=14&hidenavigation=1&theme=dark" /%}
+\{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-urgent-forked-opd5gi?fontsize=14&hidenavigation=1&theme=dark" /%\}
 
 `<FilterList names={names} />` chấp nhận một mảng lớn các tên nhân viên. Bên trong thành phần này, `query` state sẽ nhân vào một chuỗi các thông tin nhập vào từ `input`. `Input` nhập thông tin đầu là một `controlled component` cập nhật trạng thái truy vấn tên nhân viên khi người dùng nhập.
 
@@ -132,7 +132,7 @@ export function FilterList({ names }) {
 }
 ```
 
-{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-non-urgent-forked-vdbfj6" /%}
+\{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-non-urgent-forked-vdbfj6" /%\}
 
 Hãy mở bản `demo`.
 Nếu bạn nhập nhanh một truy vấn vào trường nhập liệu, bạn sẽ nhận thấy độ trễ trong việc đánh dấu truy vấn bên trong danh sách. React đã tách riêng việc hiển thị tác vụ khẩn cấp (cập nhật trường nhập khi người dùng nhập) khỏi tác vụ không khẩn cấp (làm nổi bật truy vấn bên trong danh sách). Cách tiếp cận như vậy cung cấp trải nghiệm người dùng tốt hơn.
