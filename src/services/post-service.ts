@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+// import { prisma } from "@/lib/prisma"
 import { cookies } from "next/headers"
 
 class PostService {
@@ -23,40 +23,42 @@ class PostService {
     cookies().set(this.cookieKeys.views(id), new Date().getTime().toString(), {
       expires: new Date(Date.now() + 1000 * 30),
     })
-    return prisma.post.update({ where: { slug: id }, data: { views: { increment: 1 } } })
+
+    return Promise.resolve()
+    // return prisma.post.update({ where: { slug: id }, data: { views: { increment: 1 } } })
   }
 
   getAllPosts() {
-    return prisma.post.findMany({
-      where: {
-        status: this.status.publish,
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-    })
+    // return prisma.post.findMany({
+    //   where: {
+    //     status: this.status.publish,
+    //   },
+    //   orderBy: {
+    //     created_at: "desc",
+    //   },
+    // })
   }
 
   detail(id: string) {
-    return prisma.post.findFirst({
-      where: { slug: id, status: this.status.publish },
-      include: { user: true },
-    })
+    // return prisma.post.findFirst({
+    //   where: { slug: id, status: this.status.publish },
+    //   include: { user: true },
+    // })
   }
 
   getPostsFromTag(tagId: bigint | number) {
-    return prisma.post.findMany({
-      orderBy: {
-        created_at: "desc",
-      },
-      where: {
-        post_tags: {
-          some: {
-            tagId,
-          },
-        },
-      },
-    })
+    // return prisma.post.findMany({
+    //   orderBy: {
+    //     created_at: "desc",
+    //   },
+    //   where: {
+    //     post_tags: {
+    //       some: {
+    //         tagId,
+    //       },
+    //     },
+    //   },
+    // })
   }
 }
 

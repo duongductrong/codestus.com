@@ -25,7 +25,11 @@ export async function generateMetadata(
   { params: { id } }: PostDetailProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const post = await postService.detail(id)
+  // const post = await postService.detail(id)
+
+  const post = allPosts.find((p) => p.slug === id)
+
+  if (!post) notFound()
 
   const url = generateUrlFormSlug(post?.slug)
 
@@ -44,9 +48,9 @@ export async function generateMetadata(
       locale: "vi",
       siteName: "Codestus.com",
       images: compact([post?.thumbnail, OpenGraphImage.src]),
-      publishedTime: post?.publish_at?.toDateString(),
+      publishedTime: post?.publishAt,
       emails: ["duongductrong06@gmail.com"],
-      modifiedTime: post?.updated_at?.toDateString(),
+      modifiedTime: post?.updatedAt,
       authors: ["Duong Duc Trong"],
     },
     twitter: {

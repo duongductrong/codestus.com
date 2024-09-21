@@ -1,6 +1,6 @@
 import { allTags } from "@/constants/tags"
 import { PAGE_URLS } from "@/constants/urls"
-import { prisma } from "@/lib/prisma"
+// import { prisma } from "@/lib/prisma"
 import { allPosts } from "content-collections"
 import dayjs from "dayjs"
 import { MetadataRoute } from "next"

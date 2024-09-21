@@ -1,8 +1,9 @@
-import { prisma } from "@/lib/prisma"
+// import { prisma } from "@/lib/prisma"
 
 class TagService {
   detail(id: string) {
-    return prisma.tag.findFirst({ where: { slug: id } })
+    return []
+    // return prisma.tag.findFirst({ where: { slug: id } })
   }
 }
 
