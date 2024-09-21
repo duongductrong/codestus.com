@@ -14,7 +14,6 @@
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
     "@next/mdx": "^14.1.0",
-    "@prisma/client": "^5.3.1",
     "@radix-ui/react-slot": "^1.0.2",
     "@types/lodash": "^4.14.199",
     "@types/mdx": "^2.0.8",
