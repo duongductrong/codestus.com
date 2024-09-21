@@ -1,0 +1,106 @@
+---
+title: Cách lấy giá trị thuộc tính CSS với Javascript
+description: Đôi khi, khi phát triển dự án chỉ sử dụng CSS sẽ không đủ đối với nhu cầu bạn cần cho một hiệu ứng cần xây dựng. Bạn sẽ cần điều chỉnh được giá trị CSS với Javascript. Nhưng làm sao để lấy giá trị trong CSS để có thể làm việc này?
+tags: HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2022-03-02T13:16:00.000Z
+createdAt: 2022-03-02T13:16:54.000Z
+updatedAt: 2024-06-03T11:07:45.048Z
+views: 5184
+slug: cach-lay-thuoc-tinh-css-voi-javascript
+---
+
+Đôi khi, khi phát triển dự án chỉ sử dụng CSS sẽ không đủ đối với nhu cầu bạn cần cho một hiệu ứng cần xây dựng. Bạn sẽ cần điều chỉnh được giá trị CSS với Javascript. Nhưng làm sao để lấy giá trị trong CSS để có thể làm việc này?
+
+Có hai cách khả thi, tùy thuộc vào việc bạn đang cố gắng tạo kiểu nội tuyến hay kiểu tính toán.
+
+## Inline Styles
+
+Với cách viết stylesheet `inline style` trong thuộc tính HTML bên dưới
+
+```jsx
+<div class="element" style="font-size: 1.5rem; color: green;">Hello world</div>
+```
+
+Để có thể lấy được giá trị của các thuộc tính trong `style inline` bạn có thể sử dụng cách truy xuất `style` trong đối tượng `element selector`
+
+```jsx
+const elementAfterSelector = document.querySelector("#element");
+
+console.log(elementAfterSelector.style.fontSize); // 1.5rem;
+console.log(elementAfterSelector.style.color); // green;
+```
+
+## Computed Styles
+
+Nếu bạn viết stylesheet cho dự án của mình trong các tệp CSS thì `computed style` sẽ là cách giúp bạn lấy các giá trị của thuộc tính bạn đã viết trong CSS file.
+
+Nó sẽ bao gồm 2 tham số:
+
+```jsx
+// *.js
+getComputedStyle(selectorElement, pseudoElement);
+```
+
+- Với `selectorElement` ở đây sẽ phần tử phận cần lấy thuộc tính của nó với `document.querySelector` chẳng hạn.
+- Với `pseudoElement` ở đây đề cập đến chuỗi của phần tử giả mà bạn đang cố lấy (nếu có). Bạn có thể bỏ qua giá trị này nếu không chọn.
+
+Hãy xem qua một ví dụ để giúp bạn hiểu mọi thứ. Giả sử bạn có HTML và CSS sau:
+
+```jsx
+// *.html
+<div id="element"> Element </div>
+```
+
+```css
+// *.css
+#element { color: green } 
+```
+
+Và khá đơn giản để chúng ta có thể có giá trị `green` của `color` bằng cách sau
+
+```jsx
+// *.js
+
+const el = document.querySelector("#element");
+
+getComputedStyle(el); // CSSStyleDeclaration list
+
+// getComputedStyle(el).color // green
+```
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ce2c44e5-d65b-4ec1-bc2c-f228e416b1ab/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220301%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220301T181258Z&X-Amz-Expires=86400&X-Amz-Signature=3a908f675f398a2482bf36c0a1cd22f60a2a2620b12029d5d4b0bd419931bd90&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22&x-id=GetObject)
+
+Bạn cũng có thể thấy các thuộc tính của đối tượng này trong dev-tools của trình duyệt Chrome và Firefox. Chọn **inspector** hoặc **F12 (Win)** hoặc **Option + Command + I (MacOS)**
+
+![Screen Shot 2022-03-02 at 00.42.38.png](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/fafd6767-a4b5-4f37-b881-2360e0214083/Screen_Shot_2022-03-02_at_00.42.38.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220301%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220301T181532Z&X-Amz-Expires=86400&X-Amz-Signature=45f5312244c27be0a1322688fecfb5d97b9dcda5941e7050038ee749cd1253e8&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Screen%2520Shot%25202022-03-02%2520at%252000.42.38.png%22&x-id=GetObject)
+
+## Style pseudo elements
+
+Đôi khi trong dự án, sẽ có trường hợp bạn dùng `::before` và `::after`. Để lấy được giá trị của các thuộc tính CSS trong pseudo element này. Chúng ta co thể sử dụng `getComputedStyle` như sau:
+
+```jsx
+// *.html
+<div id="element"> Element </div>
+```
+
+```css
+// *.css
+#element { color: green } 
+
+#element::before { content: "test", color: pink; }
+```
+
+Và khá đơn giản để chúng ta có thể có giá trị `green` của `color` bằng cách sau
+
+```jsx
+// *.js
+
+const el = document.querySelector("#element");
+
+const computedStyle = getComputedStyle(el, "::before"); // CSSStyleDeclaration list
+
+// computedStyle.content // "test"
+// computedStyle.color // pink
+```
+      

@@ -1,0 +1,53 @@
+---
+title: Bổ sung một số kỹ năng debug với console.log() 
+description: Nếu bạn so sánh cả hai, bạn sẽ thấy điều này hữu ích như thế nào. Tránh nhầm lẫn các giá trị của các biến khi chúng ta debug bằng mắt.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2023-04-12T10:56:04.000Z
+createdAt: 2023-04-12T10:56:04.000Z
+updatedAt: 2024-06-03T17:50:49.523Z
+views: 331
+slug: bo-sung-mot-so-ky-nang-debug-voi-consolelog
+---
+
+## 1. Hiển thị nội dung bằng object
+Thay vì sử dụng `console.log(url, url2, foo)`, hãy thay nó bằng `console.log({ url, url2, foo })`.
+
+![Example](https://res.cloudinary.com/xskill/image/upload/v1681232203/codestus/CleanShot_2023-04-11_at_23.56.28_2x_vlx4ib.png)
+
+Nếu bạn so sánh cả hai, bạn sẽ thấy điều này hữu ích như thế nào. Tránh nhầm lẫn các giá trị của các biến khi chúng ta debug bằng mắt.
+
+## 2. Đặt prefix cho console.log()
+Khi chúng ta đặt `console.log` ở nhiều nơi trong ứng dụng mà không có prefix nó sẽ trở nen rối và khó kiểm soát. Sẽ dễ dàng hơn nếu chúng ta đặt prefix trước khi log dữ liệu. Ngoài ra, chúng ta cũng sẽ dễ dàng tìm kiếm nó hơn.
+
+![console.log example](https://res.cloudinary.com/xskill/image/upload/v1681231402/codestus/CleanShot_2023-04-11_at_23.43.00_2x_uzdi5d.png)
+
+Tìm kiếm `A function ABC`: sẽ cho phép bạn nội dung debug cần tìm kiếm, giúp bạn tiết kiệm rất nhiều thời gian nếu có các console.log không liên quan khác.
+
+
+## 3. Sử dụng console.table() cho object
+`console.table()` là một sự thay thế trực quan mạnh mẽ hơn nhiều so với `console.log()` khi chúng ta muốn hiển thị cấu trúc nội dung của các objects.
+
+![From builderio](https://res.cloudinary.com/xskill/image/upload/v1681231562/codestus/assets_2FYJIGb4i01jvw0SRdL5Bt_2F441fd8a98dba4b2ab4316031bbd1d5a7_xnagtv.jpg)
+
+![From builderio](https://res.cloudinary.com/xskill/image/upload/v1681231568/codestus/assets_2FYJIGb4i01jvw0SRdL5Bt_2F9b02b958f23143e887add524f5b6e1c8_j07x4e.jpg)
+
+Định dạng bảng cho thấy rõ ràng ngay lập tức rằng chúng ta đã viết sai chính tả `name` thành `names` trong một hàng, và quên mất `id` ở một hàng khác.
+
+## 4. Sử dụng console.dir() cho các hàm và DOM elements
+`console.dir()` rất tốt trong việc giúp bạn kiểm tra các nguyên mẫu phức tạp. Hiển thị dữ liệu theo dạng phân cấp.
+
+Khi sử dụng để hiển thị thông tin của một DOM elements với `console.log` chúng ta chỉ thấy được thông tin HTML của đối tượng.
+
+![Example](https://res.cloudinary.com/xskill/image/upload/v1681231947/codestus/CleanShot_2023-04-11_at_23.52.15_2x_fl3x0p.png)
+
+Để hiển thị chi tiết các thuộc tính nguyên mẫu phức tập của một DOM elements, thay vì sử dụng `console.log` chúng ta có thể sử dụng `console.dir` lấy các thông tin này.
+
+![Example](https://res.cloudinary.com/xskill/image/upload/v1681232053/codestus/CleanShot_2023-04-11_at_23.54.05_2x_nscdhu.png)
+
+## Kết luận
+Hi vọng một số kỹ thuật sử dụng `console` trong Javascript này có thể giúp các bạn tiết kiệm thời gian khi debug ứng dụng.
+
+Tham khảo qua một số nguồn:
+- https://www.builder.io/blog/console-log#tip-3-use-console-table-for-objects
+      

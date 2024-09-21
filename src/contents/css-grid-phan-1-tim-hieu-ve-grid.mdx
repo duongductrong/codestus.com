@@ -1,0 +1,90 @@
+---
+title: CSS Grid #1: Tìm hiểu về Grid
+description: Chúng ta hãy bắt đầu thay suy nghĩ về CSS Grid đi nhé. Đây là Cheatsheet về mọi thứ bạn có thể làm với Grid để bắt đầu vào năm 2021!
+tags: JavaScript,React
+author: Trọng Dương Đức
+publishAt: 2021-03-07T16:00:54.000Z
+createdAt: 2021-03-07T16:00:54.000Z
+updatedAt: 2024-05-31T12:02:57.283Z
+views: 6480
+slug: css-grid-phan-1-tim-hieu-ve-grid
+---
+
+Chúng ta hãy bắt đầu thay suy nghĩ về CSS Grid đi nhé. Đây là Cheatsheet về mọi thứ bạn có thể làm với Grid để bắt đầu vào năm 2021!
+
+## Kiến trúc Grid
+![](https://res.cloudinary.com/xskill/image/upload/v1615132845/codestus/pehkfp8bnqk4212phzf7.png)
+
+Bên trên là hình ảnh sơ về `grid architecture` hoạt động theo 2  trục `Cross Axis (Rows)` và `Main Axis (Column)`.
+
+Giờ cùng bắt đầu tìm hiểu về `grid` qua các thuộc tính của nó cùng mình nhé.
+
+## Thuộc tính grid-template-column
+![Thuộc tính grid-template-columns](https://res.cloudinary.com/practicaldev/image/fetch/s--SsyA3A3f--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/pu3jedhac2u0onuan6go.png)
+Dựa theo `grid-template-column` trong ảnh, chúng ta có thể biết được số cột (column) là 3
+- Cột 1: width 200px
+- Cột 2: width `auto`
+- Cột 3: width 100px
+
+Chúng ta sử dụng nó để số cột  và độ rộng của mỗi cột theo trục `main axis` như hình phía trên.  Bạn có thể đặt riêng chiều rộng của từng cột hoặc đặt chiều rộng đồng nhất cho tất cả các cột bằng cách sử dụng hàm `repeat ()`.
+![Thuộc tính grid-template-column](https://res.cloudinary.com/xskill/image/upload/v1615135590/codestus/gpqritt3b7rq2go69itn.png)
+
+## Thuộc tính grid-template-rows
+Ngược lại với `grid-tempate-columns`, thuộc tính `grid-template-rows` sẽ định nghĩa số hàng và kích thuốc của chúng theo chiều dọc `cross axis`.
+
+![Thuộc tính grid-template-rows](https://res.cloudinary.com/xskill/image/upload/v1615175289/codestus/ar66jksteqiamnpwaqkz.png)
+> Nguồn ảnh: Joy Shaheb
+
+
+Phân tích một chút về hình phái trên, chúng ta có tổng thể 3 hàng dựa trên ảnh `grid-template-rows: 200px auto 100px`.
+- Hàng 1 (Màu đỏ): height 200px
+- Hàng 2 (Màu xanh): height `auto`
+- Hàng 3 (Màu đen): height 100px
+
+giống như `grid-template-columns` chúng ta cũng có thể sử dụng phương thức `repeat(quantity, frame)` để định nghĩa hàng
+
+```css
+.classname {
+	grid-temlate-rows: repeat(3, 200px);
+} 
+```
+
+![Thuộc tính grid-template-rows](https://res.cloudinary.com/xskill/image/upload/v1615175613/codestus/bafcmijwdhckhed7gmrz.png)
+> Nguồn ảnh: Joy Shaheb
+
+## Thuộc tính grid-template-areas
+Chúng ta sử dụng thuộc tính này để chỉ định lượng không gian mà một ô lưới phải mang theo cột & hàng trên vùng `wrapper`. Điều này sẽ dễ dàng hơn vì bạn có thể quan sát dc những gì chúng ta đang làm.
+
+![Thuộc tính grid-template-areas](https://res.cloudinary.com/xskill/image/upload/v1615175790/codestus/md347vkhtlbhh5r77rik.png)
+> Nguồn ảnh: Joy Shaheb
+
+Dựa vào hình ảnh phía trên, chúng ta có một vài thông tin cần thiết
+- Layout chúng ta muốn xây dựng gồm 12 cột và 12 hàng và gồm 3 khối
+	- Khối A có 12 cột và 4 hàng
+	- Khối B có 10 cột và 8 hàng
+	- Khối C có 2 cột và 8 hàng
+
+Từ phân tích chúng ta sẽ có bản thiết kế
+![Grid template area design](https://res.cloudinary.com/xskill/image/upload/v1615176233/codestus/jqr3zxituiwqmndxaxob.png)
+> Nguồn ảnh: Joy Shaheb
+
+Và giả sử khoảng cách giữa các đối tượng phía trên với nhau là 50px bạn sẽ cần biết tới thuộc tính sau
+
+## Column-gap
+`column-gap` được sử dụng để định nghĩa khoảng các giữa các cột:
+
+![](https://res.cloudinary.com/xskill/image/upload/v1615176369/codestus/c4sqinu2aor44mknwird.png)
+
+> Nguồn ảnh: Joy Shaheb
+
+Tương tự, chúng ta cũng có `row-gap`
+
+## row-gap
+Thuộc tính này cũng tương tự như `column-gap`, nhưng dùng để định nghĩa cho khoảng cách giữa các hàng.
+![](https://res.cloudinary.com/xskill/image/upload/v1615176446/codestus/iodoqzqwvzwwzakf1oik.png)
+
+> Nguồn ảnh: Joy Shaheb
+
+Bài có lẽ đến đây đã hơi dài, mình sẽ cắt ngắn từng phần để các bạn dễ đọc và dễ hiểu.
+Trong phần sau, chúng ta sẽ tìm hiểu về các thuộc tính dùng để căn chỉnh phần tủ bên trong grid nhé.
+      

@@ -1,0 +1,35 @@
+---
+title: Trường hợp sử dụng useEffect và useLayoutEffect như thế nào?
+description: Về mặt sử dụng thì cả 2 hook useEffect và useLayoutEffect đều có cách sử dụng giống nhau, nhưng sẽ khác nhau trong một số trường hợp. Vì vậy, trong bài viết này, chúng ta sẽ cân nhắc xem xét các trường hợp khi sử dụng 2 React Hook này.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2021-10-16T10:02:17.000Z
+createdAt: 2021-10-16T10:02:17.000Z
+updatedAt: 2024-09-21T09:26:34.840Z
+views: 7253
+slug: truong-hop-useeffect-va-uselayouteffect-nhu-the-nao
+---
+
+Về mặt sử dụng thì cả 2 hook `useEffect` và `useLayoutEffect` đều có cách sử dụng giống nhau, nhưng sẽ khác nhau trong một số trường hợp. Vì vậy, trong bài viết này, chúng ta sẽ cân nhắc xem xét các trường hợp khi sử dụng 2 React Hook này.
+
+## Về useEffect
+
+Mình cá là 99% bạn đọc ở đây đều sử dụng `useEffect` trong tất cả các trường hợp. Hiện tại React Hooks đã dần ổn định và nếu trong trường hợp bạn muốn cấu trúc lại các Class component sang hooks, bạn sẽ chuyển các **Life Cycle** của Class Component sang `useEffect` .
+
+Một trong những lưu ý là nó sẽ chạy sau khi mỗi lần thành phần của bạn hiển thị và đảm bảo quá trình gọi này không chặn quá trình kết xuất giao diện **(lock browser paint).** Điều này khác với các **Life Cycle** của Class component nơi các `componentDiDMount` và `componentDidUpdate` sẽ chạy đồng bộ sau khi hiển thị giao diện. Nó hoạt động hiểu qua hơn theo cách này.
+
+Tuy nhiên, nếu bạn thực hiện một tác động làm thay đổi DOM (via a DOM node ref) và nó sẽ thay đổi DOM node giữa các lần hiển thị giao diện và hiệu ứng của bạn làm thay đổi nó thì bạn sẽ không muốn sử dụng `useEffect` đâu. Cái bạn cần là `useLayoutEffect` bởi lẽ người dùng có thể thấy các thay đổi đột biến (quá trình thay đổi) giữa các lần. **Đây sẽ là lý do bạn muốn tránh sử dụng useEffect thay vào đó bằng useLayoutEffect.**
+
+## Về useLayoutEffect
+
+ **useLayoutEffect sẽ được chạy đồng bộ ngay lập tức sau khi** React đã thực hiện tất cả các DOM mutations. Điều này có thể hữu ích nếu bạn muốn đo lường các DOM (Như việc bạn muốn lấy vị trí cuộn, vị trí của các phần tử) và sau đó tạo DOM mutations hoặc trigger hiển thị một cách đồng bộ bằng cách cập nhật trạng thái.
+
+Theo lịch trình, nó hoạt động giống như cách làm việc của `componentDidMount` và `componentDidUpdate` . Các logic của bạn sẽ được thực thi ngay lập tức sau khi DOM đã được tính toán, trước khi trình duyệt thực hiện kết xuất lại giao diện. 
+
+## Tóm tắt lại
+
+- **useLayoutEffect**: Chỉ sử dụng trong các trường hợp bạn cần thay đổi DOM hoặc thực hiện các phép tính đo lường, các trường hợp xảy ra lỗi từ **useEffect. Hãy nghĩ đến useLayoutEffect như một giải pháp.**
+- **useEffect:** Nếu bạn không cần tương tác với DOM trong hầu hết trường hợp nên sử dụng **useEffect**.
+
+Trong hầu hết các trường hợp, bạn nên thử sử dụng useEffect. Nếu gặp vẫn đề, hãy nghĩ tới việc sử dụng **useEffectLayout.**
+      

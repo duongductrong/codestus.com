@@ -1,0 +1,270 @@
+---
+title: 6 Design Patterns thông dụng trong JavaScript cần biết
+description: Để tiến sâu hơn trong lập trình với ngôn ngữ JavaScript, các bạn nên tích luỹ thêm các kiến thức về các design patterns để giúp code tốt, có cấu trúc và có tổ chức rõ ràng hơn.
+tags: JavaScript,Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-01T18:11:16.000Z
+createdAt: 2021-02-01T18:11:16.000Z
+updatedAt: 2024-06-03T16:37:28.878Z
+views: 12655
+slug: 6-design-patterns-thong-dung-trong-javascript-can-biet
+---
+
+Để tiến sâu hơn trong lập trình với ngôn ngữ JavaScript, các bạn nên tích luỹ thêm các kiến thức về các **design patterns** để giúp code tốt, có cấu trúc và có tổ chức rõ ràng hơn.
+
+Trong bài viết này, chúng ta sẽ cùng khám phá một số **Design patterns** thường được sử dụng trong JavaScript.
+
+## 1. Constructor Pattern
+Trong các ngôn ngữ lập trình hướng đối tượng, **constructor** là một phương thức đặt biệt được sử dụng để khởi tạo đối tượng mới cùng với các thuộc tính khởi tạo ban đầu. 
+
+Trong JavaScript, hầu như mọi thứ đều là một **object** và chúng ta thường quan tâm đến việc khởi tạo đối tượng với **Object Constructor**.
+
+```js
+// Sử dụng {}
+const person  = {};
+
+// Sử dụng Object()
+const person = new Object();
+```
+
+Ngoài ra, bạn cũng có thể khởi tạo 1 constructor bằng function
+
+```js
+function Person() {}
+
+const personA = new Person();
+
+personA.name = "Codestus.com";
+```
+
+## 2. Prototype Pattern
+**Prototype Pattern** là một object-based. Nó tạo ra một phiên bản mới của đối tượng dựa trên đối tượng nguyên mẫu. Mục tiêu chính là tạo ra một đối tượng sử dụng làm làm bản thiết kế cho mỗi đối tượng được tạo sau đó.
+
+Nếu bạn cảm thấy khởi tạo một đối tượng mới trực tiếp quá phức tạp và không hiệu quả, trong trường hợp này, sử dụng **Prototype Pattern** là một cách ý tưởng không tồi.
+
+Bạn có thể triển khai Prototype Pattern theo các như sau:
+
+```js
+// Khởi tạo đối tượng
+function Person(name, age) {
+	this.name = name;
+	this.age = age;
+
+	this.showName = () => console.log(this.name);
+}
+
+// Clone prototype của đối tượng
+function PersonPrototype(prototype) {
+	const _prototype = prototype;
+	
+	this.clone = () => {
+		let person = new Person();
+		person.name = _prototype.name;
+		person.age = _prototype.age;
+		
+		return person;
+	}
+}
+
+const person = new Person("Codestus.com", 20);
+const prototypeOfPerson = new PersonPrototype(person);
+const tester = prototypeOfPerson.clone();
+
+tester.showName() // "Codestus.com"
+```
+
+Ngoài ra, bạn cũng có thể sử dụng khái niệm kế thừa **prototype** đã tích hợp sẵn trong đối tượng **Object**.
+
+```js
+const person = {
+	name: "Codestus.com",
+	age: 20,
+}
+
+const personA = Object.assign({}, person);
+```
+
+## 3. Command Pattern
+Mục đích của **Command Pattern** là đóng gói các hành động dưới dạng đối tượng. Cho phép phân tách hệ thống các đối tượng nhận yêu cầu với các đối tượng thực thi yêu cầu, có khả năng ghép nối. Trong đó, các yêu cầu được gọi là **sự kiện** và các mã để thực thi yêu cầu được gọi là trình xử lý sự kiện.
+
+Nào bây giờ hãy tưởng tượng bạn nhận được yêu cầu xây dựng hệ thống thanh toán cho một cửa hàng thương mại điện tử. Tuỳ thuộc vào loại phương thức thanh toán, bạn sẽ chọn cho mình một quy trình cụ thể.
+
+Ví dụ 
+```js
+
+if(paymentMethod === "creditcard") {
+	// Xử lý thanh toán
+}
+```
+
+Một số phương thức thanh toán chỉ cần một bước duy nhất, một số khác thì không. Dựa vào ví dụ trên, chúng ta sẽ thử xây dựng quy trình thanh toán.
+
+**Command Pattern** là một giải pháp tốt để áp dụng trong ví dụ này. Cụ thể về ví dụ, hệ thống xử lý của bạn sẽ không biết nhiều thông tin về việc xử lý từng phương thức thanh toán như thế nào. Các yêu cầu xử lý thanh toán và nơi xử lý thanh toán sẽ tách biệt và được ghép nối lại từ hệ thống xử lý.
+
+```js
+// Phần lõi điều hướng xử lý
+function Command(operation) {
+	this.operation = operation;
+}
+
+Command.prototype.execute = function() {
+	this.operation.execute()
+}
+
+// Hàm phương thức thanh toán
+function ProccessPaypalPayment() {
+	return {
+		execute: function() {
+			console.log("Payment with Paypal");
+		}
+	}
+}
+
+// Hàm phương thức thanh toán
+function ProccessCreditCardPayment() {
+	return {
+		execute: function() {
+			console.log("Payment with Credit Card");
+		}
+	}
+}
+
+// Hàm xử lý thanh toán nhận yêu cầu và điều hướng xử lý thực thi
+function PaymentHandler() {
+	let paymentCommand;
+	
+	return {
+		setPaymentCommand(command) {
+			this.paymentCommand = command;
+		},
+		
+		executeCommand() {
+			this.paymentCommand.execute();
+		}
+	}
+}
+
+function main() {
+	let systemPayment = new PaymentHandler();
+	
+	systemPayment.setPaymentCommand(new  Command(new ProccessPaypalPayment));
+	systemPayment.executeCommand();
+}
+
+main()
+```
+
+## 4. Observer Pattern
+Bạn có bao giờ **Đăng ký nhận tin** ở trang web nào chưa?. Chắc hẵn là rồi, khi bạn đăng ký nhận tin, địa chỉ email của bạn sẽ được lưu xuống hệ thống. Khi blog, tạo bài viết mới, bạn sẽ nhận được thông báo về nó. Đây là **Observer**.  (Tuy nhiên, cũng không hẵn hệ thống Subscribe Email nào cũng thực hiện theo cách này).
+
+**Observer Pattern** cung cấp cho chúng ta một mô hình cơ bản bao gồm **Subscribe**, **Unsubscribe** và **Notify**.
+
+![Observer Pattern Example](https://codestus.com/uploads/images/posts/observer-3x.png)
+
+Ví dụ
+```js
+// Nơi lưu trữ người đăng ký và các phương thức
+function Observable() {
+	this.observers = [];
+}
+
+// Đăng ký nhận tin
+Observable.prototype.subscribe = function(subscriber) {
+	this.observers.push(subscriber);
+}
+
+// Huỷ đăng ký nhận tin
+Observable.prototype.unsubscribe = function(subscriber) {
+	this.observers = this.observers.filter(observer => observer !== subscriber);
+}
+
+// Thông báo khi có bài viết mới
+Observable.prototype.notify = function(data) {
+	this.observers.forEach(observer => {
+		observer(data);
+	})
+}
+
+const usersSubscribe = new Observable();
+
+const userOne = (data) => console.log("Subscriber 1 " + data);
+const userTwo = (data) => console.log("Subscriber 2 " + data);
+const userThree = (data) => console.log("Subscriber 3 " + data);
+
+usersSubscribe.subscribe(userOne); // Người đăng ký
+usersSubscribe.subscribe(userTwo); // Người đăng ký
+usersSubscribe.subscribe(userThree); // Người đăng ký
+usersSubscribe.unsubscribe(userOne); // Người huỷ đăng ký
+
+usersSubscribe.notify("được thông báo bài viết mới")
+```
+
+## 5. Singleton Pattern
+Đây là một **design pattern** vô cùng nổi tiếng, chúng ta sử dụng **singleton pattern** để hạn chế khởi tạo đối tượng, giảm bớt được khai báo đối tượng dư thừa, chỉ khởi tạo một lần duy nhất và có thể truy cập toàn cục. Đây sẽ là một **pattern** vô cùng hữu ích cho các trường hợp bạn phải xử lý 1 tác vụ ở nhiều nơi, có thể hạn chế được số lần khai báo đối tượng không cần thiết.
+
+Cùng thử xem ví dụ
+
+```js
+const utils = (() => {
+	let instance;
+	
+	function initialize() {
+		return {
+			sum: function() {
+				let nums = Array.prototype.slice.call(arguments);
+				return nums.reduce((numb, total) => numb + total, 0)
+			}
+		}
+	}
+	
+	return {
+		getInstance: function() {
+			// Nếu đối tượng này chưa được khởi tạo
+			if(!instance) {
+				// Khởi tạo lần đầu tiên
+				instance = new initialize();
+			}
+			
+			// Không khởi tạo nữa, chỉ trả về đối tượng đã khởi tạo
+			return instance;
+		}
+	}
+})()
+
+const firstU =  utils.getInstance(); // Cùng lấy 1 instance
+const secondU =  utils.getInstance(); // Cùng lấy 1 instance
+
+console.log(firstU === secondU); // Trả về true là đúng vì cùng thuộc 1 instance duy nhất
+
+console.log(firstU.sum(1,2,3,4,5)) // 15 // working
+```
+
+## 6. Module Pattern
+**Module pattern** là design pattern được sinh ra để triển khai khái niệm modules software. Một pattern được sử dụng thông dụng trong **JavaScript**. Khi kiểm tra bên trong mã nguồn của các thư viện, bạn sẽ nhận thấy cách khởi tạo của nó gần giống như **Singleton Pattern**. Đây là một design pattern sinh ra để tuân thủ tính bao đóng như các ngôn ngữ lập trình OOP (Các đối tượng class luôn có tính bao đóng, để tránh các truy cập, chỉnh sửa trái phép).
+
+Ví dụ
+```js
+const person = (() => {
+	let name = "Codestus";
+	let age = 20;
+	
+	return {
+		getName: () => {
+			return name;
+		},
+		
+		getAge: () => {
+			return age;
+		},
+		
+		setName: (_name) => name = _name,
+		setAge: (_age) => name = _age,
+	}
+})()
+```
+
+Như đoạn mã phía trên, bạn chỉ có thẻ truy cập get hoặc set thông qua các phương thức đã được cung cấp trong @return chứ không được quyền truy cập vào biến chỉnh sửa.
+
+## Kết luận
+Những **Design Patterns** trên sinh ra để giải quyết những vấn đề nan giải của **JavaScript**, hãy dùng một cách đúng chứ đừng lạm dụng nó. Có thể, nó không giúp đơn giản vấn đề nhưng nó giúp bạn có một luồng xử lý dữ liệu rõ ràng. Ngoài ra, cũng không nên áp dụng **design patterns** với một số vấn đề quá đơn giản, điều này sẽ mang tác dụng ngược lại.
+      

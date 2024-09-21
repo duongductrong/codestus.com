@@ -1,0 +1,72 @@
+---
+title: Tìm hiểu về “use” hook trong React
+description: Trong bài viết này, hãy cùng nhau tìm hiểu về công dụng của “use” hook. Lưu ý rằng Hook này chưa có sẵn chính thức trong React.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-08-21T00:14:23.000Z
+createdAt: 2023-08-21T00:14:23.000Z
+updatedAt: 2024-09-21T09:26:37.428Z
+views: 131
+slug: tim-hieu-ve-use-hook-trong-react
+---
+
+Trong bài viết này, hãy cùng nhau tìm hiểu về công dụng của “use” hook. Lưu ý rằng Hook này chưa có sẵn chính thức trong React. 
+
+Nếu bạn muốn dùng thử, hãy đảm bảo rằng phiên bản gói `react` và `react-dom` của bạn được đặt thành "**experimental**".
+
+Không dài dòng nữa, hãy nói về Hook mới này!
+
+## Thông tin về “use” Hook
+
+`use` Hook đã được tiết lộ kể từ năm 2022 bởi React Team trong RFC. Nó được thiết kế để đơn giản hoá quá trình lấy dữ liệu và giảm số lượng code cần thiết để định nghĩa một Promise từ việc lấy dữ liệu.
+
+Như bạn đã biết, lấy dữ liệu trong React yêu cầu xử lý nhiều trạng thái khác nhau như loading, error handling, etc.
+
+## Làm thể nào để dùng “use” Hook?
+
+Theo RFC, `use` hook sử  dụng giống như một `await`
+
+```tsx
+// `use` được sử dụng bên trong một Component
+const data = use(promise);
+
+// ...tương tự với `await` bên trong một function async
+const data = await promise;
+```
+
+Không giống như các Hook khác, `use` Hook có một điểm đặc biệt là nó có thể được gọi là các điều kiện, blocks và vòng lặp bên trong.
+
+Điều này làm cho nó trở thành một Hook linh hoạt khi bạn muốn thêm các luồng logic và điều kiện mà không cần thêm nhiều thành phần khác.
+
+## Ví dụ sử dụng
+
+Dưới đây, là một ví dụ được cung cấp bởi RFC về việc làm thế nào để sử dụng `use` hook. Với hook này, một `promise` có thể được thông qua như một đối số cho phép dữ liệu được tìm nạp không đồng bộ. Thêm nữa, `use` hook có thể được sử dụng bên trong câu lệnh if, giúp có thể tạm dừng dữ liệu một cách có điều kiện dựa trên các điều kiện nhất định.
+
+```tsx
+import { use } from "react";
+
+function Note({id, shouldIncludeAuthor}) {
+  // Lấy dữ liệu bất đồng bộ
+  const note = use(fetchNote(id));
+
+  let byline = null;
+  if (shouldIncludeAuthor) {
+   
+    const author = use(fetchNoteAuthor(note.authorId));
+    byline = <h2>{author.displayName}</h2>;
+  }
+
+  return (
+    <div>
+      <h1>{note.title}</h1>
+      {byline}
+      <section>{note.body}</section>
+    </div>
+  );
+}
+```
+
+## Kết luận
+
+Trong bài viết này, chúng ta đã thảo luận về một số tính năng và cách sử dụng của `use` hook. Nó có thể là một giải pháp tốt hơn trong tương lai để thay thế cho việc lấy dữ liệu như ở hiện tại chúng ta đang làm.
+      

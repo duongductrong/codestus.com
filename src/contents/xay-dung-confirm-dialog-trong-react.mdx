@@ -1,0 +1,291 @@
+---
+title: Xây dựng Confirm Dialog trong React
+description: Confirm dialog (hay tiếng việt gọi là “hộp thoại xác nhận”) là một trong những thành phần tương tác người dùng phổ biến nhất được thấy trong các ứng dụng ngày nay khi người dùng thực hiện một hành động quan trọng nào đó có khả năng ảnh hưởng cao và không thể hoàn tác
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-09-02T23:53:38.000Z
+createdAt: 2023-09-02T23:53:38.000Z
+updatedAt: 2024-09-21T08:40:27.487Z
+views: 351
+slug: xay-dung-confirm-dialog-trong-react
+---
+
+Confirm dialog (hay tiếng việt gọi là “hộp thoại xác nhận”) là một trong những thành phần tương tác người dùng phổ biến nhất được thấy trong các ứng dụng ngày nay khi người dùng thực hiện một hành động quan trọng nào đó có khả năng ảnh hưởng cao và không thể hoàn tác. Chắc rằng bạn đã từng gặp điều gì đó như thế này trước đây, có thể là hộp thoại bạn nhìn thấy khi muốn xóa kho lưu trữ trên **GitHub**, về cơ bản chúng là thành phần tương tác này. Thật ra, tất cả các trình duyệt đều có Native API cho hộp thoại (confirm dialog) được gọi là [Window.confirm()](https://developer.mozilla.org/en-US/docs/Web/API/Window/confirm), lấy xác nhận từ người dùng cho một số hành động mà nhà phát triển đã chỉ định. Mặc dù vậy, nó không thể tùy chỉnh về mặt hình thức (giao diện) và chức năng, tuy nhiên chúng ta khả dễ sử dụng API này.
+
+## Simple “Confirm Dialog” component
+
+Trước khi đi sâu vào, chúng ta cần xây dựng phần đơn giản mà cần thiết nhất của ****************************Confirm Dialog là một Component****************************. Chỉ cần xây dựng nó trên Modal component hiện có của bạn hoặc một cái gì đó hoàn toàn mới. Hãy tưởng tượng chúng ta có một thành phần `<Alert />` có các props sau:
+
+```tsx
+<Alert
+  isOpen={true}       
+  onClose={() => {}}
+  title=""
+  description=""
+  confirmBtnLabel=""
+  onConfirm={() => {}}
+/> 
+```
+
+Trong đó:
+
+- **isOpen**: Quản lý trạng thái hiển thị hoặc ẩn
+- **title, description**: Thông tin hiển thị
+- **onClose**: Callback được gọi khi người dùng ấn **Cancel**
+- **onConfirm**: Callback được gọi khi người dùng ấn **Confirm**
+- ….
+
+Khá dễ dàng để sử dụng thành phần này, Chỉ cần đưa nó vào component của bạn và thêm một số trạng thái bổ sung để kiểm soát mức độ hiển thị. Sau đó, chuyển đổi trạng thái này trong các trình xử lý sự kiện thích hợp và chỉ thực hiện một mutation quan trọng khi sự kiện `onConfirm` của <Alert /> kích hoạt. Có thể trông như thế này
+
+```tsx
+function Example() {
+  const [showAlert, setShowAlert] = useState(false);
+
+  const handleDeleteAll = () => {
+    // Perform your dangerous critical action here.
+		console.log("Do something to delete the data")
+    
+    // Remember to close your alert
+    setShowAlert(false);
+    
+  };
+
+  return (
+    <Button onClick={() => setShowAlert(true)}>
+      Delete all
+    </Button>
+
+    <Alert
+      isOpen={showAlert}
+      title="Delete all"
+      description="Are you sure you want to delete all?"
+      confirmBtnLabel="Yes"
+      onConfirm={handleDeleteAll}
+			onClose={() => setShowAlert(false)} 
+    />
+  );
+}
+```
+
+Đoạn code trên chạy đúng rồi còn gì? Điều đó tất nhiên, tuy nhiên chúng ta hãy xem xét kĩ hơn đoạn code phía trên.
+
+- Thực tế, cuộc gọi đến hàm thực hiện hành động nguy hiểm như trên đã được di chuyển từ sự kiện mà sẽ khởi đầu nó. Nó đã được chuyển đến trình xử lý `onConfirm` của component `<Alert />`. Trong trình xử lý này, nó chỉ đơn thuần thay đổi trạng thái hiển thị của **Confirm Dialog** tương ứng.
+Đây không phải là một điều tốt, đặc biệt dưới góc độ dễ đọc và bảo trì nó về sau. Nếu bạn thử tìm kiếm hành động mà `<Button />` đang thực hiện, bạn sẽ phải tìm state (trạng thái) mà nó đang thay đổi, đồng thời là Component `<Alert />` đang sử dụng state đó, sau đó mới đến nơi gọi hàm `onConfirm`. Quá nhiều sự phụ thuộc và nối tiếp nhau gây gián đoạn khả năng đọc của bạn, khả năng tái sử dụng cũng không hề cao.
+- “Remember to close your alert”, Lưu ý ở hàm `handleDeleteAll`, bạn phải nhớ đóng hộp thoại sau khi hoàn thành công việc. Điều này cũng lặp lại tương tự ở **Button delete all**. Consumer trách nhiệm kiểm soát mức độ hiển thị của **Confirm Dialog** mặc dù đây chỉ là việc xảy ra một lần với luồng vào và ra cố định.
+- Khả năng tái sử dụng của thành phần? Think again guys. `<Alert />` component được đóng gói để hiển thị và làm cho nó có thể tái sử dụng, nhưng để lại chức năng cho người đối tượng cần sử dụng xử lý (consumer). Hãy tưởng tượng việc thêm nhiều **Confirm Dialog** hơn vào cùng một thành phần và bạn sẽ có một loạt `<Alert />` và các state tương ứng cũng như các lệnh gọi đến `setters` của chúng nằm rải rác trong component của bạn.
+
+## Inspiration
+
+Tìm kiếm xung quanh để lấy cảm hứng về giao diện cũng như cơ tính năng của Confirm Dialog, tình cờ thấy rằng trình duyệt đã hỗ trợ nó từ đời nào qua  `window.confirm()` API. Tuy nhiên, nó lại quá cứng nhắc và không linh hoạt. Chỉ còn cách xem xét nó về mặt tính năng để có thể xây lại cái bánh xe này có khả năng linh hoạt hơn, may thay chúng ta có cái để copy.
+
+Sửa đổi đoạn mã của chúng ta ở trên một tí với `window.confirm` API, ta được như sau:
+
+```tsx
+  function Demo() {
+  const handleDeleteAll = () => {
+    const choice = window.confirm(
+      "Are you sure you want to delete everything?"
+    )
+    if (choice) {
+      // If choice = true, we can do anything we want to do
+    }
+  }
+
+  return <Button onClick={handleDeleteAll}>Delete all</Button>
+}
+```
+
+Hmm, thử nghiệm một tí chúng ta có thể thấy rằng `window.confirm` nó hoạt động đơn giản là
+
+- Khi gọi hàm, `window.confirm`, nó sẽ trả về cho chúng ta một dialog nguyên bản của trình duyệt với một chuỗi message thông báo cho `user`
+- Trên dialog, sẽ có 2 buttons - “Cancel” và “Ok”
+- Nếu người dùng ấn “Ok”, biến `choice` sẽ nhận giá trị `true` và ngược lại là `false`
+
+Sau khi nhìn thấy sự cách thức hoạt động của nó, chúng ta biết đây là thứ chúng ta sẽ cần thực hiện tương tự cho **Confirm Dialog** của mình. Nó giải quyết tất cả các lỗi của đoạn code trước đó chúng ta viết và không có biến trạng thái bổ sung hoặc lệnh gọi tới setters để thay đổi mức độ hiển thị của bất kỳ thứ gì. Tất cả những điều đó đều được xử lý bằng chính phương thức `confirm`.
+
+Ngoài những lợi ích về khả năng đọc hiểu dễ, API này cũng giúp việc thêm hành vi của **Confirm Dialog** vào các chức năng hiện có của chúng ta trở nên rất dễ dàng, không gây ảnh hưởng. Chỉ thêm một lệnh gọi hàm, bảo vệ `critical mutation` chỉ chạy nó khi người dùng ấn “Ok”.
+
+Điều duy nhất còn thiếu ở API này là chúng ta có thể tuỳ chỉnh lại khả năng hiển thị của nó cho người dùng, chúng ta sẽ không thể tuỳ chỉnh API này, nhưng chúng ta đã có ý tưởng về cách triển khai nó, giờ thì… bắt đầu thôi.
+
+## Bắt đầu với Confirm Dialog API
+
+Một điều mà chúng ta sẽ chợt nhận ra ngay tức khắc nếu nghĩ về việc sử dụng nó, chúng ta sẽ thấy nó sẽ được gọi và sử dụng ở khắp các components, và tại bất kì thời điểm nào, người dùng chỉ thấy một ************************Confirm Dialog************************ sẽ không xảy ra tình trạng có 2 **Confirm Dialog** hiển thị cho người dùng cùng một lúc (Dựa trên các trường hợp mà mình đã triển khai).
+
+Việc có `<Alert />` (Phục vụ cho việc hiển thị và lấy confirm từ phía người dùng) được chia sẻ ở cấp cao hơn sẽ duy trì tính logic trong việc quản lý mức độ hiển thị của component tại một nơi và giúp các component khác dễ dàng “kết nối” sử dụng chức năng này khi cần. Điều này có thể được giải quyết bằng cách sử dụng React Context API. Chúng ta có thể tạo một Context Provider để quản lý việc hiển thị Confirm Dialog và expose một hàm thông qua “hook” để các components khác có thể sử dụng.
+
+```tsx
+import { createContext, useContext, useState } from "react"
+
+const ConfirmDialog = createContext()
+
+export function ConfirmDialogProvider({ children }) {
+  const [state, setState] = useState({ isOpen: false })
+
+  return (
+    <ConfirmDialog.Provider value={setState}>
+      {children}
+      <Alert isOpen={state.isOpen} />
+    </ConfirmDialog.Provider>
+  )
+}
+
+export default function useConfirm() {
+  return useContext(ConfirmDialog)
+}
+```
+
+Với context mà chúng ta vừa setup, các Consumer đã có thể sử dụng `useConfirm` hook để thực hiện việc hiển thị **Confirm Dialog**
+
+```tsx
+import useConfirm from "./ConfirmDialog" 
+
+function Demo() {
+  const confirm = useConfirm() 
+
+  const handleDeleteAll = () => {
+    confirm({ isOpen: true }) 
+    // Dangerous critical action here.
+  }
+
+  return <Button onClick={handleDeleteAll}>Delete all</Button>
+}
+```
+
+Như này đã đưa chúng ta tiến gần hơn với việc sao chép lại hành vi của `window.confirm()` API của browser, nhưng chúng ta vẫn chưa có option nào cho phép đóng Confirm Dialog hay tuỳ chỉnh thêm về `title` và `description` của `<Alert />`. Hiện tại, chúng ta chỉ đang cho phép các component control `isOpen` để điều chỉnh việc hiển thị của `<Alert />` component. Để có nhiều khả năng tuỳ chỉnh hơn, chúng ta sẽ cần cập nhật lại nó một chút.
+
+```tsx
+import { useState } from "react"
+
+export function ConfirmDialogProvider({ children }) {
+  const [state, setState] = useState({ isOpen: false })
+  const confirm = (data) => {
+    setState({ ...data, isOpen: true })
+  }
+  return (
+    <ConfirmDialog.Provider value={confirm}> 
+      {children}
+      <Alert {...state} /> 
+    </ConfirmDialog.Provider>
+  )
+}
+```
+
+Chúng ta cần tạo một hàm mới có tên là `confirm` trong **Context Provider**, hàm này lấy các props cho `<Alert />` làm đối số và lưu trữ nó ở trạng thái cục bộ cùng với mặc định `isOpen` thành `true`. Sau đó, chúng ta chuyển hàm này dưới dạng giá trị của context và cập nhật component `<Alert />` để phân bổ tất cả các giá trị của trạng thái dưới dạng props.
+
+Giờ đây, các Consumer (hay gọi là các component có nhu cầu sử dụng) có thể chỉ cần gọi hàm `confirm()` và đặt `title`, `description` cũng như các props khác theo ý muốn mà không cần phải đặt `isOpen` thành `true` một cách rõ ràng.
+
+```tsx
+import useConfirm from './ConfirmDialog';
+
+function Demo() {
+  const confirm = useConfirm();
+
+  const handleDeleteAll = () => {
+    confirm({
+      title: "Are you sure?", 
+      description: "Are you sure you want to delete everything?" 
+      confirmBtnLabel: "Yes", 
+    });
+
+    // Dangerous critical action here.
+  };
+
+  return (
+    <Button onClick={handleDeleteAll}>
+      Delete all
+    </Button>
+  );
+}
+```
+
+Mặc dù `Confirm Dialog` đã hoạt động như dự định, chúng ta vẫn chưa có chức năng nào hoạt động. Làm cách nào để chúng ta nắm bắt được sự tương tác của người dùng trên **Confirm Dialog** (cho dù họ đã xác nhận hay hủy hành động của mình)? Làm cách nào để tạm dừng quá trình thực thi tại thời điểm người gọi gọi `confirm()` và chỉ tiếp tục khi người dùng đã thực hiện một số tương tác? Đây là nơi chúng ta đang gặp phải rào cản.
+
+Suy nghĩ về việc pause hay resume một hành vi mà chúng ta đang thử xây dựng, `Promise` là thứ đầu tiên tôi nghĩ tới trong kịch bản này, nào giờ hãy refactor một tý hàm `confirm` của chúng ta nhé.
+
+```tsx
+import { useState } from "react"
+
+export function ConfirmDialogProvider({ children }) {
+  const [state, setState] = useState({ isOpen: false })
+
+  const confirm = (data) => {
+    return new Promise((resolve) => { 
+      setState({ ...data, isOpen: true })
+    })
+  }
+
+  return (
+    <ConfirmDialog.Provider value={confirm}>
+      {children}
+      <Alert {...state} />
+    </ConfirmDialog.Provider>
+  )
+}
+```
+
+Với `Promise` đã thêm, chúng ta sẽ cần trả lời thêm câu hỏi, khi nào chúng ta sẽ resolve Promise?. Quay lại kịch bản của chúng ta, hãy nhớ rằng, chúng ta chỉ thực hiện hành vi quan trọng nào đó mà mình muốn khi người dùng đã tương tác với yêu cầu của Confirm Dialog, chọn **Confirm** hoặc **Cancel**. Vì vậy, chúng ta đã xác định được rằng Promise sẽ được giải quyết thông qua trình xử lý sự kiện được chuyển tới `onClose` và `onConfirm` của **Confirm Dialog**.
+
+```tsx
+import { useRef, useState } from "react"
+
+export function ConfirmDialogProvider({ children }) {
+  const [state, setState] = useState({ isOpen: false })
+  const fn = useRef() 
+
+  const confirm = (data) => {
+    return new Promise((resolve) => {
+      setState({ ...data, isOpen: true })
+      fn.current = (choice) => {
+        resolve(choice)
+        setState({ isOpen: false })
+      }
+    })
+  }
+
+  return (
+    <ConfirmDialog.Provider value={confirm}>
+      {children}
+      <Alert
+        {...state}
+        onClose={() => fn.current(false)}    
+        onConfirm={() => fn.current(true)}  
+      />
+    </ConfirmDialog.Provider>
+  )
+}
+```
+
+Chúng ta sẽ sử dụng `ref` để lưu lại hàm resolve cùng với lựa chọn mà người dùng đã thực hiện với biểu thị `cancel=false` và `confirmed=true` và đặt lại trạng thái ban đầu cho `setState` khi hàm confirm kích hoạt. Nếu `confirm()` không được gọi thực thi bởi các Consumer component, ref sẽ chẳng có gì để resolve.
+
+Sau đó, chúng ta chỉ việc gọi `ref` thực thi ở 2 sự kiện `onClose` và `onConfirm` chúng ta cần.
+
+```tsx
+import useConfirm from './ConfirmDialog';
+
+function Demo() {
+  const confirm = useConfirm();
+
+  const handleDeleteAll = async () => { 
+    const choice = await confirm({ 
+      title: "Are you sure?",
+      description: "Are you sure you want to delete everything?"
+      confirmBtnLabel: "Yes",
+    });
+
+    if (choice) { 
+      // Dangerous critical action here.
+    }
+  };
+
+  return (
+    <Button onClick={handleDeleteAll}>
+      Delete all
+    </Button>
+  );
+}
+```
+
+## Kết luận
+
+Bây giờ, thật kỳ diệu khi thấy API ở trên dễ sử dụng đến mức nào, trong đó các component không cần bận tâm về cách thức/vị trí **Confirm Dialog** được hiển thị, nó chỉ gọi và sử dụng dữ liệu mà nó trả về. Việc thêm chức năng Confirm Dialog này ngay bây giờ vào bất kỳ chức năng nào khác cũng rất đơn giản mà không yêu cầu nhiều thay đổi về code và cũng rất phù hợp với các lệnh gọi không đồng bộ hiện có của bạn tới các API.
+      

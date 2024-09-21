@@ -1,0 +1,92 @@
+---
+title: Tìm hiểu về “useSyncExternalStore” hook trong React
+description: Trong bài viết lần này, chúng ta sẽ cùng tiềm hiểu về `useSyncExternalStore` hook. Đây là một hook hữu ích khi bạn cần tích hợp tính năng quản lý states không có React trong ứng dụng của mình.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-08-23T11:15:26.000Z
+createdAt: 2023-08-23T11:15:26.000Z
+updatedAt: 2024-09-21T09:25:14.039Z
+views: 241
+slug: tim-hieu-ve-usesyncexternalstore-hook-trong-react
+---
+
+Trong bài viết lần này, chúng ta sẽ cùng tiềm hiểu về `useSyncExternalStore` hook. Đây là một hook hữu ích khi bạn cần tích hợp tính năng quản lý states không có React trong ứng dụng của mình.
+
+## useSyncExternalStore là gì
+
+`useSyncExternalStore` là một hook được tính hợp sẵn kể từ React 18, cho phép bạn `subscribe` một store data ở bên ngoài, lắng nghe các các cập nhật thay đổi giá trị từ store data đó và trigger updates components nếu cần.
+
+`external store` được đề cập trong tên hook cũng đã thể hiện:
+
+- Thư viện quản lý trạng thái của bên thứ ba giữ trạng thái bên ngoài React
+- API trình duyệt hiển thị một giá trị có thể thay đổi và các sự kiện để đăng ký các thay đổi của nó
+
+Một số ví dụ chúng ta có thể thấy về `external store` như:
+
+- Browser history
+- localStorage
+- Third-party libraries
+
+## Khi nào chúng ta nên sử dụng useSyncExternalStore?
+
+Theo các tài liệu [chính thức](https://react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store), hook này sẽ hữu ích khi bạn muốn cập nhật lại components khi trạng thái, giá trị của một dữ liệu nào đó bị thay đổi, và khi bạn cần tích hợp với các third-party hay các đoạn mã **non-React**.
+
+Trường hợp khác, nếu bạn không sử dụng `useSyncExternalStore`, bạn sẽ cần thực hiện `subscribe` thủ công các `external store` này bằng cách sử dụng useEffect. Trong một số trường hợp, điều này có thể gây ra tình trạng re-render lại các thành phần mà chúng ta không mong muốn. Do đó, sử dụng useSyncExternalStore sẽ tối ưu hơn.
+
+## Triển khai
+
+Đây là một ví dụ đơn giản về cách sử dụng:
+
+```tsx
+const externalStore = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+```
+
+`useSyncExternalStore` sẽ trả về một snapshot dữ liệu của external store mà bạn đã subscribe
+
+- **Subscribe**: Định nghĩa một callback sẽ được gọi khi component re-render. Nó cũng sẽ xử lý việc dọn dẹp subscription.
+- **getSnapshot**: Thao tác này tìm nạp và trả về snapshot của dữ liệu đã đăng ký. Nếu giá trị trả về khác so với phiên bản trước đó thì component sẽ được trigger re-render.
+- **getServerSnapshot**: Hàm này trả về snapshot ban đầu của dữ liệu và cung cấp snapshot trong quá trình server-side render.
+
+## Ví dụ
+
+Để kiểm tra thử cách thức hoạt động của `useSyncExternalStore` qua ví dụ, điều này giúp có cái nhìn trực quan và tăng khả năng tiếp cận hơn là nói luyên thuyên lý thuyết như ở trên. 
+
+Giả sử, bạn đang muốn listen các thay đổi trong **localStorage**.
+
+Đầu tiên bạn sẽ cần `import` nó từ `react`.
+
+```tsx
+import { useSyncExternalStore } from 'react'
+```
+
+Tiếp theo, bạn sẽ triển khai hook để đọc dữ liệu từ ************************localStorage************************ như sau:
+
+```tsx
+const subscribe = (listener) => {
+	// Lắng nghe thay đổi của localStorage thông qua storage event, 
+	// khi có thay đổi listener callback sẽ được gọi, từ đó getSnapshot sẽ được invoke
+	window.addEventListener("storage", listener);
+
+  return () => {
+    window.removeEventListener("storage", listener);
+  };
+}
+
+const getSnapshot = () => {
+	// Bạn có thể làm gì đó ở đây, cập nhật dữ liệu cho component khi localStorage thay đổi giá trị 
+	// thông qua việc useSyncExternalStore invoke hàm getSnapshot
+
+	return localStorage.getItem("myItem")
+}
+
+const value = useSyncExternalStore(subscribe, getSnapshot)
+```
+
+Hãy nhớ rằng đây là một ví dụ tối giản nhưng nó sẽ cung cấp cho bạn ý chính về cách thức hoạt động của nó. Vì vậy, chức năng `subscribe` sẽ lắng nghe các thay đổi trong localStorage và xử lý cả việc hủy đăng ký. Sau đó `getSnapShot` lấy giá trị của dữ liệu.
+
+Cuối cùng, chúng ta sử dụng `useSyncExternalStore` để đảm bảo thành phần sẽ re-render lại bất cứ khi nào phát hiện thấy thay đổi từ `localStorage`, external store mà chúng ta đang đăng ký.
+
+## Kết luận
+
+**useSyncExternalStore** hook là một bổ sung tuyệt vời và hữu ích cho bộ công cụ của React. Sẽ mất thời gian để tìm hiểu một số lưu ý của Hook này và hiểu đầy đủ cách triển khai nó, vì vậy tôi hy vọng bài viết này là điểm khởi đầu tốt cho bạn.
+      

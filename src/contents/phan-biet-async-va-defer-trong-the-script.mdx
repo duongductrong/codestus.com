@@ -1,0 +1,71 @@
+---
+title: Phân biệt async và defer trong thẻ script
+description: Trong khi sử dụng thuộc tính async, quá trình phân tích cú pháp HTML đang diễn ra, bất kỳ tập lệnh nào có thuộc tính async đều được tìm nạp từ mạng một cách không đồng bộ cùng với quá trình phân tích cú pháp HTML.
+tags: JavaScript,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-03-20T17:46:59.000Z
+createdAt: 2021-03-20T17:46:59.000Z
+updatedAt: 2024-05-31T13:36:46.222Z
+views: 6603
+slug: phan-biet-async-va-defer-trong-the-script
+---
+
+Khi bạn tải một trang HTML trên trình duyệt, sẽ có 2 điều chính được thực hiện trong quá trình tải trang của bạn
+- Chuyển đổi HTML
+- Tải các đoạn mã (script)
+
+### Đoạn tải các tệp mã script lại bao gồm 2 phần nhỏ:
+- Tìm nạp tập lệnh từ mạng
+- Thực thi biên dịch mã
+
+Một thẻ `script` có 2 thuộc tính chính đó là `async` và `defer`, điều này có thể cung cấp cho chúng ta nhiều quyền kiểm soát hơn đối với cách thức để tìm nạp và thực thi đoạn script mà chúng ta chèn vào.
+
+Hai thuộc tính `async` và `defer` nhận vào giá trị `boolean`.
+
+## Sử dụng thẻ script thông thường
+
+Thông thường, chúng ta sử dụng `script` sẽ  có dạng thế này
+
+```html
+.....
+<body>
+<!-- .... -->
+	<script src="/dist/bundle.js"></script>
+</body>
+....
+```
+
+Giả sử, trình duyệt của bạn đang phân tích cú pháp HTML phía trên và bắt gặp thẻ `<script>` với yêu cầu tải đoạn mã script /dist/bundle.js.
+
+### Trường hợp thông thường (Normal)
+Mọi thứ diễn ra hết sức bình thường, tuần tự từ trên xuống dưới trong mã nguồn với thứ tự:
+- JS chặn phân tích cú pháp HTML 
+- Tìm nạp tập lệnh từ mạng 
+- Thực thi tập lệnh 
+- Phân tích cú pháp HTML chỉ được bắt đầu sau khi tập lệnh được thực thi đầy đủ
+
+### Trường hợp sử dụng thuộc tính async
+Thuộc tính `async` được sử dụng để thông báo cho trình duyệt biết rằng tệp `script` có thể được thực thi không đồng bộ khi trình duyệt bắt gặp chúng, đồng thời có thể tải các đoạn mã html, script, ... bên dưới chúng mà không bị chặn.
+
+```html
+<script src="/dist/bundle.js" async></script>
+```
+
+Trong khi sử dụng thuộc tính async, quá trình phân tích cú pháp HTML đang diễn ra, bất kỳ tập lệnh nào có thuộc tính async đều được tìm nạp từ mạng một cách không đồng bộ cùng với quá trình phân tích cú pháp HTML.
+
+### Trường hợp sử dụng thuộc tính defer
+
+Ta sẽ sử dụng tương tự như async:
+
+```html
+<script src="/dist/bundle.js" defer></script>
+```
+
+Thuộc tính `defer` ra lệnh cho trình duyệt chỉ thực thi tệp script khi tài liệu HTML đã được phân tích cú pháp đầy đủ.
+
+
+## Kết luận
+Qua bài viết này, chúng ta đã phân biệt được cách thức hoạt động của 2 thuộc tính `defer` và `async` trong thẻ script. 
+
+Một số lưu ý khi sử dụng, chúng ta cần biết rõ đoạn mã nào cần được tải và thực thi để tránh tình trạng tải và thực thi sai trình tự các bạn nhé.
+      

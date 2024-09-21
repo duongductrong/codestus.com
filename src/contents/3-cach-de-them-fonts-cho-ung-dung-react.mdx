@@ -1,0 +1,101 @@
+---
+title: 3 Cách để thêm fonts cho ứng dụng React
+description: Là một newbie, bạn có lẽ con chật vật với React làm sao để thêm thư viện, tích hợp scss, thêm font cho ứng dụng thì đây sẽ là bài viết giúp bạn giải quyết vấn đề đã nêu ở tiêu đề.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-01-29T16:23:21.000Z
+createdAt: 2021-01-29T16:23:21.000Z
+updatedAt: 2024-06-03T18:31:43.620Z
+views: 11793
+slug: 3-cach-de-them-fonts-cho-ung-dung-react
+---
+
+Là một newbie, bạn có lẽ con chật vật với **React** làm sao để thêm **thư viện**, **tích hợp scss**, **thêm font cho ứng dụng** thì đây sẽ là bài viết giúp bạn giải quyết vấn đề đã nêu ở tiêu đề.
+
+Trong **HTML**, bạn sẽ thêm **@font-face**, **font-family** để thêm phông, kích thước (**font, style**) cho **chữ**. Trong **React**, bạn có thể thêm phông chữ bằng nhiều cách khác nhau. Bài viết này sẽ đưa ra 3 cách nhanh nhất để thêm phông chữ cho ứng dụng của bạn.
+
+## Sử dụng Font-link
+Chúng ta có thể thêm liên kết phông chữ  thông qua thông qua cách **host** và gán vào thẻ `<link>` bên trong tệp **HTML**. 
+
+Bây giờ, cùng cho ví dụ sử dụng **Google Fonts** kèm theo thẻ `<link>` trong **HTML** để thử cách đầu tiên nhé.
+
+- Hãy đến đường dẫn [http://fonts.google.com/](http://fonts.google.com/)
+- Chọn **Phông chữ** mà bạn muốn.
+- ![Phông chữ - Google Fonts](https://codestus.com/uploads/images/posts/Untitled.png)
+- Chọn `select this font`, đây là lựa chọn của bạn về độ đậm nhạt của **chữ**, tương ứng với thuộc tính `font-weight` trong **CSS**.
+- ![Link font](https://codestus.com/uploads/images/posts/link-font.png)
+- Đi đến tệp `index.html` trong dự án của bạn. Nếu khởi tạo bằng `create-react-app`, bạn sẽ tìm thấy nó trong thư mục **public/**. Và dán đoạn mã đã sao chép được bên trong tệp, ở mục `<head>`
+- Tiếp tục đến tệp **CSS** của bạn và thêm thuộc tính `font-family` 
+
+## Sử dụng Web Font Loader
+Thư viện **[Web Font Loader](https://github.com/typekit/webfontloader)** hỗ trợ bạn tải các phông chữ từ **Google Fonts, Typekit, Fonts.com**. Bây giờ hãy cùng xem ví dụ làm thế nào để tải nhiều phông chữ từ các nguồn trên trong **React Component**.
+
+Cài đặt webfontloader
+
+```js
+yarn add webfontloader
+```
+hoặc
+```js
+npm i webfontloader
+```
+
+Import vào component của bạn
+```js
+import WebFont from 'webfontloader'
+```
+
+Đặt **Component** WebFont vào bên trong **Hook useEffect** và điền các tên phông chữ mong muốn. Sau khi **component render** các  **Phông chữ** sẽ được tải.
+
+Bạn có thể gọi **WebFont** bên trong tệp **App**
+```js
+useEffect(() => {
+	WebFont.load({
+		google: {
+			families: ['Droid Sans', 'Roboto', Chilanka']
+		}
+	})
+}, [])
+```
+
+Bây giờ bạn có thể sử dụng **style** hoặc **className** để đặt phông chữ cho ứng dụng của mình
+```css
+// ../styles.css
+.roboto {
+	font-family: 'roboto'
+}
+```
+
+```html
+// ../component.jsx
+<h1 className="roboto">Hello world</h1>
+```
+
+hoặc viết thẳng vào **style inline** như thế này
+```html
+<div style={{fontFamily: 'roboto'}}>...</div>
+```
+
+## Sử dụng @font-face
+Trong vài trường hợp, bạn có thể không được phép kết nối **online** với các đường dẫn phông chữ như phía trên. Ứng dụng của bạn chỉ sử dụng thông qua dạng **intranet** và không cho phép truy cập **Internet** hoặc những phông chữ độc quyền, không hề được cung cấp miễn phí từ các kho chứa phía trên.
+
+`@font-face` là một quy tắc định nghĩa phông chữ trong **CSS**. Để triển khi, thực hiện các bước như sau
+- Tạo thư mục với tên src/fonts
+- Tải phông chữ được yêu cầu vào thư mục src/fonts. Cho ví dụ, chúng ta sẽ tải 2 fonts, **Goldman, Lobster**.
+- ![Ảnh ví dụ thư mục chứa Fonts](https://codestus.com/uploads/images/posts/font.png)
+- Tiếp đến, thêm fonts vào bên trong tệp `index.js`.
+```js
+	import './fonts/Goldman/Goldman-Bold.ttf'
+```
+- Và thêm `@font-face` bên trong css
+```css
+@font-face {
+	font-family: "GoldmanBold";
+	src: local("GoldmanBold"), url("./fonts/Goldman/Goldman-Bold.ttf") format ("truetype");
+	font-weight: bold
+}
+```
+- Bây giờ thỉ cần thêm className hoặc style tên với tên font đã định nghĩa `font-family: GoldmanBold`
+
+Mình đã tham khảo qua các bài viết: https://blog.greenroots.info/3-quick-ways-to-add-fonts-to-your-react-app-ckjo6jbgd084w8ls1d7xp05qj
+      

@@ -1,0 +1,76 @@
+---
+title: Xây dựng UI Component Design Systems dành cho lập trình viên Frontend (Phần 1)
+description: Thiết kế hệ thống UI Component  (User Interface Component) cho phép các nhóm phát triển giới thiệu về trải nghiệm hình ảnh và các chức năng nhất quán của người dùng khác nhau giữa các sản phẩm và ứng dụng.
+tags: JavaScript,React,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-02-18T11:41:49.000Z
+createdAt: 2021-02-18T11:41:49.000Z
+updatedAt: 2024-06-03T22:41:29.887Z
+views: 9209
+slug: xay-dung-ui-component-design-systems-danh-cho-lap-trinh-vien-frontend
+---
+
+Thiết kế hệ thống UI Component  (User Interface Component) cho phép các nhóm phát triển giới thiệu về trải nghiệm hình ảnh và các chức năng nhất quán của người dùng khác nhau giữa các sản phẩm và ứng dụng.
+
+Về phía nhà thiết kế, họ sẽ định nghĩa phong cách thiết kế, tập hợp các thành phần cốt lõi, có khả năng tái sử dụng cho phép thiết kế có tính thống nhất, hài hoà giữa các thành phần và mang tính thương hiệu để giới thiệu đến người dùng trên tất cả các phiên bản (Sản phẩm, Ứng dụng, etc.). Đây là lý do tại sao các công ty lớn như **Uber**, **Airbnb**, **Shopify** và nhiều nơi khác dày công xây dựng nó.
+
+Về phía nhà phát triển, xây dựng các thành phần dựa trên thiết kế có khả năng tái sử dụng giúp đạt tính thống nhất, chuẩn hoá về mặt giao diện và có khả năng sử dụng được trên nhiều dự án khác. Tiết kiệm được thời gian xây dựng một ứng dụng mới, giảm được chi phí bảo trì và khả năng tiếp cận mô hình khi có thành viên mới tham gia.
+
+Điểm quan trọng nhất. Về phía người dùng, một bản thiết kế hệ thống UI Component được coi là thành công khi nó đạt được khả năng nhận diện thương hiệu tốt, không nhầm lẫn với các Brand khác, khả năng điều hướng sản phẩm đến người dùng tốt, tạo cảm giác thân thuộc, dễ nhớ. Đối với doanh nghiệp, điều này là một kết quả tốt.
+
+Tuy nhiên, việc xây dựng một hệ thống UI Component thành công như Material, Ant Design... khó hơn bạn nghĩ. Thu hẹp khoảng các giữa các nhà thiết kế và nhà phát triển là chuyện không hề dễ, cả về quy trình phát triển và thời gian. Trong bài viết này, chúng ta sẽ đi qua một số nguyên tắc cơ bản để đạt được khả năng xây dựng thiết kế, hệ thống thành phần giao diện mà chúng ta hay gọi là UI Component. Chúng ta cùng điểm qua một số công cụ hỗ trợ giúp chúng ta xây dựng nó.
+
+## Thu hẹp khoảng cách giữa nhà thiết kế và nhà phát triển
+
+![Thu hẹp khoảng cách giữa nhà thiết kế và nhà phát triển](https://res.cloudinary.com/practicaldev/image/fetch/s--b5-S6s_X--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://thepracticaldev.s3.amazonaws.com/i/i5w30nf86phz6iwyhhb2.png)
+
+Khi phát triển, bạn sẽ phải đối mặt với một số thách thứ lớn. Đầu tiên, phải kể đến đó là có được sự hợp tác hài hoà giữa các đội nhóm **Nhà thiết kế, Nhà phát triển, Nhóm Marketing, Nhóm nghiên cứu sản phẩm và nhiều hơn thế**. Điều này rất khó, các nhà phát triển thường sử dụng một số công cụ như Photoshop, Sketch để thiết kế, các ứng dụng này rất bổ ích về thiết kế nhưng chúng không chuyển các bản phát thảo này thành những đoạn mã được. Các công cụ như [Framer](https://www.framer.com/) giúp thu hẹp khoảng cách này giữa các nhà phát triển và thiết kế.
+
+Các nhà phát triển thường sẽ làm việc với các source control như Git (Github) với những ngôn ngữ và công nghệ khác (chẳng hạn như các khung dựa trên thành phần: React, Vue...) và phải chuyển đổi thiết kế thành mã nguồn giống nhau một cách chân thực. Công cụ như [BIT](https://bit.dev/) giúp biến các thành phần được viết trong codebase của bạn thành một hệ thống thiết kế trực quan, dễ quan sát, giúp dễ dàng sử dụng lại và cập nhật các thành phần ứng dụng, hiển thị chúng cho các nhà thiết kế đánh giá.
+
+Các thành phần được trực quan hoá từ những dòng mã là chìa khoá để thu hẹp khoản cách này. Chúng hoạt động trên cả các yếu tố đảm bảo thiết kế giao diện người dùng trực quan, thành phần chức năng được đóng gói và khả tái sử dụng. Đó là bước đệm để tăng khả năng trải nghiệm của người dùng, ngoài ra giúp tiêu chuẩn hoá trên các dự án khác nhau trong bộ mã của tổ chức phát triển.
+
+![codebase và khả năng trực quan](https://res.cloudinary.com/practicaldev/image/fetch/s--FIWuESOx--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://storage.googleapis.com/bit-docs/component-page-chart-bit-gif.gif)
+
+Để thu hẹp khoản cách, bạn phải cho phép các nhà thiết kế và các bên liên quan không viết các mã lệnh khác trên mã nguồn chính. Bạn có thể sử dụng BIT hoặc các công cụ tương tự để thu hẹp khoảng cách này, nơi các nhà phát triển có thể có thể dễ dàng xây dựng, phân phối và áp dụng các thành phần torng khi các nhà thiết kế và mọi đội nhóm khác có thể cộng tác để xây dựng và sắp xếp triển khai thiết kể của các thành phần trên các ứng dụng.
+
+## Chọn Stack và Tools
+
+![Chọn Stack và Tools](https://res.cloudinary.com/practicaldev/image/fetch/s--2T6OoCEq--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://thepracticaldev.s3.amazonaws.com/i/kosibx3er6bnje0mb6f4.jpeg)
+
+Sự lựa chọn công nghệ và công cụ là chìa khoá quan trọng cho sự thành công của hệ thống thiết kể của bạn. Chúng ta sẽ cùng cố gắn thu hệp nó thành một số lựa chọn chính mà bạn cần phải thực hiện trong suốt quá trình.
+
+### Sử dụng Framework hay không sử dụng?
+Các framework hiện nay như React, Vue và Angular cung cấp một môi trường nơi bạn có thể xây dựng các thành phần và ứng dụng dựa trên các thành phần (Component). Cho dù bạn chọn một thư viện hay một mô hình MVC toàn diện, bạn có thể bắt đầu xây dựng các thành phần của mình với một chuỗi công cụ và cộng đồng phía sau bạn. Tuy nhiên, sử dụng các frameworks có thể không cần thiết ở tương lai, nó có thể bị giới hạn trong khả năng tái sử dụng, tiêu chuẩn hoá giữa các thành phần, trên các nên tảng khác nhau, khả năng sử dụng nó.
+
+Vẫn có cách khác để thực hiện được điều đó là [Framework-agnostic web components](https://blog.bitsrc.io/9-web-component-ui-libraries-you-should-know-in-2019-9d4476c3f103). Tuỳ chỉnh các thành phần và widgets dựa trên các tiêu chuẩn hoá của Web Component, sẽ có thể hoạt động trên các trình duyệt hiện đại và có thể sử dụng với bất kỳ thư viện hoặc khung JavaScript nào hoạt động với HTML.
+
+Điều này có nghĩa nó được tái sử dụng nhiều hơn, ổn định hơn, trừ tượng hoá và tiêu chuẩn hoá, ít công việc hơn và khá nhiều thứ khác đi kèm. Trong khi nhiều người đang ngồi chờ đợi vào các dự án **web-assembly**, trong nhiều năm, chúng ta đã thấy các công cụ và công nghệ tăng lên đáng kể cho đến thời điểm này.
+
+Khái niệm cốt lõi về hệ thống thành phần được tiêu chuẩn hoá hoạt động được ở mọi nơi, hoàn toàn phù hợp với khái niệm của nó.
+
+### Sử dụng thư viện Component hay không?
+Xây dựng một thư viện component về cơ bản là một cách để giảm chi phí, đi kèm với việc phải duy trì nhiều kho lưu trữ cho nhiều thành phần. Thay vào đó, bạn nhóm nhiều thành phần vào một kho lưu trữ duy nhất và phân phối nó, giống như một Album CD nhiều bài hát.
+
+Đây là sự đánh đổi? Các nhà phát triển ứng dụng (Người sử dụng các thành phần giao diện để xây dựng ứng dụng) sẽ không thể sử dụng, cập nhật hoặc sửa đổi các thành phần riêng lẻ mà họ cần. Họ đang đấu tranh với ý tưởng kết hợp việc phát triển các sản phẩm của họ với việc phát triển sản phẩm từ thư viện. Sử dụng các ứng dụng đa nền tảng có thể giải quyết được vấn đề này, bằng cách xây dựng codebase dựa trên cấu trúc của các nền tảng cho phép bạn chia sẻ thư viện của mình dưới dạng "Danh sách", giúp mọi người dễ khám phá, phát triển, cập nhật, chỉnh sửa và trao đổi giữa các đội, nhóm phát triển hệ thống. Mọi nhà phát triển có thể chia sẻ, tìm kiếm, sử dụng và cập nhật các thành phần ngay từ các dự án của họ.
+
+Khi xây dựng thư viện, hãy tổ chức một monorepo nó một cách hiệu quả bao gồm nhiều thành phần. Các công cụ mã nguồn mở như [bit-cli](https://github.com/teambit/bit) có thể giúp bạn tách biệt từng thành phần, tự động định nghĩa các đối tượng phụ thuộc (dependencies) và môi trường (enviroment), thử nghiệm và xây dựng nó một cách riêng biệt.  Chia sẻ nó như một đơn vị độc lập có thể tái sử dụng. Cho phép các nhà phát triển ứng dụng nhập và đề xuất các bản cập nhật cho các thành phần ngay từ các dự án của riêng họ, để tăng việc áp dụng các thành phần dùng chung.
+
+### Tính discoverability và visualization
+
+![Tính discoverability và visualization](https://res.cloudinary.com/practicaldev/image/fetch/s--B1c3BeBb--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://storage.googleapis.com/bit-docs/Component-design-system-bit.png)
+
+Khi xây dựng và phân phối các thành phần bạn có thể phải tạo ra một hướng đi cho cả nhà phát triển và những cộng tác khác của bạn. Để khám phá và tìm hiểu chính xác các thành phần bạn có, chúng trông như thế nào, cách chúng hoạt động ở các trạng thái khác nhau và cách sử dụng chúng.
+
+Khi làm việc với các công cụ như Bit, bạn sẽ có được điều, vì tất cả các thành phần của bạn được hiển thị trong một hệ thống thiết kế được làm từ các thành phần thực tế của bạn. Các nhà phát triển có thể sử dụng và phát triển các thành phần từ cùng một nơi mà các nhà thiết kế, nhà tiếp thị và quản lý sản phẩm có thể xem và đánh giá các thành phần đó.
+
+![Xây dựng UI Component Design Systems dành cho lập trình viên Frontend (Phần 1)](https://res.cloudinary.com/practicaldev/image/fetch/s--tOsNf9b0--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://storage.googleapis.com/bit-docs/component-design-systems.gif)
+
+Bạn có thể tạo một cổng tài liệu của riêng mình hoặc sử dụng các công cụ hỗ trợ như [storybook](https://storybook.js.org/) để thể hiện tính trực quan về các thành phần mà bạn phát triển.
+
+### Kết thúc phần 1
+Bài viết quá dài có thể ảnh hưởng đến thời gian đọc của bạn, vì vậy mình sẽ kết thúc phần một tại đây và phần tiếp theo chúng ta sẽ nói về [**Việc xây dựng hệ thống thiết kế: Top-down vs. Bottom-up**](#)
+
+## Có thể bạn sẽ cần
+Mình đã tham khảo thông tin qua: [**dev.to**](https://dev.to/jonisar/ui-component-design-system-a-developer-s-guide-19fg)
+      

@@ -1,0 +1,231 @@
+---
+title: Drop drilling là gì và tránh nó thế nào trong React?
+description: Prop Drilling là một khái niệm được nhắc đến trong React, đôi khi không thể tránh khỏi, trong nhiều trường hợp chúng ta không nên áp dụng nó. Trong bài viết lần này, chúng ta sẽ xem xét nó là gì và lý do phải tránh nó như đề cập ở tiêu đề.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-08-18T10:26:00.000Z
+createdAt: 2023-08-18T10:26:23.000Z
+updatedAt: 2024-09-21T09:26:42.322Z
+views: 214
+slug: drop-drilling-la-gi-va-tranh-no-the-nao-trong-react
+---
+
+Prop Drilling là một khái niệm được nhắc đến trong React, đôi khi không thể tránh khỏi, trong nhiều trường hợp chúng ta không nên áp dụng nó. Trong bài viết lần này, chúng ta sẽ xem xét nó là gì và lý do phải tránh nó như đề cập ở tiêu đề.
+
+## Props trong React
+
+Để hiểu **Drop drilling**, trước tiên chúng ta cần làm rõ `props` là gì trong React và cách chúng đóng vai trò quan trọng trong sự thành công của React liên quan đến chia sẻ luồng dữ liệu một chiều.
+
+Nếu bạn đã biết về props trong React, có thể bỏ qua phần này và đến phần tiếp theo. Nhưng bạn cũng có thể đọc để học thêm được điều gì đó mới, mặc dù bạn đã làm việc với React được một thời gian.
+
+Đầu tiên và hơn hết, `props` là viết tắt của **Properties**. **Props** được sử dụng để giao tiếp từ thành phần này xuống thành phần khác. Cho ví dụ, một component cha có thể truyền thông tin cho component con của nó thông qua `props`. Để truyền dưới dạng props, bạn sẽ cần thêm viết JSX như viết một thẻ HTML và truyền dữ liệu thông qua `props` như cách bạn viết attributes cho thẻ.
+
+Đây là một ví dụ đơn giản về việc truyền props từ cha mẹ sang thành phần con và đọc nó ở đó:
+
+```tsx
+// Parent Component
+
+function ProductDetails() {
+  return (
+    <ProductHeader
+      className="parent-component"
+      productName="The best product ever"
+    />
+  );
+}
+
+// Child Component accessing the whole props object
+function ProductHeader(props) {
+  return (
+    <div className={props.className}>
+      <h1>{props.productName}</h1>
+    </div>
+  );
+}
+
+// Child Component destructuring the props object
+function ProductHeader({ className, productName }) {
+  return (
+    <div className={className}>
+      <h1>{productName}</h1>
+    </div>
+  );
+}
+```
+
+Bạn không chỉ có thể chuyển các giá trị thông qua các props xuống con của nó mà còn có thể gửi toàn bộ các thành phần thông qua đó, một khái niệm phổ biến khi làm việc với React, và diều này lại trở nên quan trọng khi chúng ta nói về cách tránh prop drilling. Đây là một ví dụ về nó:
+
+```tsx
+function ProductDetails() {
+  return (
+    <ProductHeader>
+      <div>
+        <h1>The best product ever</h1>
+      </div>
+    </ProductHeader>
+  )
+}
+
+function ProductHeader({ children }) {
+  return <div>{children}</div>
+}
+```
+
+Như này là sao?. trước khi giải thích, chúng ta cần biết **Prop drilling** là gì?
+
+## Prop drilling là gì?
+
+Bây giờ chúng ta đã hiểu về props trong React, hãy nói về **Prop drilling** và tại sao nó có thể trở thành một vấn đề.
+
+Chúng ta nói về **Prop drilling** khi chúng ta truyền muốn truyền một prop xuống nhiều cấp độ bên trong một component. Thường thì các props này được chuyển qua các component mà chúng không cần quan tâm đến nhưng lại cần giúp chuyển các props đó xuống một điểm nhất định.
+
+Đây là một ví dụ về điều đó. Hãy tưởng tượng bạn có một cây component như thế này:
+
+```tsx
+<App>
+  <Header />
+  <MainContent> <- children of App
+    <ProductList> <- children of MainContent
+      <ProductCard> <- children of ProductList
+        <ProductDetailsModal> <- children of ProductCard
+          <ProductDetails> <- children of ProductDetailsModal
+            <ProductHeader />
+            <ProductDescription />
+            <ProductPrice />
+          </ProductDetails>
+        </ProductDetailsModal>
+      </ProductCard>
+    </ProductList>
+  </MainContent>
+  <Footer />
+</App>
+```
+
+Bây giờ, ở cấp độ root, bạn lấy dữ liệu từ API về danh sách sản phẩm (products) và cần đẩy nó xuống component cần nó. 
+
+Hãy tưởng tượng component cần nó là `<ProductHeader />` để phục vụ cho viện hiển thị tên sản phẩm (productName). Nhìn vào cây component của chúng ta, đồng nghĩa với việc chúng ta phải truyền một prop xuống 6, 7 levels trong cây để cho duy nhất thằng <ProductHeader /> sử dụng.
+
+```tsx
+const productName = 'The best product ever'
+
+-- Tree component --
+<App productName={productName}>
+  <Header />
+  <MainContent productName={productName}>
+    <ProductList productName={productName}>
+      <ProductCard productName={productName}>
+        <ProductDetailsModal productName={productName}>
+          <ProductDetails productName={productName}>
+            <ProductHeader productName={productName} />
+            <ProductDescription />
+            <ProductPrice />
+          </ProductDetails>
+        </ProductDetailsModal>
+      </ProductCard>
+    </ProductList>
+  </MainContent>
+  <Footer />
+</App>
+-- Tree component --
+```
+
+Hmm, tại sao đây lại là vấn đề?. Đây dường như là cách được đề xuất để truyền dữ liệu trong React. Đối với một vài cấp độ, sử dụng Prop drilling là tốt.
+
+Nhưng nó sẽ trở nên lộn xộn nếu bạn áp dụng kỹ thuật này ở nhiều cấp độ trong cây component của chúng ta. Và thứ hai, nếu bạn thực hiện một thay đổi đối với các `props` này, bạn phải cập nhật những thay đổi này ở mọi nơi, điều này khiến nó trở nên dài dòng và bất tiện.
+
+Một lý do nữa để khuyên chúng ta nên tránh nó là `debugging` rất cực. Tưởng tượng bạn bạn nhận thấy rằng ở cấp độ component nào đó mà bạn đang làm điều gì đó với dữ liệu đó, bạn vượt qua quá nhiều cấp độ, bạn nhận được các giá trị sai. Bây giờ bạn phải theo dõi dữ liệu thông qua tất cả các thành phần và tìm ra lỗi sai ở đâu 🤢
+
+## Sử dụng Context? (Không phải giải pháp)
+
+Khi React giới thiệu về Context, nhiều lập trình viên in rằng nó là một giải pháp thay thế tốt để quản lý Global states và tránh Prop drilling.
+
+Context cho phép một parent component cung cấp dữ liệu cho toàn bộ components. Đây là một ví dụ về việc sử dụng React Context:
+
+```tsx
+const ProductContext = React.createContext()
+
+function App() {
+  const productName = 'The best product ever'
+
+  return (
+    <ProductContext.Provider value={productName}>
+      <Header />
+      <MainContent />
+      <Footer />
+    </ProductContext.Provider>
+  )
+}
+
+function ProductHeader() {
+  const productName = React.useContext(ProductContext)
+
+  return <h1>{productName}</h1>
+}
+```
+
+Điều này có vẻ hoàn hảo, phải không? Không cần phải chuyển các props xuống sâu nhiều cấp độ và chúng ta có thể truy cập nó dễ dàng, nơi chúng ta thực sự cần.
+
+Nếu bạn cân nhắc sử dụng ngữ cảnh để tránh prop drilling, tôi phải làm bạn thất vọng. Nó là một ý tưởng không tốt. Vì bạn phải vượt qua một số đạo cụ ở nhiều cấp độ sâu không có nghĩa là bạn nên đưa thông tin đó vào **Context**.
+
+Thật dễ dàng để lạm dụng khái niệm này.
+
+## **Composition nghe lạ ta,**
+
+Vậy, còn cái nào khác ngoài Context để giải quyết vấn đề Prop drilling mà chúng ta đề cập ban đầu?. Câu trả lời là **Composition**. Composition trong React có nghĩa là cách bạn sắp xếp cây component của mình (Dan Abramov, đã viết trên twitter về nó [being good at composing your React components is a top skill to learn in 2023  ↗](https://twitter.com/dan_abramov/status/1623771055943831553).)
+
+Hãy tóm tắt thật nhanh. Đầu tiên, việc prop drilling trong React có thể dài dòng và bất tiện vì việc gỡ lỗi một prop được truyền qua nhiều thành phần có thể khó gỡ lỗi.
+
+Trích xuất một số component trên đường bạn đi là một định nghĩa cho Composition trong React. Vì vậy, bạn phải tự hỏi: có hợp lý không khi component này được lồng sâu xuống nhiều cấp độ và chuyển dữ liệu dọc theo nó mà không quan tâm? Hoặc nó có thể ở cấp cao hơn của cây component hoặc một phần của component khác để chúng ta có thể loại bỏ toàn bộ cấp trên cây thành phần?
+
+Đây luôn là bước đầu tiên bạn phải thực hiện, khi bạn nhận thấy rằng một prop được truyền xuống quá nhiều cấp độ trong component.
+
+Bạn có nhớ khi chúng ta nhắc về JSX, HTML attributes phía trên, điều này rất có ích khi chúng ta nghĩ về Composition trong React và muốn tránh Prop drilling. Đây là ví dụ về các chúng ta áp dụng composition:
+
+```tsx
+-- Tree component --
+const productName = 'The best product ever'
+
+<App>
+  <Header />
+  <MainContent>
+    <ProductList productName={productName}>
+      <ProductCard>
+        <ProductDetailsModal>
+          <ProductDetails>
+            <ProductHeader />
+            <ProductDescription />
+            <ProductPrice />
+          </ProductDetails>
+        </ProductDetailsModal>
+      </ProductCard>
+    </ProductList>
+  </MainContent>
+  <Footer />
+</App>
+-- Tree component --
+
+function ProductList ({ productName }) {
+  return (
+    <ProductCard>
+      <ProductDetailsModal>
+        <ProductDetails>
+          <ProductHeader>
+            <h1>{productName}</h1>
+          </ProductHeader>
+          <ProductDescription />
+          <ProductPrice />
+        </ProductDetails>
+      </ProductDetailsModal>
+    </ProductCard>
+  )
+}
+```
+
+Trong ví dụ này, **Composition** trong React được sử dụng để tránh Drop drilling bằng cách truyền các props cần thiết qua các components con nằm trực tiếp trong `children` của component cha của nó.
+
+## Kết luận
+
+Tóm lại, Composition trong React là một kỹ thuật mạnh mẽ có thể giúp tránh việc Prop drilling, đây là một vấn đề phổ biến khi chuyển props xuống một số cấp độ trong component.
+
+Tránh được Prop drilling, mọi thứ trở nên sạch sẽ, dễ kiểm soát và bảo trì hơn. Sử dụng composition, chúng ta có thể module hoá và tái sử dụng component dễ hơn.
+      

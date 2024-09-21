@@ -1,0 +1,147 @@
+---
+title: React.useTransition() hook là gì và sử dụng thế nào?
+description: Một số cập nhật giao diện người dùng nên có sự ưu tiên, thực hiện càng nhanh càng tốt (Nhập giá trị vào một input hay chọn một option từ dropdown), trong khi đó một số thành phần khác nên có độ ưu tiên thấp hơn (lọc danh sách).
+tags: React
+author: Trọng Dương Đức
+publishAt: 2022-12-17T14:25:00.000Z
+createdAt: 2022-12-16T13:10:35.000Z
+updatedAt: 2024-06-03T16:46:25.384Z
+views: 2111
+slug: react-usetransition-hook-la-gi-va-su-dung-the-nao
+---
+
+Một số cập nhật giao diện người dùng nên có sự ưu tiên, thực hiện càng nhanh càng tốt (Nhập giá trị vào một input hay chọn một option từ dropdown), trong khi đó một số thành phần khác nên có độ ưu tiên thấp hơn (lọc danh sách).
+
+Cho đến thời điểm hiện tại, React vẫn chưa cung cấp công cụ để ưu tiên cập nhật giao diện người dùng.
+
+May mắn thay, bắt đầu từ React 18, bạn có thể bật chế độ `concurrent mode` — chế độ này cho phép bạn đánh dấu các bản cập nhật giao diện người dùng có mức độ ưu tiên cao hoặc thấp.
+
+Trong bài viết lần này, chúng ta sẽ nói về việc ứng dụng `useTransition()` hook trong React thế nào để đánh dấu các bản cập nhật giao diện với mức độ ưu tiên thấp, đặc biệt hữu ích cho các bản cập nhật UI nặng không khẩn cấp.
+
+## 1. useTransition() hook
+Mặc định, tất cả các cập nhật giao diện trong React đều có mức độ khẩn cấp, cần thực hiện ngay lập tức. Điều đó có thể gây ra sự cố khi các bản cập nhật nhanh bị chậm lại bởi các bản cập nhật nặng.
+
+![Ví dụ 1](https://dmitripavlutin.com/118bc6d32d941ce629f1f18206fefc6f/legacy-4.svg)
+
+Tuy nhiên, bắt đầu từ React 18, chúng ta có tính năng mới là `concurrency`, nó có khả năng đánh dấu một số các cập nhật ở mức độ ưu tiên thấp không khẩn cấp. Điều đó đặc biệt hữu ích với các bản cập nhật giao diện người dùng nặng, chẳng hạn như lọc một danh sách lớn.
+
+![Ví dụ 2](https://dmitripavlutin.com/2539ba977c8a8880be97d01c03835a88/concurrent-4.svg)
+
+`useTransition()` là hook cho phép bạn truy cập chế độ `concurrency` bên trong một React component. Được khi báo và sử dụng khá quen thuộc.
+
+```jsx
+const [isPending, startTransition] = useTransitionHook()
+```
+Trong đó:
+- `isPending`: chỉ ra rằng quá trình chuyển đổi đang chờ xử lý
+- `startTransition(callback)`: Cho phép bạn đánh dấu bất kì bản cập nhật trạng thái nào đó ở trạng thái ưu tiên thấp (`transition`)
+
+```jsx
+import { useTransition } from 'react';
+function MyComponent() {
+  const [isPending, startTransition] = useTransition();
+  // ...
+  const someEventHandler = (event) => {
+    startTransition(() => {
+      // Mark updates as transitions
+      setValue(event.target.value);
+    });
+  }
+  return <HeavyComponent value={value} />;
+}
+```
+
+Lưu ý rằng: Để sử dụng `useTransition()` hook, bạn phải đảm bảo rằng đã [bật `concurrent mode`](https://github.com/reactwg/react-18/discussions/5).
+
+## 2. Thử nghiệm
+Hãy xem xét một ví dụ khi tất cả các bản cập nhật đều là khẩn cấp, và nó ảnh hưởng như thế nào đến trải nghiệm người dùng.
+
+Giả sử, bạn có một danh sách hiển thị tên các nhân viên, cũng như một trường nhập thông tin đầu vào, nơi người dùng bắt đầu 1 truy vấn yêu cầu lấy thông tin. Và component sẽ hiển thị `hightlight` tên nhân viên khi tìm thấy tên tương ứng với thông tin đã nhập.
+
+Về cơ bản, nó sẽ trông như thế này:
+```jsx
+function ListItem({ name, highlight }) {
+  const index = name.toLowerCase().indexOf(highlight.toLowerCase());
+  if (index === -1) {
+    return <div>{name}</div>;
+  }
+  return (
+    <div>
+      {name.slice(0, index)}
+      <span className="highlight">
+        {name.slice(index, index + highlight.length)}
+      </span>
+      {name.slice(index + highlight.length)}
+    </div>
+  );
+}
+
+export function FilterList({ names }) {
+  const [query, setQuery] = useState('');
+  const changeHandler = ({ target: { value } }) => setQuery(value);
+  return (
+    <div>
+      <input onChange={changeHandler} value={query} type="text" />
+      {names.map((name, i) => (
+        <ListItem key={i} name={name} highlight={query} />
+      ))}
+    </div>
+  );
+}
+```
+
+{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-urgent-forked-opd5gi?fontsize=14&hidenavigation=1&theme=dark" /%}
+
+`<FilterList names={names} />` chấp nhận một mảng lớn các tên nhân viên. Bên trong thành phần này, `query` state sẽ nhân vào một chuỗi các thông tin nhập vào từ `input`. `Input` nhập thông tin đầu là một `controlled component` cập nhật trạng thái truy vấn tên nhân viên khi người dùng nhập.
+
+Sau khi thử `demo` phía trên, bạn sẽ nhận thấy độ trễ khi nhập và giao diện người dùng cảm thấy không phản hồi trong các khoảng thời gian đáng chú ý.
+
+Tại sao xuất hiện vấn đề này, và hướng xử lý của nó là gì?
+
+Cập nhật ngay lập tức các ký tự người dùng nhập vào input là một nhiệm vụ khẩn cấp, và nó được ưu tiên thực hiện ngay. Tuy nhiên, việc cập nhật `hightlight` tên nhân viên khi matched với `input` là một nhiệm vụ nặng nề và không khẩn cấp.
+
+Các nhiệm vụ không khẩn cấp, mức độ xử lý nặng làm chậm các nhiệm vụ khẩn cấp có mức độ xử lý nhẹ.
+
+`useTransition()` hook có thể giúp bạn tách các bản cập nhật giao diện người dùng khẩn cấp ra khỏi đó.
+
+## 3. Áp dụng transition vào thử nghiệm
+Như đã đề cập, bạn có thể sử dụng `useTransition()` hook để nói cho **React** biết rằng bản cập nhật nào có mức độ khẩn cấp, ưu tiên và bản cập nhật nào có mức độ ưu tiên thấp, không khẩn cấp.
+
+Hãy thực hiện các điều chỉnh cần thiết cho thành phần `<FilterList>`.
+
+Đầu tiên, hãy gọi hook `[isPending, startTransition] = useTransition()` để truy cập hàm `startTransition()`. Thứ hai, hãy tạo một state để giữ giá trị trạng thái truy vấn cụ thể cho quá trình chuyển đổi.
+
+```jsx
+import { useState, useTransition } from 'react';
+export function FilterList({ names }) {
+  const [query, setQuery] = useState('');
+  const [highlight, setHighlight] = useState('');
+  const [isPending, startTransition] = useTransition();
+  const changeHandler = ({ target: { value } }) => {
+    setQuery(value);
+    startTransition(() => setHighlight(value));
+  };
+  return (
+    <div>
+      <input onChange={changeHandler} value={query} type="text" />
+      {names.map((name, i) => (
+        <ListItem key={i} name={name} highlight={highlight} />
+      ))}
+    </div>
+  );
+}
+```
+
+{% codeSanBoxEmbed url="https://codesandbox.io/embed/heavy-update-as-non-urgent-forked-vdbfj6" /%}
+
+Hãy mở bản `demo`.
+Nếu bạn nhập nhanh một truy vấn vào trường nhập liệu, bạn sẽ nhận thấy độ trễ trong việc đánh dấu truy vấn bên trong danh sách. React đã tách riêng việc hiển thị tác vụ khẩn cấp (cập nhật trường nhập khi người dùng nhập) khỏi tác vụ không khẩn cấp (làm nổi bật truy vấn bên trong danh sách). Cách tiếp cận như vậy cung cấp trải nghiệm người dùng tốt hơn.
+
+## 4. Kết luận
+- Chế độ đồng thời trong React cho phép bạn tách biệt các tác vụ khẩn cấp khỏi các tác vụ không khẩn cấp, giúp cập nhật giao diện người dùng thân thiện hơn với người dùng.
+
+
+---
+Mình đã tham khảo qua: 
+- https://dmitripavlutin.com/react-usetransition/
+      

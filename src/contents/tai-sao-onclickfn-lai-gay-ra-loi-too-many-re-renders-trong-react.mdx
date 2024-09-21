@@ -1,0 +1,57 @@
+---
+title: Tại sao onClick={fn()} lại gây ra lỗi "too many re-renders" trong React?
+description: Sự khác biệt ở trên là gì?. Tại sao trong ví dụ 2 trên ảnh lại gây ra tình trạng lặp vô hạn "too many re-renders" trong React?.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-04-24T11:00:32.000Z
+createdAt: 2023-04-24T11:00:32.000Z
+updatedAt: 2024-05-30T13:47:56.588Z
+views: 379
+slug: tai-sao-onclickfn-lai-gay-ra-loi-too-many-re-renders-trong-react
+---
+
+![Sự khác biệt giữa 2 cách viết onClick={fn()}  và onClick={() => fn()} trong React](https://res.cloudinary.com/xskill/image/upload/v1682267861/codestus/initial-3_c684nu.png)
+Sự khác biệt ở trên là gì?. Tại sao trong ví dụ 2 trên ảnh lại gây ra tình trạng lặp vô hạn "too many re-renders" trong React?.
+
+## Xử lý sự kiện
+Đầu tiên, chúng ta sẽ cùng kiểm tra xem ví dụ đúng về các xử lý "event handler" trong React.
+![Cách xử lý event handler đúng trong React](https://res.cloudinary.com/xskill/image/upload/v1682268052/codestus/handler-2_wtblcz.png)
+Javascript có hà bật nhất (First class Function). Điều này có nghĩa chúng ta có thể truyền một hàm như bất kì giá trị nào khác. Ở đây, chúng ta truyền một arrow function `() => setCount(count + 1) ` vào thuộc tính onClick của React. Khi người dùng nhấp vào nút, React sẽ gọi hàm này. Điều này sẽ kích hoạt việc cập nhật lại trạng thái `count` và thành phần của chúng ta sẽ được render lại. Mọi thứ ở đây đều ok.
+
+## Lỗi vòng lặp vô hạn
+Bây giờ, chúng ta cùng kiểm tra ví dụ gây ra lỗi render vô hạn. Nhưng đầu tiên, chúng ta sẽ tiếp cận nó bằng vanillajs.
+
+```js
+const x = (v) => v;
+
+const onClick1 = () => x(1);
+const onClick2 = x(1);
+
+console.log(onClick1) // () => x(1)
+console.log(onClick2) // 1
+```
+
+Trong đoạn code trên, chúng ta assign arrow function cho `onClick1`. Nhưng với `onClick2`, chúng ta assign cho nó **Kết quả của việc thực thi hàm x(1)**. Điều này có nghĩa chúng ta đang gọi `x()`, lấy giá trị trả về và assign nó cho `onClick2`.
+
+Vấn đề này xảy ra tương tự trong ví dụ React của chúng ta. Chúng ta đang assign kết quả của việc thực thi hàm setCount trong `onClick`. Đồng thời, `onClick` cũng sẽ không hoạt động vì `setCount` không trả về bất kì giá trị nào (undefined), nhưng nó sẽ khiến component đó lặp vô hạn vì chúng ta đang gọi hàm cập nhật setCount thực thi ngay lập tức sau khi render component.
+
+![Lỗi lặp vô hạn trong React component](https://res.cloudinary.com/xskill/image/upload/v1682269022/codestus/loop-3_cxog0f.png)
+
+## Tại sao việc này xảy ra?
+
+Một ví dụ khác bạn có thể liên tưởng là `recursion` minh hoạ với vanillajs
+```js
+function render() {
+  render()
+}
+
+render()
+```
+
+![Minh hoạ đệ quy](https://res.cloudinary.com/xskill/image/upload/v1682269115/codestus/recursion_kiqk37.jpg)
+
+Điều này xảy ra tương tự với vấn đề `onClick={fn()}` mà chúng ta đã đề cập phía trên.
+
+Nguồn thông tin mình tham khảo:
+- https://alexsidorenko.com/blog/onclick-too-many-re-renders/
+      

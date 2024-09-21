@@ -1,0 +1,96 @@
+---
+title: For..in và For..of trong javascript!
+description: Khi làm việc với vòng lặp trong JavaScript, chúng ta thường làm việc với các đối tượng như một Array hay Object . Thông thường chúng ta chỉ sử dụng for loop cho việc xử lý mảng
+tags: 
+author: Trọng Dương Đức
+publishAt: 2021-01-23T06:06:34.000Z
+createdAt: 2021-01-23T06:06:34.000Z
+updatedAt: 2024-06-03T16:19:44.249Z
+views: 8566
+slug: for-in-va-for-of-trong-javascript
+---
+
+Khi làm việc với vòng lặp trong JavaScript, chúng ta thường làm việc với các đối tượng như một **Array** hay **Object** . Thông thường chúng ta chỉ sử dụng **for loop** cho việc xử lý mảng, đây là vòng lặp cơ bản khi các bạn được tiếp cận ngôn ngữ lập trình. Trong JavaScript, khi bạn dùng For loop để xử lý các đối tượng Array hay Object sẽ như thế này.
+
+## Đối với Array
+Mình có một đổi danh sách bên dưới.
+```js
+var students = ['Student A', 'Student B', 'Student C'];
+```
+
+Như thông thường, chúng ta sẽ lấy giá trị bên trong bằng for loop
+
+```js
+for(var i = 0; i < students.length; i++) {
+	console.log(students[i]);
+}
+
+// "Student A"
+// "Student B"
+// "Student C"
+
+```
+
+## Đối với Object
+Tương tự, mình cũng có một danh sách với dạng object
+```js
+var students = {
+	0: "student A",
+	1: "student B",
+	2: "student C",
+}
+```
+
+Và lặp qua nó bằng cách sử dụng for loop thông thường như
+
+```js
+for(let i = 0; i < Object.keys(students).length; i++) {
+    console.log(students[i])
+}
+```
+
+Chúng ta sẽ vẫn nhận được kết qua giống như lặp qua mảng. Nhưng, đối với đây là trường hợp đơn giản, có thể cách này không có vấn đề gì. Nhưng đối với trường hợp một mảng phức tập hay một đối tượng object phức tạp hơn chúng ta phải xử lý thì dùng for loop trong javascript đối với cá nhân mình là một cực khi khi phải gọi lồng các biến gán vào trong như **Students[i][j][x][y][z]** --__--.
+
+Để đơn giản điều đó, chúng ta có thể sử dụng **For in** Và **For of** để xử lý các trường hợp trên cho **Array** và đối tượng **Object** trong **JavaScript**. Và bài viết chỉ đo lường trên cách viết chứ không nói đến hiệu xuất giữ 3 thằng **for loop**, **for in** và **for of**.
+
+Trong hầu hết các trình duyệt (IE> 9) và Chrome V8, JavaScript cho phép thao tác với Object hoặc Mảng chỉ đơn giản bằng việc sử dụng **For in** hoặc **For of** để xử lý và thực thi.
+
+## Sử dụng For..in cho Object
+Mặc dù **For..in** hay **For..of** đều có thể dùng cho lẫn nhau cho các đối tượng nhưng chúng ta vẫn nên theo concept đã cho của **Mozilla**.
+
+```js
+var students = {
+	0: "student A",
+	1: "student B",
+	2: "student C",
+}
+
+for(let key in students) {
+	// key: 0, 1, 2
+	console.log(students[key])
+}
+
+```
+
+Như này, không quá khác gì so với việc sử dụng **For loop** nhưng vẫn mang lại cảm giác code tốt hơn, dễ đọc hơn so với việc sử dụng for loop.
+
+## Sử dụng For..of cho Array
+Đối với mảng, việc này sẽ đơn giản hơn nhiều.
+
+```js
+var students = ['Student A', 'Student B', 'Student C'];
+
+for(var student of students) {
+	console.log(student);
+}
+
+// "Student A"
+// "Student B"
+// "Student C"
+
+```
+
+Và hầu như trong các dự án bạn làm, có thể sử dụng **For..in** hay **For..of** để thay thế cho **For..loop** nhưng nói như thế cũng không có nghĩa **For..loop** sẽ không được sử dụng. Một số case quá phức tạp chúng ta cũng chỉ có thể dùng **for..loop** chứ không thể sử dụng **For..in** hay **For..of** xử lý được.
+
+Hãy thử áp dụng vào dự án của bạn tự đánh giá và cho cái nhìn khái quát hơn nhé. Phần này đến đây thôi, rất mong được các bạn góp ý.
+      

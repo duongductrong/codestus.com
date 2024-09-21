@@ -1,0 +1,203 @@
+---
+title: Xây dựng tính năng đặt lịch đăng bài với Laravel
+description: Trong wordpress, đôi khi bài blog bạn vừa soạn thảo không được đăng ngay trong lúc đó, bạn sẽ muốn lên lịch đăng bài cho nó vào ngày hôm sau. Yes, cứ đặt lịch đăng bài cho nó thôi vì tính năng đó đã được xây dựng sẵn từ Wordpress.
+tags: Laravel
+author: Trọng Dương Đức
+publishAt: 2021-08-30T00:05:10.000Z
+createdAt: 2021-08-30T00:05:10.000Z
+updatedAt: 2024-06-03T00:12:47.845Z
+views: 4434
+slug: xay-dung-tinh-nang-dat-lich-dang-bai-voi-laravel
+---
+
+Chắc hẵn nhiều bạn đọc qua bài blog này của mình cũng đã từng sử dụng qua Wordpress để làm trang viết blog chẳng hạn. Trong wordpress, đôi khi bài blog bạn vừa soạn thảo không được đăng ngay trong lúc đó, bạn sẽ muốn lên lịch đăng bài cho nó vào ngày hôm sau. Yes, cứ đặt lịch đăng bài cho nó thôi vì tính năng đó đã được xây dựng sẵn từ Wordpress. 
+
+Trong bài viết lần này, chúng ta cũng sẽ xây dựng tính năng hẹn lịch đăng bài tương tự Wordpress, nhưng chúng ta sẽ sử dụng Laravel nhé.
+
+## Cần chuẩn bị
+
+Yêu cầu bài viết bạn đã nắm được cơ bản kiến thức về cách sử dụng Laravel để viết code ở phía máy chủ.
+
+## Tư duy về tính năng
+
+Trên thực tế, cách hẹn thời gian đăng bài không phức tạp như chúng ta nghĩ, tuy nhiên bạn sẽ cần cấu trúc dữ liệu hợp lý để có thể triển khi tính năng.
+
+Mình có bài một cấu trúc thông tin bài viết như thế này
+
+```jsx
+- Table : Article
+- Column     | Data Type
+- title      | string (191)
+- content    | text
+- status     | string (191) -> sẽ có 3 loại "publish" | "schedule" | "disable"  
+- publish_at | timestamp (default null) -> sẽ cài đặt thời gian khi bài viết được đăng
+```
+
+Sau khi định nghĩa dữ liệu, chúng ta sẽ dựa vào 2 cột chính để xác định bài viết ở trạng thái hiển thị, hẹn đăng bài hay bị ẩn khỏi hệ thống.
+
+- `status: publish`  sẽ cho phép bài viết hiển thị trên website của chúng ta
+- `status: schedule` sẽ là trạng thái để xác định các bài viết được hẹn giờ dựa theo thời gian xác định ở cột `publish_at`
+- `status: disable` sẽ ẩn bài viết khỏi website của chúng ta
+
+Như vậy, chúng ta đã có cột `status` để phân loại các trạng thái của bài viết và ở tính năng **Đặt Lịch Đăng Bài** chúng ta sẽ dựa vào thêm 1 yếu tố nữa đó là thời gian được đặt ở cột `publish_at` để so sánh với thời gian hiện tại.
+
+- Trường hợp thời gian publish_at > hiện tại: Nghĩa là bài viết vẫn đang ở trạng thái `schedule`
+- Trường hợp thời gian publish_at < hiện tại: Nghĩa là bài viết cần phải chuyển sang publish, lúc này chúng ta chỉ cần cập nhật dữ liệu của bài viết đó sang `status: publish` .
+
+Tuy nhiên, để làm được việc so sánh thời gian thực so với dữ liệu ở cột `publish_at` đã thêm để chuyển trạng thái bài viết, chúng ta cần kiểm tra nó từng phút để đảm bảo bài viết được đăng đúng thời hạn. Để thực hiện được điều này, chúng ta cần thêm một anh hùng thầm lặng đó là **Crontab.** Bạn này sẽ thực hiện nhiệm vụ truy vấn để các `articles` có trạng thái `schedule` mỗi phút để kiểm tra thời gian publish_at.
+
+Trước khi đi vào phần cấu hình cho Crontab trên server, chúng ta sẽ cần cấu hình các Task Schedule trong ứng dụng của chúng ta.
+
+```php
+// Tạo một task schedule command với lệnh php artisan make:command <name>
+php artisan make:command SchedulePosts
+```
+
+Sau khi khởi tạo, chúng ta sẽ có một tệp cấu hình sẵn nằm trong App\Console\Commands\...
+
+```php
+class SchedulePosts extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'schedule:posts'; // Đặt tên cho command
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Mô tả';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return int
+     */
+    public function handle()
+    {
+        // Đây sẽ là hàm xử lý chính của chúng ta cho phần hẹn lịch đăng bài 
+    }
+}
+```
+
+Phần chúng ta cần chú ý sau khi tạo là đặt `signature` cho command và phần code xử lý ở `handle()` method. 
+
+Bây giờ, cùng thêm logic xử lý schedule post mà chúng ta đã tư duy ban đầu vào `handle()`  
+
+```php
+// ....
+public function handle() {
+	// Gọi truy vấn đề lấy ra các bài viết thuộc nhóm status: schedule
+	// Ở đây mình sử dụng Model Eloquent, bạn cũng có thể dùng Database Builder để lấy dữ liệu
+	$articles = Articles::where("status", "schedule")->get();
+	
+	$articles->each(function($item) {
+		// Kiểm tra các $item article nếu thời gian nhỏ hơn hoặc bằng hiện tại
+		// => publish
+		if($item->publish_at <= now()) {
+			$item->status = "publish";
+
+			// Lưu lại
+			$item->save();
+		}
+	});
+}
+```
+
+Sau khi cấu hình hàm xử lý xong, chúng ta cần gọi đối tượng Command `SchedulePosts` vào Kernel.php ở **Console (App\Console\Kernel.php)**
+
+Tại biến `protected $commands` chúng ta import `Command` đã cấu hình vào
+
+```php
+protected $commands = [
+	  \App\Console\Commands\SchedulePosts::class,
+];
+```
+
+Tiếp theo ở hàm `schedule` , chúng ta gọi `$schedule->command("signature")->everyMinute();`
+
+```php
+protected function schedule(Schedule $schedule)
+{
+		// Nó có nghĩa là task command này sẽ được run mỗi phút
+    $schedule->command("schedule:posts")->everyMinute();
+}
+```
+
+Bây giờ nhìn tổng quan lại ở file Kernel nhé.
+
+```php
+class Kernel extends ConsoleKernel
+{
+    /**
+     * The Artisan commands provided by your application.
+     *
+     * @var array
+     */
+    protected $commands = [
+        \App\Console\Commands\SchedulePosts::class,
+    ];
+
+    /**
+     * Define the application's command schedule.
+     *
+     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @return void
+     */
+    protected function schedule(Schedule $schedule)
+    {
+        // Nó có nghĩa là task command này sẽ được run mỗi phút
+		    $schedule->command("schedule:posts")->everyMinute();
+    }
+
+    /**
+     * Register the commands for the application.
+     *
+     * @return void
+     */
+    protected function commands()
+    {
+        $this->load(__DIR__ . '/Commands');
+
+        require base_path('routes/console.php');
+    }
+}
+```
+
+## Chạy thử
+
+Sau các bước trên, bạn để cấu hình xong cho mình task schedule thực thi tính năng Hẹn Lịch Đăng Bài mà chúng ta muốn ban đầu, để chạy thử chúng ta có thể gọi
+
+```php
+php artisan schedule:run
+
+// Tương tự như thế này xem như đã thành công
+// '/opt/homebrew/Cellar/php@7.3/7.3.29_1/bin/php' sẽ là đoạn trỏ đến php trong máy bạn
+// '/opt/homebrew/Cellar/php@7.3/7.3.29_1/bin/php' 'artisan' schedule:posts > '/dev/null' 2>&1
+```
+
+## Cấu hình Crontab ở Server
+
+```php
+* * * * * path/to/php path/to/artisan schedule:run > '/dev/null' 2>&1
+
+// * * * * *: có nghĩa là mỗi phút, bạn có thể tham khảo ở https://crontab.guru/#*_*_*_*_*
+// path/to/php: Là đường dẫn đến php của bạn trên server
+// path/to/artisan: Là đường dẫn đến tệp aritsan trong source code của bạn
+
+```
+      

@@ -1,17 +1,16 @@
-import { BlogCard } from "@/components/custom-cards/blog-card"
-import { Link } from "@/components/ui/router"
+import OpenGraphImage from "@/assets/images/open-graph-image.png"
+import { allTags } from "@/constants/tags"
 import { PAGE_URLS } from "@/constants/urls"
-import postService from "@/services/post-service"
 import tagService from "@/services/tag-service"
 import { ParamsProps } from "@/types/utilities"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import OpenGraphImage from "@/assets/images/open-graph-image.png"
 
 export interface PostsTagProps extends ParamsProps<"id"> {}
 
 export async function generateMetadata({ params: { id } }: PostsTagProps): Promise<Metadata> {
-  const tag = await tagService.detail(id)
+  // const tag = await tagService.detail(id)
+  const tag = allTags.find((t) => t.slug === id)
 
   if (!tag) return notFound()
 
@@ -31,9 +30,9 @@ export async function generateMetadata({ params: { id } }: PostsTagProps): Promi
       countryName: "Viet Nam",
       locale: "vi",
       siteName: "Codestus.com",
-      publishedTime: tag?.created_at?.toDateString(),
+      publishedTime: tag?.created_at,
       emails: ["duongductrong06@gmail.com"],
-      modifiedTime: tag?.updated_at?.toDateString(),
+      modifiedTime: tag?.updated_at,
       authors: ["Duong Duc Trong"],
       images: [OpenGraphImage.src],
     },
@@ -53,23 +52,24 @@ const PostsTag = async ({ params: { id } }: PostsTagProps) => {
 
   if (!tag) notFound()
 
-  const posts = await postService.getPostsFromTag(tag.tagId)
+  return null
+  // const posts = await postService.getPostsFromTag(tag.tagId)
 
-  return (
-    <section className="w-full flex flex-col">
-      {posts.map((post) => (
-        <BlogCard
-          as={Link}
-          key={post.postId}
-          title={post.title}
-          content={post.content || ""}
-          description={post.description || ""}
-          href={PAGE_URLS.POST_DETAIL.replace(":id", post.slug)}
-          publishedAt={post.publish_at?.toDateString()}
-        />
-      ))}
-    </section>
-  )
+  // return (
+  //   <section className="w-full flex flex-col">
+  //     {posts.map((post) => (
+  //       <BlogCard
+  //         as={Link}
+  //         key={post.postId}
+  //         title={post.title}
+  //         content={post.content || ""}
+  //         description={post.description || ""}
+  //         href={PAGE_URLS.POST_DETAIL.replace(":id", post.slug)}
+  //         publishedAt={post.publish_at?.toDateString()}
+  //       />
+  //     ))}
+  //   </section>
+  // )
 }
 
 export default PostsTag

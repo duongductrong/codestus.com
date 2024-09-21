@@ -1,0 +1,84 @@
+---
+title: Những hàm Javascript siêu đơn giản nhưng hữu ích
+description: Xung quanh sự phát triển nổi trội với lối ngôn ngữ thiên về Functions thay vì Class , JavaScript sinh ra một số hàm đơn giản nhưng hữu ích có thể sẽ cần đến trong những dự án mà bạn phát triển.
+tags: JavaScript,React
+author: Trọng Dương Đức
+publishAt: 2021-01-25T06:04:32.000Z
+createdAt: 2021-01-25T06:04:32.000Z
+updatedAt: 2024-05-24T07:59:31.859Z
+views: 5873
+slug: nhung-ham-javascript-sieu-don-gian-nhung-huu-ich
+---
+
+Javascript hiện tại là một ngôn ngữ rất hữu ích, có thể xây dựng một **frameworks** phức tạp cho đến xử lý các dữ liệu từ `api`. 
+
+Xung quanh sự phát triển nổi trội với lối ngôn ngữ thiên về Functions thay vì Class , **JavaScript** sinh ra một số hàm đơn giản nhưng hữu ích có thể sẽ cần đến trong những dự án mà bạn phát triển.
+
+## Hàm Random Boolean (return true/false)
+Hàm này sử dụng Math.random để xử lý  trả về **Boolean** `true` hoặc `false` dự trên giá trị **Math.random** lớn hơn hay nhỏ hơn 0.5.
+
+```js
+const randomBoolean = () => Math.random() >= 0.5
+```
+
+## Hàm kiểm tra ngày trong tuần
+Hàm này sẽ nhận vào giá trị được cung cấp và kiểm tra xem nó có phải ngày trong tuần hay không (Không phải ngày cuối tuần sẽ là true, hoặc ngược lại)
+```js
+/**
+* @param {Date} date
+*/
+const isWeekDay = (date) => date.getDate() % 6 === 0;
+```
+
+## Hàm đảo ngược chuỗi
+Hàm này sẽ sử dụng lần lượt các **method** `split`, `join`, `reverse` để xử lý việc đảo ngược chuỗi. Quá đơn giản đúng không
+
+```js
+const reverseString = (str) => str.split("").reverse().join("");
+```
+
+## Kiểm tra tab hiện tại có ở chế độ focus / view hay không ?
+Chúng ta sẽ sử dụng `document.hidden` để kiểm tra xem **tab** hiện tại người dùng đang mở có đang ở chế độ focus / view
+
+```js
+const isBrowserTabInViewFocus = () => document.hidden;
+```
+
+Chúng ta có thể áp dụng để kiểm tra xem người dùng có đang truy cập trang, thời gian người dùng truy cập trang web của chúng ta để đưa ra các giải pháp tốt hơn giữ người dùng duy trì truy cập trên trang web.
+
+## Kiểm tra số chẵn hoặc lẻ
+Hàm này quá quen thuộc với các bạn sinh viên trong thời còn đi học. Trong JavaScript, bạn chỉ cần một dòng để xử lý nó. Nhưng chỉ ở 1 hạn mức số xác định.
+
+```js
+const isEvent = numb => numb % 2 === 0
+```
+
+## Lấy thời gian (Giờ, phút, giây) từ thời gian cung cấp
+Chúng ta sẽ dùng `toTimeString` **method** kèm theo việc cắt chuỗi đúng cách sẽ lấy được thời gian cung cấp
+```js
+/**
+* @param {Date} date
+*/
+const getTimeFromDate  = (date) => date.toTimeString().slice(0, 8);
+
+getTimeFromDate(new Date) //"13:43:33"
+```
+## Tuỳ chỉnh lấy giá trị phía sau dấu phẩy của số thập phân
+Dựa vào hàm `Math.pow()` chúng ta có thể tuỳ chỉnh lấy giá trị phía sau dấu phẩy của số thập phân.
+
+```js
+const toFixedDecimal = (n, fixed) => ~~(Math.pow(10, fixed) * n) / Math.pow(10, fixed);
+
+toFixedDecimal(14.56789, 1) // 14.5
+toFixedDecimal(14.56789, 2) // 14.56
+toFixedDecimal(14.56789, 3) // 14.567
+```
+
+## Kiểm tra Device thuộc nhà cung cấp Apple
+Chúng ta có thể kết hợp việc sử dụng `regexp` với hàm navigator.platform mà browser cung cấp cho chúng ta để kiểm tra thiết bị người dùng sử dụng. Ngoài hàm này ra, bạn vẫn có thể tự tuỳ chỉnh hàm để phát hiện thiết bị người dùng sử dụng để cung cấp dịch vụ phù hợp.
+```js
+const isAppleDevice = /Mac|iPod|iPhone|iPad/.test( navigator.platform );
+```
+
+Ở trên là một số hàm có thể sẽ hữu ích cho dự án của bạn.
+      

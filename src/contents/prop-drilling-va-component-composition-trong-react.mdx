@@ -1,0 +1,67 @@
+---
+title: Prop drilling và component composition trong React
+description: Đôi khi tất cả những gì chúng ta cần để tránh việc prop drilling là một chút tái cấu trúc
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-04-25T00:09:00.000Z
+createdAt: 2023-04-24T11:29:32.000Z
+updatedAt: 2024-06-03T11:44:20.383Z
+views: 453
+slug: prop-drilling-va-component-composition-trong-react
+---
+
+Đôi khi tất cả những gì chúng ta cần để tránh việc prop drilling là một chút tái cấu trúc:
+
+https://res.cloudinary.com/xskill/video/upload/v1682315453/codestus/initial_mcujgo.mp4
+
+## Ví dụ thực tế
+
+Giả sử chúng ta có cấu trúc UI như sau.
+
+![Giả sử chúng ta có cấu trúc UI như sau.](https://res.cloudinary.com/xskill/image/upload/v1682270676/codestus/layout_tgeltr.png)
+
+Thanh điều hướng là động. Thanh bên nhận dữ liệu từ máy chủ và hiển thị thanh điều hướng dựa trên dữ liệu này.
+
+![Thanh điều hướng là động. Thanh bên nhận dữ liệu từ máy chủ và hiển thị thanh điều hướng dựa trên dữ liệu này.](https://res.cloudinary.com/xskill/image/upload/v1682270711/codestus/CleanShot_2023-04-24_at_00.25.00_2x_mtwlf3.png)
+
+Việc chúng ta lấy dữ liệu này như thế nào không quan trọng cho ví dụ của chúng ta. Phiên bản đơn giản của JSON cho thanh điều hướng của chúng tôi có thể nhìn như sau:
+
+```js
+
+[
+  { "label": "Trang chủ", "href": ... },
+  { "label": "Giới thiệu", "href": ... }
+  {
+    "label": "Tài khoản",
+    "sub": [
+      {"label": "Hồ sơ", "href": ...},
+      {"label": "Đăng ký", "href": ...}
+    ]
+  }
+];
+
+```
+
+Chúng ta cần ánh xạ dữ liệu này vào các thành phần của chúng ta (NavList, NavItem, SubNavList, SubNavItem). Một cách để làm điều này là để cho các thành phần hiển thị lẫn nhau và truyền dữ liệu trên đường dẫn.
+
+https://res.cloudinary.com/xskill/video/upload/v1682270781/codestus/passv5.mp4_t_0_brbo2k.mp4
+
+Điều này sẽ làm được công việc. Tuy nhiên, cấu trúc này bao gồm rất nhiều prop drilling. Mỗi thành phần trung gian cần nhận biết các props nó nhận và hiểu cách truyền các props đó xuống và hiển thị một thành phần con.
+
+Bây giờ hãy tái cấu trúc các thành phần của chúng ta để chúng độc lập với môi trường xung quanh của chúng bằng cách sử dụng prop children.
+
+https://res.cloudinary.com/xskill/video/upload/v1682270842/codestus/composition.mp4_t_0_o5uhiz.mp4
+
+Và bây giờ khi chúng ta có một tập hợp các thành phần độc lập đơn giản, chúng ta có thể hiển thị chúng trực tiếp trong thanh bên.
+
+https://res.cloudinary.com/xskill/video/upload/v1682270892/codestus/wiringv3.mp4_t_0_zoxibi.mp4
+
+Điều này tránh việc prop drilling và tạo ra một tập hợp các thành phần độc lập có thể được sử dụng lại ở các vị trí khác nhau với cấu trúc dữ liệu khác nhau.
+
+Và nếu chúng ta không muốn thực hiện ánh xạ dữ liệu trực tiếp trong thanh bên, chúng ta có thể chuyển nó vào một thành phần riêng biệt.
+
+https://res.cloudinary.com/xskill/video/upload/v1682270934/codestus/encapsulatev3.mp4_t_0_uvjkjt.mp4
+
+Đã tham khảo:
+- https://alexsidorenko.com/blog/react-prop-drilling-composition/
+      

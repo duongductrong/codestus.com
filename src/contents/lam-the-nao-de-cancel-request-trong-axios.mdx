@@ -1,0 +1,84 @@
+---
+title: Làm thế nào để cancel request trong Axios?
+description: Bài viết ngắn gọn và đi thẳng vào vấn đề này chỉ cho bạn 2 cách riêng biệt để cancel một request đang gửi đi trong Axios.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2023-04-07T13:30:34.000Z
+createdAt: 2023-04-07T13:30:34.000Z
+updatedAt: 2024-06-03T19:40:48.861Z
+views: 1064
+slug: lam-the-nao-de-cancel-request-trong-axios
+---
+
+Bài viết ngắn gọn và đi thẳng vào vấn đề này chỉ cho bạn 2 cách riêng biệt để cancel một request đang gửi đi trong Axios.
+
+## Sử dụng AbortController
+Nếu bạn đang phát triển dự án với phiên bản mới nhất của Axios, bạn có thể theo cách này.
+Đầu tiên, hãy tạo một `controller`.
+
+```js
+const abortController = new AbortController();
+```
+
+Khi bạn thực hiện một request, hãy đính `abortController.signal` vào signal của request như sau:
+
+```js
+try {
+      const response = await axios.get('https://your-api-here.abc', {
+        signal: controller.signal,
+      });
+      console.log(response);
+    } catch (error: any) {
+      if (axios.isCancel(error)) {
+        console.log('Request canceled', error.message);
+      } else {
+        console.log(error);
+      }
+}
+```
+
+Cuối cùng, chỉ việc gọi `abortController.abort()` để cancel request mà bạn muốn. Thao tác này sẽ kích hoạt `catch`, chúng ta sẽ nhận được log message `Request canceled` ngay sau đó.
+
+```js
+abortController.abort()
+```
+
+## Sử dụng CancelToken
+Nếu bạn đang sử dụng phiên bản cũ của Axios (v0.22 trở lại), phương pháp này là một lựa chọn tốt. Nếu không, hãy đi với giải pháp đầu tiên.
+
+Bước đầu tiên, tạo `cancelToken` với `source()`.
+
+```js
+const CancelToken = axios.CancelToken;
+const source = CancelToken.source();
+```
+
+
+Đặt thuộc tính `cancelToken` thành `source.token` khi thực hiện yêu cầu:
+
+```js
+try {
+      const response = await axios.get('https://your-api-here.abc', {
+        cancelToken: source.token,
+      });
+      console.log(response);
+} catch (error: any) {
+      if (axios.isCancel(error)) {
+        console.log('Request canceled', error.message);
+      } else {
+        console.log(error);
+      }
+}
+```
+
+Bạn có thể hủy yêu cầu bằng cách kích hoạt phương thức source.cancel():
+
+```js
+source.cancel('Cancelling.');
+```
+
+Thao tác này sẽ đưa ra lỗi và bạn có thể bắt lỗi đó trong khối `catch()`.
+
+Bài viết được tham khảo tại:
+- https://www.kindacode.com/snippet/ways-to-cancel-a-request-in-axios/
+      

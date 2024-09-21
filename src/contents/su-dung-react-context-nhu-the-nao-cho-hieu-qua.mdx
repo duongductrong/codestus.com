@@ -1,0 +1,202 @@
+---
+title: Sử dụng React Context như thế nào cho hiệu quả?
+description: Ứng dụng Context trong React và useReducer tốt hơn và hiệu quả hơn như thế nào?
+tags: React
+author: Trọng Dương Đức
+publishAt: 2021-10-17T07:00:00.000Z
+createdAt: 2021-10-17T06:41:39.000Z
+updatedAt: 2024-06-02T17:49:23.664Z
+views: 7067
+slug: su-dung-react-context-nhu-the-nao-cho-hieu-qua
+---
+
+Trong khái niệm về **Application State Management với React,** chúng ta sẽ nói về cách kết hợp sử dụng **local state** và **React Context** có thể giúp bạn quản lý tốt hơn**.** Chúng ta sẽ cùng theo dõi một số các ví dụ và cũng nêu ra một vài điều về những ví dụ đó, làm thế nào để bạn có thể tạo một React Context hiệu quả tránh xa các vấn đề. Giúp các nhà phát triển tăng kinh nghiệm của mình, cũng như khả năng bảo trị các đối tượng context bên trong ứng dụng React của bạn.
+
+Đầu tiên, tạo một file `src/countContext.js` với nội dung
+
+```jsx
+import React, { createContext } from 'react'
+
+const CountContext = createContext();
+
+export default CountContext;
+```
+
+Trước hết, chúng ta không tạo giá trị khởi tạo cho `CountContext` . Nếu bạn muốn giá trị khởi tạo cho nó, sẽ chỉ cần thêm `createContext({ count: 0 })`. Nhưng chúng ta không thêm giá trị mặc định vào đó là có lý do. Giá trị mặc định chỉ hữu ích trong trường hợp như thế này: 
+
+```jsx
+// Some imports
+
+function DisplayCounting() {
+	const { count } = useContext(CountContext);
+	
+	return <div>{ count }</div> 
+}
+
+// Render logic
+```
+
+Không ai trong chúng ta thích có lỗi trong quá trình `runtime`. Tuy nhiên, Context sẽ được sử dụng như thế nào nếu nó không có giá trị thực tế? Nếu nó chỉ sử dụng giá trị mặc định đã được cung cấp, thì nó thực sự không thể hoạt động tốt. 99% thời gian bạn sẽ tạo và sử dụng Context trong ứng dụng của mình. Bạn muốn Context Consumers được hiển thị trong một Provider cung cấp các giá trị hữu ích hơn.
+
+> Có những tình huống mà các giá trị mặc định hữu ích, nhưng hầu hết thời gian chúng không cần thiết hoặc hữu ích.
+> 
+
+Với Reacts Document gợi ý rằng việc bạn cung cấp giá trị khởi tạo "Có thể hữu ích trong việc kiểm tra các thành phần một cách riêng biệt mà không cần bao bọc chúng". Mặc dù đúng là nó cho phép bạn làm điều này, tuy nhiên không đồng ý rằng việc này là cần thiết. 
+
+## Context Provider Component
+
+Chúng ta hãy tiếp tục. Để **Context** trở nên hữu ích, chúng ta cần sử dụng Provider dưới dạng một Component cung cấp các giá trị cho ứng dụng giống như thế này:
+
+```jsx
+function App() {
+	return (
+		<CountProvider>
+			<CountDisplay />
+			<AnyCounter />
+		</CountProvider>
+	)
+}
+```
+
+Chúng ta sẽ thực hiện tạo Provider tương tự như trên với
+
+```jsx
+// import our context
+
+const CountContext = createContext();
+
+const initialState = { count: 0 };
+
+function countReducer(state, action) {
+	switch (action.type) {
+    case "increase":
+      state = { ...state, count: state.count + 1 };
+      break;
+    case "decrease":
+      state = { ...state, count: state.count - 1 };
+      break;
+    default:
+      return state;
+  }
+
+  return state;
+}
+
+function CountProvider(props) {
+	const [state, dispatch] = useReducer(countReducer, initialState;
+	return <CountContext.Provider value={ state, dispatch }>
+			{props.children}
+		</CountContext.Provider>
+}
+
+export CountProvider;
+```
+
+> Đây là một ví dụ giả định về cách sử dụng Context cho bạn thấy một kịch bản trong thực tế hơn sẽ như thế nào. Điều này không có nghĩa là lần nào nó cũng phải phức tạp như thế này! Hãy thoải mái sử dụng **useState** nếu điều đó phù hợp với kịch bản của bạn. Ngoài ra, một số Context Provider sẽ ngắn gọn và đơn giản như thế này, và  Context Provider khác sẽ tham gia nhiều hơn với nhiều móc nối liên tiếp nhiều Context Provider trong ứng dụng của bạn.
+> 
+
+## Context Consumer Hook
+
+Hầu hết các API từ tài liệu của React cho phép chúng ta sử dụng Context theo cách bên dưới:
+
+```jsx
+function AnyComponent() {
+	const value = useContext(CountContext);
+	
+	return // Display Something
+}
+```
+
+Nhưng nó lại không cung cấp một trải nghiệm tốt và đơn giản cho người sử dụng. Thay thế điều này, chúng ta có thể ứng dụng kỹ thuật `Custom hook` tương tự như:
+
+```jsx
+function AnyComponent() {
+	const value = useAnyThing();
+}
+```
+
+Nó mang lại nhiều lợi ích và dễ sử dụng hơn khi chúng ta thực hiện nó
+
+```jsx
+const CountContext = createContext();
+
+const initialState = { count: 0 };
+
+function countReducer(state, action) {
+	switch (action.type) {
+    case "increase":
+      state = { ...state, count: state.count + 1 };
+      break;
+    case "decrease":
+      state = { ...state, count: state.count - 1 };
+      break;
+    default:
+      return state;
+  }
+
+  return state;
+}
+
+function CountProvider(props) {
+	const [state, dispatch] = useReducer(countReducer, initialState;
+	return <CountContext.Provider value={ state, dispatch }>
+			{props.children}
+		</CountContext.Provider>
+}
+
+// add custom hook
+// name: useCount hook
+function useCount() {
+	const context = useContext(CountContext);
+
+	if(context === undefined) {
+		throw new Error("Context should be use winthin a CountProvider");
+	}
+
+	return context;
+}
+
+export { CountProvider, useCount };
+```
+
+Đầu tiên, `useCount` hook sử dụng `useContex` để lấy nhận giá trị từ Context gần như được thay đổi từ `CountProvider`. Tuy nhiên, nếu nó không có giá trị, chúng ta đưa ra một thông báo lỗi hữu ích cho biết rằng hook không được gọi trong một thành phần hàm được hiển thị trong `CountProvider` .
+
+## Custom Consumer Component (React < 16.8.0)
+
+Nếu bạn đang sử dụng hoàn toàn về hook, bạn có thể xây dựng một custom hook để xử lý các phần thay đổi `state` cho nó. Tuy nhiên, phần này sẽ danh cho những ứng dụng React đang có phiên bản nhỏ hơn 16.8.0. Chúng ta cần sẽ cần đề cập tới Consumer tại đây.
+
+```jsx
+function CountConsumer({ children }, ...props) {
+	return <CountContext>
+		{(ctx) => (children(ctx))}
+</CountContext>
+} 
+```
+
+và đây sẽ là cách chúng ta sử dụng Consumer trong class component:
+
+```jsx
+class CounterAnyThing() extends Component {
+	render() {
+		return (
+			<CountConsumer>
+				{({value, dispatch) => (
+					/* Do anything with value and dispatch to change state */
+				)}
+			</CountConsumer>
+		)
+	}
+}
+```
+
+Nhìn có vẻ như nó đã hoạt động một rồi đấy. Tuy nhiên hãy cố gắng nâng cấp phiên bản ứng dụng của bạn lên 16.8.0 trở đi để có thể sử dụng React Hooks một cách tốt và tiện lợi nhất. Bây giờ hãy nhìn tống quan lại những gì chúng ta đã xây dựng.
+
+<iframe src="https://codesandbox.io/embed/react-context-custom-hook-7my4w?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="React Context - Custom Hook"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+	 
+Tham khảo: [kentcdodds](https://kentcdodds.com/blog/how-to-use-react-context-effectively#the-custom-provider-component)
+      

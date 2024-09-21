@@ -1,0 +1,112 @@
+---
+title: React Hooks Series #1: Tìm hiểu về useState()
+description: Chúng ta hãy cùng bắt đầu chuỗi bài viết nói về React hooks. Mục tiêu chung là nắm được toàn bộ các hooks được cung cấp bởi React và từ những phát triển custom hooks.
+tags: 
+author: Trọng Dương Đức
+publishAt: 2021-03-03T12:55:01.000Z
+createdAt: 2021-03-03T12:55:01.000Z
+updatedAt: 2024-06-02T22:35:16.670Z
+views: 4427
+slug: react-hooks-series-tim-va-hieu-ve-usestate
+---
+
+Chúng ta hãy cùng bắt đầu chuỗi bài viết nói về **React hooks**. Mục tiêu chung là nắm được toàn bộ các hooks được cung cấp bởi React và từ những phát triển custom hooks.
+
+Giờ chúng ta cùng bắt đầu thôi, như tựa đề đã nêu, chúng ta sẽ.
+
+## useState hook là gì?
+**useState** là một [Hook](https://reactjs.org/docs/hooks-intro.html) cho phép bạn khởi tạo một state trong functional component. Trước khi hooks được giới thiệu, chúng ta bị giới hạn trong phạm vi sử dụng states bên trong class components, nhưng từ bản update React v16,8 của facebook, họ đã cho ra mắt hàng loạt các hooks sử dụng torng functional component và `useState hook` nằm trong số đó .
+
+Trước khi giới thiệu sâu hơn về `useState`, mình muốn cho các bạn quan sát sơ về sự khác biệt giữa `state` bên trong `class component` và `function component`.
+
+![useState là gì?](https://res.cloudinary.com/xskill/image/upload/v1614776416/codestus/xukujqnh5liwppl9iiis.jpg)
+
+Như bạn thấy, `useState` không chỉ đơn giản hơn mà còn làm code sạch và dễ đọc hơn.
+
+### Các quy tắc cần tuân theo để triển khai useState hoặc bất kỳ hooks nào khác.
+- Thành phần bạn sử dụng hooks nên là một functional component
+- useState hoặc bất kỳ hook nào khác phải được định nghĩa ở cấp cao nhất của thành phần.
+
+Cho ví dụ
+
+```jsx
+import React, { useState } from 'react'
+
+const Test = () => {
+	const [message, setMessage] = useState("");
+	// many hooks
+	
+	return <p>{message}</p>
+}
+```
+- Hooks sẽ được thực thi theo thứ tự, vì vậy chúng ta không được phép bọc hooks vào bất kỳ hàm, hoặc lệnh nào khác.
+
+## Thử triển khai useState hook
+**useState** nhận một đối số là giá trị khởi tạo của `state` và trả về mảng gồm 2 phần tử:
+- Phần tử thứ nhất: là giá trị khởi tạo và sau khi cập nhật
+- Phần tử thứ hai: là hàm dùng để cập nhật thay đổi trạng thái `state`
+- 
+```jsx
+import React, { useState } from 'react'
+
+const Test = () => {
+	const [message, setMessage] = useState("");
+	
+	return <p>{message}</p>
+}
+```
+
+Thông thường, chúng ta sử dụng [array destructuring](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment) để trích xuất giá trị trả về từ `useState`, nhưng nó cũng có thể thực hiện như cách bên dưới
+
+```jsx
+import React, { useState } from 'react'
+
+const Test = () => {
+	//Bad Practice
+	const messageState = useState("");
+	const valueMessage = messageState[0];
+	const setValueMessage = messageState[1];
+
+	// Good Practice
+	const [message, setMessage] = useState("");
+	
+	return <p>{message}</p>
+}
+
+```
+
+### Làm thế nào để cập nhật giá trị trong useState?
+Khi khởi tạo, useState trả về 2 phần tử mà mình đã nói ở trên. Đầu tiên là biến chứa giá trị, biến thứ 2 là hàm để cập nhật trạng thái cho `state`.
+
+Và cách sử dụng nó cũng rất đơn giản
+
+```jsx
+import React, { useState } from 'react'
+
+const Test = () => {
+	// Good Practice
+	const [message, setMessage] = useState("Initialize");
+	
+	const updateMessage = () => {
+		setMessage("Clicked");
+	}
+	
+	return <p onClick={updateMessage}>{message}</p>
+}
+```
+
+Giờ hãy thử xem bên trong IDE của bạn để thấy kết quả nhé. Và tất nhiên kết quả là nó biến `Initialize` thành `Clicked`.
+
+- *Lưu ý:* Kết quả không được cập nhật ngay trong hàm đâu nhé, vì nó là một cách xử lý bất đồng bồ. Đó là lý do tại sao bạn console.log() bên trong hàm `updateMessage` trên để xem giá trị của `message` lại không thay đổi.
+
+## Về hiệu xuất
+Phương pháp triển khai useState ở trên hoàn toàn ổn. Nhưng, trong một số trường hợp đặc biệt, chúng ta không muốn giá trị khởi tạo lần đầu trong `useState` được gán mặc định thủ công mà phải dựa vào thay đổi trước đó. *Giống như việc bạn thay đổi chế độ dark->light bạn không muốn khi f5 hoặc chuyển sang page khác rồi quay lại thì giá trị khởi tạo lần đầu vẫn là dark (Nó phải là light)*. Vì vậy, chúng ta sẽ truyền vào đối số là một callback
+
+```jsx
+const [message, setMessage] = useState(() => {/** Thực hiện gì đó để khởi tạo giá trị mặc định */})
+```
+
+Như vậy, chúng ta sẽ giúp giá trị khởi tạo của `useState` trở nên linh hoạt hơn trong các trường hợp cần thiết (Như ví dụ về dark/light).
+
+Điều này có thể hữu ích khi bạn đang xử lý những logic đòi hỏi sự linh hoạt và phức tạp hơn. Chạy đi, chạy lại nhiều lần sẽ ảnh hưởng đến hiệu xuất, nó sẽ tốt hơn nếu bạn sử dụng phương pháp này.
+      

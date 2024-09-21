@@ -1,0 +1,87 @@
+---
+title: Khởi tạo ứng dụng Vue
+description: Mặc dù vue hay còn gọi là vuejs là một công nghệ sinh sau đẻ muộn hơn so với react hay angularjs đời đầu. Nhưng hiện tại, nó có thể coi là một công nghệ, framework đang rất được ưa chuộng trong các dự án của nhiều công ty hiện nay.
+tags: Frontend,Vue
+author: Trọng Dương Đức
+publishAt: 2021-06-06T00:18:01.000Z
+createdAt: 2021-06-06T00:18:01.000Z
+updatedAt: 2024-06-01T21:12:45.379Z
+views: 5395
+slug: khoi-tao-ung-dung-vue
+---
+
+Mặc dù **vue** hay còn gọi là **vuejs** là một công nghệ sinh sau đẻ muộn hơn so với react hay angularjs đời đầu. Nhưng hiện tại, nó có thể coi là một công nghệ, framework đang rất được ưa chuộng trong các dự án của nhiều công ty hiện nay. Đi kèm với **vue** là những khái niệm tương tự với **react, angular** đối với những lập trình viên đã từng làm việc với các công nghệ phát triển web hướng **Single Page Application**. Tuy nhiên, bài viết này cũng dành cho cả 2 đối tượng là người mới hoặc đã sử dụng các công nghệ tương tự.
+
+Mục đích của chúng ta sẽ tìm hiểu các sử dụng nó trong bài viết lần này.
+
+## Tóm tắt chút về Vuejs.
+**Vue** là một công nghệ phát triển web theo dạng đơn trang (**Single Page Application**) được nhà sáng lập lấy cảm hứng trong quá trình phát tiển framework **angular** tại **Google**. 
+
+Không giống như cách phát triển thông thường, phía máy chủ sẽ quản lý các điều hướng của trang web. Vue cho phép chúng ta quản lý mọi điều hướng của trang web tại **Vue** thông qua [**Vue-router**](https://router.vuejs.org/). Tuy nhiên, một bất lợi là mà các **SPA** như Vue mang đến là sự không thân thiên với SEO. Vì quá trình kết xuất các đoạn mã HTML được thực hiện sau quá trình tải lần đầu của một trang web mà chúng ta truy cập.
+
+Để bắt đầu tìm hiểu các khái niệm cơ bản trong Vuejs, chúng ta sẽ cần biết cách **khởi tạo một ứng dụng vue như thế nào?**. Cùng tìm hiểu xem nhé.
+
+## Khởi tạo Vue
+Trước khi khởi tạo bạn cần cài đặt đoạn **CLI** để của **vue** để có thể khởi tạo dự án:
+
+```js
+npm install -g @vue/cli @vue/cli-service-global
+# or
+yarn global add @vue/cli @vue/cli-service-global
+```
+
+Khởi tạo một ứng dụng vue, bạn cần một **thư mục** để chứa dự án chúng ta khởi tạo và chạy `vue create demo-app`. Quá trình này vue sẽ đặt các câu hỏi tùy chọn để giúp bạn khởi tạo ứng dụng với cấu trúc đã được cấu hinh sẵn của **Vue**
+
+Sau khi khởi tạo bạn sẽ nhận được kết quả như sau:
+
+<iframe src="https://codesandbox.io/embed/funny-moon-zy2bf?autoresize=1&fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="Init App"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+## Cú pháp của Vuejs
+
+Trong đoạn `demo` phí trên, bạn sẽ thấy các cú pháp bên trong tệp `src/App.vue` để tạo giao diện và các đoạn mã javascript rất giống với html và javascript
+
+```html
+// src/App.vue
+<div id="app">
+    <img alt="Vue logo" src="./assets/logo.png" width="25%">
+    <HelloWorld msg="Hello Vue in CodeSandbox!"/>
+  </div>
+```
+
+Phạm vi phát triển ứng dụng của chúng ta sẽ nằm bên trong thẻ `div` với id là `app`. Lý do là vì **Vue** sẽ cần một thẻ để làm nơi kết xuất toàn bộ nội dung cho ứng dụng.
+
+Bây giờ, thử thay đổi nội dung của nó bên trong `<div id="app">`
+
+```html
+<div id="app">
+		<h1>Hello world</h1>
+    <HelloWorld msg="Hello Vue in CodeSandbox!"/>
+  </div>
+```
+
+Bạn sẽ thấy chữ **Hello world** được hiển thị trên màn hình theo những gì mình mong muốn. Từ đây, toàn bộ ứng dụng của chúng ta sẽ phát triển bên trong thẻ `<div id="app">` này.
+
+Và nếu bạn muốn khởi tạo các `container`, `components` bắt buộc phải có cấu trúc như sau:
+```jsx
+<template>
+// Nội dung HTML
+</template>
+
+<script>
+export default {
+	name: "Demo" // Tên của component
+}
+</script>
+```
+
+Đây là cấu trúc mặc định của Vue:
+- **template**: Là nơi phụ trách hiển thị các nội dung mà chúng ta viế
+- **script**: Là nơi chúng ta đặt tên cho **component**, truyền các giá trị **data, props, event và life cycle** hỗ trợ cho việc phát triển các **Component**.
+
+> Chúng ta đã hoàn thành bước khỏi tạo ứng dụng Vue với CLI. Trong phần tiếp theo, mình sẽ đi sâu hơn vào các phần của **Vue** để các bạn có thể hình dung tổng thể về nó.
+      

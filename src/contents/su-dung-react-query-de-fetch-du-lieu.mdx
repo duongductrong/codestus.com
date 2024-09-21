@@ -1,0 +1,187 @@
+---
+title: Sử dụng React-Query để fetch dữ liệu
+description: Để khôi phục niềm tin của bạn vào việc đồng bộ hóa dữ liệu trạng thái máy chủ với thư viện React Query được cấu hình trước. Xem cách bạn có thể đưa logic tìm nạp, bộ nhớ cache và cập nhật vào một vài dòng mã dễ hiểu với các móc tự động hóa đơn giản được trình bày trong hướng dẫn này.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2021-08-29T00:11:19.000Z
+createdAt: 2021-08-29T00:11:19.000Z
+updatedAt: 2024-06-03T21:50:43.259Z
+views: 13109
+slug: su-dung-react-query-de-fetch-du-lieu
+---
+
+Để khôi phục niềm tin của bạn vào việc đồng bộ hóa dữ liệu trạng thái máy chủ với thư viện React Query được cấu hình trước. Xem cách bạn có thể đưa logic tìm nạp, bộ nhớ cache và cập nhật vào một vài dòng mã dễ hiểu với các móc tự động hóa đơn giản được trình bày trong hướng dẫn này.
+
+## Đây có thể được coi là một thay đổi lớn
+
+Là một bổ sung lớn cho phần còn thiếu của React trong việc quản lý dữ liệu từ phía máy chủ. Hãy quên việc giữ mọi thứ ở trạng thái toàn cầu tiêu chuẩn, bởi vì hầu hết các thư viện được tạo ra chỉ để xử lý trạng thái máy khách và trạng thái máy chủ thì khác.
+
+Dữ liệu máy chủ không đồng bộ. Vì nó không được lưu trữ trong ứng dụng của bạn nên nó có thể lỗi thời trong nháy mắt, vì vậy bạn nên tìm ra cách để tạo bộ nhớ cache. Đây là tin xấu - đó là một trong những điều khó nhất trong lập trình. Nhưng tin tốt là React Query có thể xử lý việc tìm nạp, lưu vào bộ nhớ đệm, đồng bộ hóa và cập nhật trạng thái máy chủ của bạn.
+
+## Hãy thử bắt đầu với React-Query
+
+Các lợi ích chính mà **React-Query** mang lại cho chúng ta:
+
+- **Window focus refetching**: khi người dùng rời khỏi tab ứng dụng của bạn, React Query sẽ đánh dấu dữ liệu là "cũ" và tìm hiểu lại dữ liệu đó khi người đó quay lại.
+- **Request retry**: bạn có thể đặt số lần thử lại cho bất kỳ yêu cầu nào để chống lại các lỗi ngẫu nhiên.
+- **Prefetching:** nếu ứng dụng của bạn cần dữ liệu mới sau khi có yêu cầu cập nhật, bạn có thể tìm nạp trước truy vấn bằng một khóa cụ thể và **React Query** sẽ cập nhật nó trong nền.
+- **Optimize Updates:** khi bạn chỉnh sửa hoặc xóa một mục trong danh sách, bạn có thể đưa ra bản cập nhật lạc quan cho danh sách.
+
+Dưới đây sẽ là cấu hình cơ bản để bắt đầu sử dụng React-Query
+
+```jsx
+// App.js
+
+import { QueryClient, QueryClientProvider } from 'react-query'
+
+const queryClient = new QueryClient()
+
+<QueryClientProvider client={queryClient}>
+  <App />
+</QueryClientProvider>
+```
+
+Tiếp tục, giả sử chúng ta có một hàm `fetching` sử dụng `Axios` để lấy dữ liệu các bài viết
+
+```jsx
+// core/services/fetchingPosts.js
+
+async function fetchingPosts() {
+	const res = await axios.get("/api/posts");
+	
+	return res.data;
+}
+```
+
+Việc kết hợp hàm tìm nạp dữ liệu của chúng ta với `React-Query` sẽ vơ cùng đơn giản
+
+```jsx
+import React from 'react'
+import { useQuery } from 'react-query'
+import fetchingPosts from 'src/core/services/fetchingPosts.js'
+
+export const Articles = () => {
+  const { data, error, isError, isLoading } = useQuery(['articles'], fetchingPosts)
+
+  if (isLoading) {
+    return <span>Đang tải...</span>
+  }
+
+  if (isError) {
+    return <span>Have an errors: {error.message}</span>
+  }
+
+  return (
+    <ul>
+      {data.map(article => (
+        <li key={article.id}>{article.title}</li>
+      ))}
+    </ul>
+  )
+}
+```
+
+Bằng cách gọi `hook` React-query và lấy ra những biến ràng buộc dữ liệu mà React-Query đã quy định trước đó, nó hoàn toàn dễ dàng sử dụng và dễ tiếp cận đối với chúng ta.
+
+## Tìm nạp dữ liệu hiện đã tốt hơn
+
+Tại sao nó lại tốt hơn so với cách tìm nạp dữ liệu thông thường với `useEffect` . Khi chúng ta truy vấn với cùng một `key` đã định nghĩ ở useQuery, React-Query ngay lập tức trả về dữ liệu đã được fetch trước đó và tìm nạp dữ liệu mới.
+
+Khi tập dữ liệu thứ hai giống với tập đầu tiên, Truy vấn React sẽ giữ cả hai làm tham chiếu mà không buộc tải lại. Đó là một cải tiến to lớn đối với trải nghiệm người dùng.
+
+## Làm thế nào để Hooks hoạt động
+
+Bạn đã biết cách tìm nạp dữ liệu dễ dàng với **React-Query** rồi. Bây giờ hãy tìm hiểu làm sao để cập nhật nó.
+
+```jsx
+async function fetchingPosts(id) {
+  await axios.post(`/api/posts/${id}`)
+}
+
+export const Articles = () => {
+  const [title, setTitle] = React.useState('')
+  const {isLoading, isError, error, mutate} = useMutation(fetchingPosts)
+
+  return (
+    <div>
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        disabled={isLoading}
+      />
+      <button
+        onClick={() => {
+          mutate({ title })
+        }}
+        disabled={isLoading || !title}
+      >
+        Add Article
+      </button>
+      <div>
+        {isLoading
+          ? "Saving..."
+          : isError
+          ? error.message
+          : "Saved!"}
+      </div>
+    </div>
+  )
+}
+```
+
+React Query có hook `useMutation` mà bạn có thể sử dụng để cập nhật / tạo / xóa dữ liệu. useMutation cung cấp cho bạn quyền truy cập vào hàm mutate mà chúng ta có thể chuyển các đối số cần thiết. Sau đó nó trả về thông tin về trạng thái của lệnh gọi API của chúng ta. Trạng thái có thể là:
+
+- `idle`: cho trạng thái nhàn rỗi hoặc mới / đặt lại
+- `Loading`: cho một đột biến hiện đang chạy,
+- `error`: Khi xuất hiện lỗi
+- `success`: Khi mọi thứ đã hoàn thành và dữ liệu đã sẵn sàng.
+
+Bạn có thể truy cập thông tin trạng thái từ biến trạng thái hoặc đối với những người thích trạng thái boolean, họ có thể truy cập thông qua các biến sau.
+
+- `isIdle`
+- `isLoading`
+- `isError`
+- `isSuccess`
+
+Như bạn thấy, nó rất dễ sử dụng. Và có nhiều sự lựa chọn cho bạn khi sử dụng `useMutation` **React Query** có thể trở thành một trong những công cụ dành cho nhà phát triển mạnh mẽ nhất của bạn.
+
+## Sức mạnh thực sự còn nằm ở phía sau?
+
+Điều gì xảy ra khi một thiết bị ngoại tuyến trong giây lát khi đang gửi dữ liệu? React Query có một giải pháp cho điều đó!
+
+## Use Request Retry
+
+Bạn có thể chuyển tùy chọn `try` với số lần `query` sẽ thử lại đột biến sau khi kết nối lại.
+
+```jsx
+const mutation = useMutation(addArticle, { retry: 3 })
+```
+
+## Query Client helps a lot with caching
+
+Hàm được đóng gói kèm theo nhiều phương thức giúp bạn xử lý bộ nhớ đệm cache.
+
+- `invalidateQueries`  phương thức đánh dấu một truy vấn có khóa đã cho là không hợp lệ để làm cho Truy vấn React tìm nạp lại dữ liệu đó. Bạn có thể sử dụng phương pháp đó trong hook useMutation sau khi cập nhật thành công (ví dụ bên dưới).
+- `setQueryData`  được sử dụng cho việc cải thiện cập nhật dữ liệu đã lưu vào bộ nhớ đệm
+- `prefetchQuery`  phương thức giúp bạn tìm nạp lại một số dữ liệu trước khi cần và rendered với useQuery. Nếu bạn biết khi nào người dùng cần dữ liệu đó, sử dụng phương thức này là một cách tìm nạp dữ liệu cải thiện nhiều về trải nghiệm người dùng.
+- `clear` đơn giản là xoá tất cả các cache đã lưu
+
+Để sử dụng những phương thức này, bạn sẽ cần `import` `useQueryClient` hook từ React-Query. Sau đó, assign nó vào một biến dưới dạng `const queryClient = useQueryClient` và gọi các phương thức bên trong nó bằng cách gọi một object thông thường.
+
+## useMutation hook options
+
+Trong hầu hết các trường hợp, bạn sẽ sử dụng các phương thức Query Client bên trong hooks options. Hãy cùng điểm qua các nó nhé
+
+- **`onMutate`** Chức năng này hoạt động trước `useMutation`. Nó khá hữu ích khi bạn muốn chạy các bạn cập nhật trên bộ nhớ cache cục bộ và cập nhật dữ liệu cho giao diện người dùng trước khi `mutation` xảy ra trên máy chủ
+- **`onSuccess`** Hàm chạy khi gọi `mutation` thành công. Truy vấn với key đã định trước và sẽ được tìm nạp lại dưới nền ứng dụng của bạn. Có thể xem ví dụ dưới
+
+    ```jsx
+    const mutation = useMutation(createPostArticle, {
+      onSuccess: data => {
+        queryClient.invalidateQueries('articles')
+      },
+    })
+    ```
+
+- **`onError`** Sẽ xảy ra khi quá trình gọi `mutation` có lỗi. Việc đặt bộ nhớ cache thành dữ liệu trước đó rất phổ biến khi có sự cố xảy ra
+      

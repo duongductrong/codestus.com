@@ -1,0 +1,89 @@
+---
+title: Lưu trữ JWT thế nào cho an toàn?
+description: Trong những năm gần đây, JWT đã được sử dụng rộng rãi như một phương pháp xác thực và uỷ quyền sử dụng trong các ứng dụng web/app.
+tags: Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-13T07:23:49.000Z
+createdAt: 2021-02-13T07:23:49.000Z
+updatedAt: 2024-06-03T11:04:50.841Z
+views: 6399
+slug: luu-tru-jwt-the-nao-cho-an-toan
+---
+
+Trong những năm gần đây, JWT đã được sử dụng rộng rãi như một phương pháp xác thực và uỷ quyền sử dụng trong các ứng dụng **web/app**. Chúng cho phép **backend** có thể xác minh được người dùng mà không cần thực hiện đến cơ sở dữ liệu hoặc bất kỳ loại lưu trữ nào khác. Dễ sử dụng và chúng cũng sử dụng các định dạng phổ biến nhất hiện nay được sử dụng cho dữ liệu trên mạng. Đó là **JSON**.
+
+Nhưng trên thực tế, ngày càng có nhiều trường hợp người dùng lưu trữ mã `xác thực JWT` sai cách, khiến các ứng dụng web dễ bị tấn công bởi các loại tấn công khác nhau.
+
+## JWT Token là cái gì ?
+JWT là viết tắt của **JSON Web Tokens**. **JWT** không khác gì so với đại diện mã hoá base64. Bằng cách **signing token**, chúng đảm bảo rằng nội dung, dữ liệu được mã hoá không bị thay đổi theo bất kỳ cách nào sau quá trình đó. Thực hiện điều này bằng cách xác minh **secret key**, và loại hình mã hoá cung cấp ban đầu.  Trong trường hợp `signature` mà chúng ta cung cấp không khớp với thông tin mã xác minh đã tạo, chúng sẽ được xem như không hợp lệ'
+
+Mã xác thực JWT gồm có ba phần, tất cả đều dưới dạng `base64`:
+- **HEADER:** Thường chứa thời gian hết hạn của mã, thuật toán sử dụng và dữ liệu bổ sung.
+- **PAYLOAD:** Chứa dữ liệu dưới dạng JSON
+- **VERTIFY SIGNATURE:** Được tạo từ `header` và `payload`
+
+`header` và `payload` được lưu trự ở dạng JSON trước khi `sign`. Mã xác thực cuối cùng là sự kết hợp của 2 đối tượng trên dưới dạng base64, được phân tách với nhau bằng dấu chấm. Vì vậy, mã xác thực JWT sẽ có dạng:
+
+```js
+header.payload.signature
+```
+
+## Có nên lưu trữ JWT ở LocalStorage?
+Rất nhiều người thường có xu hướng lưu trữ mã xác thực JWT của họ ở LocalStorage trên trình duyệt (browser). Đây là nơi dễ bị tấn công bởi các cuộc tấn công XSS. Chúng ta sẽ chỉ thảo luận về **XSS** trong ngữ cảnh **JWT**, bạn có thể tìm hiểu thông tin đó [tại đây](https://owasp.org/www-community/attacks/xss/). Trong kiểu tấn công này, kế tấn công sẽ lợi dụng thực tế là mã xác thực được lưu trữ tại **LocalStorage** có thể được truy cập bằng bất kỳ mã javascript nào chạy trên cùng một tên miền mà các ứng dụng web lưu trữ. 
+
+Nếu kẻ tấn công có thể tìm cách đưa đoạn mã độc hại vào bên trong ứng dụng mà bạn đang truy cập, bạn sẽ là nạn nhân trong việc bị khai thác mã xác thực và sử dụng chúng để làm phương tiện lấy thông tin dữ liệu của bạn và nặng hơn là có thể truy vấn toàn bộ hệ thống nếu tài khoản thuộc quyền hạn cao cấp.
+
+Vì vậy, để trả lời cho câu hỏi này, thì đừng, đừng nên lưu trữ **JWT** trong **LocalStorage**.
+
+## Vậy còn SessionStorage?
+Chúng ta cùng xem có vấn đề gì trong trường hợp này không!.
+
+Giống LocalStorage, **SessionStorage** được truy cập bởi bất kì mã **JavaScript** nào được chạy trên cùng một domain của ứng dụng đó. Vì vậy, điều duy nhất thay đổi ở đây là, khi người dùng tắt trình duyệt, mã **JWT** cũng sẽ bị xoá và người dùng phải đăng nhập lại sau đó để tiếp tục sử dụng ứng dụng web/app của bạn.
+
+Như **LocalStorage**, không nên lưu trữ **JWT** trong **SessionStorage**.
+
+## Sử dụng Cookies?
+Từ nhiều lập trình viên, chuyên gia có tay nghề. Họ vẫn khuyên chúng ta sử dụng **Cookie** mặc dù nó đã sinh ra được khá lâu, nhưng vẫn cực kì bảo mật.
+
+> Nhưng cookie cũng có thể truy cập được thông qua javascript.
+
+Điều này đúng, nhưng chỉ khi máy chũ không đặt **httpOnly** cho một gì đó bạn phải luôn đặt cho cookie xác thực hoặc uỷ quyền.
+
+>  Điều gì sẽ xảy ra nếu ai đó gửi chúng thông qua một yêu cầu HTTP không an toàn?
+
+Trước hết, ngày nay, ít ai sử dụng HTTP, ngay cả theo cách này, chúng ta có thể đặt cờ bảo mật khi tạo **cookie**, vì vậy nó sẽ không bao giờ được gửi qua một kết nối không an toàn.
+
+> Bạn có đang quên tấn công **CSRF**
+
+Khoan đã, nhưng **CSRF Attack** là gì ?
+
+Một cuộc tấn công **CSRF** được thực hiện khi kẻ tấn công lợi dụng hành vi mặc định của trình duyệt, để gửi tất cả **cookie** ngay cả trên các yêu cầu từ tên miền chéo. Điều này có thể dẫn đến các lỗ hỏng bảo mật lớn nếu không được xử lý đúng cách. Một ví dụ về cuộc tấn công này như sau
+
+- Kẻ tấn công gửi một email với một lời đề nghị tuyệt đẹp và thêm **nút CTA** ở cuối - **NHẬN GIẢM GIÁ 70% HẤP DẪN**
+- Người dùng **thích thú** bởi ưu đãi tuyệt vời trên và **ấn nút**
+- Bởi vì **cookie** sẽ được gửi mỗi khi nhận **request**, đối với cả những tên miền chéo, như mong đợi. Nó sẽ hoạt động nếu người dùng đã đăng nhập, một trong bước trước đó đối với ứng dụng của bạn.
+- Và sau đó, không còn sau đó nữa.
+
+Nhẹ nhàng, người dùng không thể đăng nhập vào tài khoản của họ nữa nếu kẻ tấn công chỉ muốn phơi bày kỹ năng. Nhưng các hoạt động nghiêm trọng hơn có thể được thực hiện như yêu cầu người dùng nâng cấp dịch vụ, yêu cầu chuyển khoản của họ sang tài khoản giả mạo của kẻ thù. Thay vì của bạn.
+
+## Vậy chúng ta phải làm gì?
+Bạn có thể sử dụng mã JWT được tạo từ phần phụ trợ trong mọi yêu cầu mà bạn thực hiện với máy chủ (thường với bất kỳ yêu cầu nào từ POST, PUT, PATCH, DELETE. Vì vậy, khi người dùng thực hiện yêu cầu chúng ta có thể kiểm tra nếu mã đó hợp lệ hay không bằng cách tìm nạp nó từ một số bộ nhớ **cache** hoặc thâm5 chí trực tiếp từ cơ sở dữ liệu. Nhưng điều này đòi hỏi bạn phải tạo một mã **JWT** mới mổi khi người dùng chuyển hướng tới một trang mới. Vậy, giải pháp thay thế nó là gì ?
+
+Trong nhiều năm nay, thật không may, cách duy nhất để giữ an toàn là sử dụng mã xác thực **CSRF** khi sử dụng xác thực dựa trên **cookie**. Từ năm 2016, các trình duyệt hiện đại bắt đầu triển khai chính sách cookie được gọi là **SameSite**. SameSite có thể nhận một trong 3 giá trị.
+- Không cho phép gửi cookie theo yêu cầu, bao gồm cả tên miền chéo. Đây là cách trình duyệt xử lý cookie trong nhiều năm. Giá trị mặc định mới cho **SameSite** của hầu hết các trình duyệt hiện đại là **Lax**, mặc dù không phải tất cả các trình duyệt đều sử dụng **Lax** làm chính sách cookie SameSite mặc định.
+
+### Lax là gì ?
+**Lax** cho phép gửi cookie trong các yêu cầu tên miền chéo từ yêu cầu là **GET**. Tất cả các yêu cầu khác sẽ không chứa cookie với chính sách **Lax SameSite**. Bằng cách này, nó cho phép cookie được sử dụng khi, ví dụ trường hợp chuyển hướng người dùng từ email đến màn hình trang tổng quan của ứng dụng, nhưng không cho phép một biểu mẫu độc hại chèn mã độc hại lên điểm cuối.
+
+Chúng ta phải đề cập rằng **Lax** hoạt động cho tất cả các yêu chuyển hướng. Nó sẽ không gửi cookie theo yêu cầu ajax. Vì vậy, không ai có thể thêm một số mã vào web của họ và đặt yêu cầu điểm đến để khai thác dữ liệu cá nhân của người dùng đã đăng nhập. Nó cũng sẽ bị bỏ qua trong trường hợp **iframe**, ngay cả đối với các yêu cầu chưởng hướng.
+
+Vì vậy, các cách thông thường nhất mà cookie Lax được gửi từ một yêu cầu GET trên nhiều miền như sau.
+- Người dùng nhấp vào đường dẫn chuyển hướng liên kết đến trang web của bạn
+- Người dùng yêu cầu gửi GET chuyển hướng đền trang web của bạn (Hữu ích trong trường hợp bạn muốn cung cấp cách chuyển đổi động đến chuỗi truy vấn bằng cách sử dụng biểu mẫu từ trang web khác).
+- Nếu một lệnh như `window.location.href` được sử dụng
+
+Giờ đây, chính xác SameSite strict sẽ không cho phép cookie được chuyển qua các yêu cầu từ tên miền chéo theo bất kỳ cách nào. Điều này có thể hữu ích trong một số trường hợp phức tạp, nhưgn bạn phải hiểu rằng ngay cả một chuyển hướng liên kết đơn giản cũng sẽ khiến người dùng đăng xuất khỏi web của bạn nếu bạn sử dụng chính sách này. Tất nhiên, đó là cách an toàn nhất.
+
+### Có thể bạn sẽ cần !
+- Nội dung tham khảo từ tác giả [**George Koniaris**](https://dev.to/gkoniaris)
+      

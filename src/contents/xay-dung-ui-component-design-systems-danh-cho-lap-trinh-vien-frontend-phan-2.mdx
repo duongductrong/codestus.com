@@ -1,0 +1,57 @@
+---
+title: Xây dựng UI Component Design Systems dành cho lập trình viên Frontend (Phần 2)
+description: Có 2 cách để chúng ta thiết kế, xây dựng hệ thống. Lựa chọn phù hợp chủ yếu dựa trên việc bạn là ai và bạn cần đạt được những gì.
+tags: JavaScript,Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-20T03:17:03.000Z
+createdAt: 2021-02-20T03:17:03.000Z
+updatedAt: 2024-05-31T12:00:13.567Z
+views: 5991
+slug: xay-dung-ui-component-design-systems-danh-cho-lap-trinh-vien-frontend-phan-2
+---
+
+Trong [phần trước](https://codestus.com/posts/xay-dung-ui-component-design-systems-danh-cho-lap-trinh-vien-frontend) chúng ta đã tìm hiểu về các phần:
+- **Thu hẹp khoảng các giữa nhà phát triển và thiết kế**
+- **Chọn stack và tools**
+Chỉ ra những lựa chọn, luồng xử lý, công nghệ sử dụng để xây dựng hệ thống UI Component.
+
+Trong phần này, chúng ta sẽ tiến sâu hơn một chút về cách thiết kế, xây dựng hệ thống.
+
+## Thiết kế, Xây dựng hệ thống giao diện thành phần
+Có 2 cách để chúng ta thiết kế, xây dựng hệ thống. Lựa chọn phù hợp chủ yếu dựa trên việc bạn là ai và bạn cần đạt được những gì.
+
+### Thiết kế trước, sau đó xây dựng các thành phần có khả năng tái sử dụng (reusable)
+Một tiêu chuẩn được sử dụng rộng rãi ở hầu hết các tổ chức trong quá trình xây dựng UX/UI và phát triển qua nhiều nhóm và sản phẩm, đó là **Design Components First** và hãy đảm bảo rằng bản thiết kế này được thực hiện như việc phát triển các thành phần (components) và được sử dụng ở mọi nơi.
+
+Nào, hãy cùng xem luồng làm việc này thông qua một cấu trúc đơn giản như sau:
+- Xây dựng ngôn ngữ hình ảnh và thiết kế thành phần
+- Thực hiện phát triển các thành phần trong các môi trường quản lý codebase như github/gitlab.
+- Sử dụng các **components-platform** để quản lý các **package** được phát triển từ hệ thống
+- Chuẩn hoá các phiên bản của thành phần qua các dự án và ứng dụng.
+- Theo dõi, cập nhật và phát triển các thành phần
+
+### Design Systems và Atomic Design
+Thông qua việc so sánh các thành phần với các nguyên tử, phân tử, chúng ta có thể nghĩ rằng thiết kế giao diện người dùng của chúng ta như một thành phần của các mô-đun được ghép lại với nhau.
+
+Atomic design sẽ giúp [bạn phát triển và duy trì hệ thống một cách mạnh mẽ](https://bradfrost.com/blog/post/atomic-web-design/). Cho phép phát triển với chất lượng cao hơn, giao diện người dùng nhất quán hơn...
+
+## Kết hợp quản lý và cập nhật các thành phần
+Theo thời gian, hệ thống giao diện thành phần của bạn sẽ có một số phát sinh cần phải thay đổi như môi trường, màu sắc...Thiết kế có thể thay đổi, và các thành phần cũng vậy
+
+Các thành phần có thể thay đổi để phù hợp với các sản phẩm mới và thiết kế cũng vậy. Vì vậy, bạn phải coi quy trình này là sự kết hợp 2 chiều.
+
+### Kiểm soát các thay đổi thành phần trong các dự án
+Khi một thành phần được sử dụng trong 2 hoặc nhiều dự án, sớm muộn bạn sẽ phải thay đổi nó để phù hợp hơn với các dự án. Vì vậy, bạn có thể phải cập nhật một thành phần từ dự án này sang dự án khác. Kết hợp các thay đổi mã nguồn và cập nhật đầy đủ các phụ thuộc ảnh hưởng đến sự thay đổi của thành phần.
+
+## Phát triển một hệ sinh thái các thành phần trong tổ chức của bạn.
+![Phát triển hệ sinh thái các thành phần trong tổ chức](https://res.cloudinary.com/practicaldev/image/fetch/s--I1BQQEIe--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://thepracticaldev.s3.amazonaws.com/i/kwqc7cp1n1mxykxkbndh.png)
+
+Xây dựng hệ thống thiết kế thực sự là xây dựng một hệ sinh thái thành phần đang phát triển trong tổ chức của bạn. Điều này có nghĩa là việc quản lý các thành phần không phải là con đường một chiều, bao gồm những người xây dựng ứng dụng (người tiêu dùng thành phần) để các thành phần bạn xây dựng sẽ thực sự được sử dụng chúng trong các ứng dụng và sản phẩm của họ.
+
+Chia sẻ các thành phần đến nơi mà mọi người có thể dễ dàng tìm thấy và sử dụng. Hãy để họ cộng tác và làm cho việc đó trở nên dễ dàng và thú vị. Đừng ép các nhà phát triển cài đặt các thư viện nặng hoặc tham gia quá sâu vào thư viện của bạn chỉ để thực hiện một yêu cầu nhỏ. Đừng làm khó các nhà thiết kế khi tìm hiểu chính xác những thành phần nào thay đổi theo thời gian và giúp họ dễ dàng cộng tác trong quá trình này.
+
+Hãy xem hệ thống thiết kế thành phần của bạn là một sinh vật sống và thở, phát triển  theo thời gian. Nếu bạn cố gắng thực thi nó trên tổ chức của mình, nó có thể chết. Thay vào đó, hãy phát triển nó thích hợp với nhiều môi trường. Điều chỉnh quy trình này để đạt được tiêu chuẩn hóa, nhưng không cản trở hoặc làm suy yếu việc áp dụng- bằng mọi giá. BIT có lẽ là công cụ quyền lực nổi bật nhất ở đây, nhưng hãy chia sẻ nhiều hơn nếu bạn biết chúng.
+
+## Kết luận
+Hệ thống thiết kế giúp tạo ra sự nhất quán trong trải nghiệm hình ảnh và chức năng mà bạn cung cấp cho người dùng, đồng thời hình thành thương hiệu của bạn trên các sản phẩm và ứng dụng khác nhau. Các thành phần, có hoặc không có sử dụng framework, cho phép bạn triển khai hệ thống này như một tập hợp các khối xây dựng sống động có thể và nên được chia sẻ giữa các dự án để chuẩn hóa và tăng tốc độ phát triển.
+      

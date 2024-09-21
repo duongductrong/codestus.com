@@ -1,0 +1,191 @@
+---
+title: Axios Interceptors! Tại sao chúng ta cần nó?
+description: Mặc dù đã sử dụng nó rất nhiều, nhưng chúng ta vẫn chưa thực sự tận dụng hết những gì nó đang có. Trong lần này, như tiêu đề đã đề cập, chúng ta sẽ tiến hành tìm hiểu một trong số những thứ quan trọng của Axios mà bạn cần phải biết là Axios Interceptor.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-04-01T08:13:00.000Z
+createdAt: 2023-04-01T08:13:37.000Z
+updatedAt: 2024-09-21T09:26:44.607Z
+views: 1765
+slug: axios-interceptors-tai-sao-chung-ta-can-no
+---
+
+Là một Frontend dev, chắc hẵn các bạn chẳng còn lạ lùng gì với thư viện Axios.
+Cho những bạn chưa biết thì **Axios** _là một thư viện HTTP Client dựa trên Promise dành cho node. js và trình duyệt.
+Nó có tính đẳng hình (tức là cùng codebase có thể chạy trong cả trình duyệt và node. js)._
+
+Mặc dù đã sử dụng nó rất nhiều, nhưng chúng ta vẫn chưa thực sự tận dụng hết những gì nó đang có. Trong lần này, như tiêu đề đã đề cập, chúng ta sẽ tiến hành tìm hiểu một trong số những thứ quan trọng của Axios mà bạn cần phải biết là Axios Interceptor.
+
+## **Axios Interceptor là cái quái gì?**
+
+![axios interceptor visualize](https://res.cloudinary.com/xskill/image/upload/v1680271922/codestus/how-to-use-interceptor-with-react-to-set-auth-header-with-api-request_re1y4r.jpg)
+
+Đây là một chức năng mà axios sẽ đính cho mọi yêu cầu (request) gửi đi từ client hay mọi phản hồi (response) từ máy chủ trả về.
+Bạn có thể sử dụng nó để chuyển đổi, chỉnh sửa dữ liệu trước khi gửi yêu cầu ra đến một máy chủ API, hoặc dữ liệu trả về từ máy chủ API trước khi Axios trả về phản hồi cho bạn.
+
+Đây là 2 loại Axios Interceptor mà chúng ta đang đề cập:
+
+- **Request Interceptor**: — Cho phép bạn viết hoặc thực thi các kịch bản trước khi yêu cầu được gửi đi.
+- **Response Interceptor**: — Cho phép bạn viết hoặc thực thi các kịch bản trước khi phản hồi đến điểm cuối.
+
+## **Cách thức hoạt động của nó?**
+
+Hãy giả sử chúng ta có kịch bản như sau:
+
+- _Kịch bản 1. Trước khi yêu cầu được gửi đi, chúng ta cần đính token cho phép xác thực người dùng hiện tại là ai. (Biết rằng để lấy token ở cookie, chúng ta có thể sử dụng hàm getTokenInCookie())._
+- _Kịch bản 2. Sau khi nhận phản hồi, chúng ta sẽ biến dữ liệu phản hồi trở nên đơn giản hơn _
+
+Sau khi đã nắm được kịch bản chúng ta cần triển khai, giờ thì tiến đến bước đầu tiên thôi nào.
+
+### **Xử lý Request**
+
+Dưới đây là ví dụ về cách bạn có thể sử dụng một yêu cầu (Request):
+
+```js
+axios.interceptors.request.use(
+  function (config) {
+    // Thực hiện kịch bản gì đó trước khi gửi
+    return config;
+  },
+  function (error) {
+    // Thực hiện kịch bản gì đó khi yêu cầu bị lỗi
+    return Promise.reject(error);
+  },
+);
+```
+
+`axios.interceptors.request.use` nhận vào 2 tham số đều là một callback.
+
+- Tham số đầu tiên là `then`: Tương ức với một yêu cầu gửi đi không xuất hiện lỗi
+- Tham số thứ hai là `catch`: Khi xuất hiện lỗi trong quá trình xử lý gửi đi, nó sẽ nắm bắt lỗi đó và gọi callback thứ 2 này.
+
+Bây giờ, sẽ cần chút chỉnh sửa để nó hoạt động đúng với **Kịch bản 1**.
+Ở đây chúng ta biết rằng máy chủ API sẽ nhận `token` ở client gửi đi thông qua `headers` với tập key value pair là `{ Authorization: "token" }`
+
+```js
+axios.interceptors.request.use(
+  function (request) {
+    const token = getTokenInCookie();
+
+    // Đính token vào header mới
+    const newHeaders = {
+      ...request.headers,
+      Authorization: token,
+    };
+
+    // Đính header mới vào lại request trước khi được gửi đi
+    request = {
+      ...request,
+      headers: newHeaders,
+    };
+
+    return request;
+  },
+  function (error) {
+    // Xử lý lỗi
+    return Promise.reject(error);
+  },
+);
+```
+
+Chúng ta vừa hoàn thành **kịch bản 1** bằng cách `override` giá trị `Authorization` trong `headers` của yêu cầu (request) trước khi nó
+được chuyển đi với axios.interceptors.request.
+
+Kịch bản này trong thực tế cũng đang được áp dụng để xác thực các yêu cầu từ phía client trên nhiều hệ thống.
+
+Vậy đối với các phản hồi từ máy chủ (response) thì sao?. Tiếp phần sau nào
+
+### **Xử lý Response**
+
+Để xử lý một response trả về từ máy chủ với axios interceptors, chúng ta thực hiện:
+
+```js
+axios.interceptors.response.use(
+  function (response) {
+    // Thực thi các kịch bản cần thiết ở đây
+    // trước khi response đến điểm cuối
+    return response;
+  },
+  function (error) {
+    // Thực thi đối với các phản hồi bị lỗi
+    // status code: 4xx, 5xx.
+    return Promise.reject(error);
+  },
+);
+```
+
+Tương tự `axios.interceptors.request.use`, `interceptors.response` cũng nhận vào 2 tham số và thực hiện chức năng tương tự.
+
+Bây giờ chúng ta sẽ cần thay đổi một chút ở hàm `response` để khiến dữ liệu phản hồi ở điểm cuối đơn giản hơn so với mặc định.
+
+Từ một phản hồi phức tạp như này, chỉ muốn lấy những dữ liệu cần thiết như `data` và `status`, etc.
+
+```json
+{
+  "data": {
+    "my_data": true
+  },
+  "status": 200,
+  "statusText": "SUCCESS",
+  "headers": {
+    "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+    "content-type": "application/json",
+    "expires": "0",
+    "pragma": "no-cache"
+  },
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "adapter": ["xhr", "http"],
+    "transformRequest": [null],
+    "transformResponse": [null],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": -1,
+    "maxBodyLength": -1,
+    "env": {},
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Authorization": "Bearer ...token..."
+    },
+    "method": "get",
+    "url": "codestus.com"
+  },
+  "request": {}
+}
+```
+
+Chúng ta chỉ cần thay đổi giá trị `return` của hàm như sau:
+
+```js
+axios.interceptors.response.use(
+  function (response) {
+    // Thực thi các kịch bản cần thiết ở đây
+    // trước khi response đến điểm cuối
+    const { data } = response;
+    return {
+      data,
+    }; // ---> { "my_data": true }
+  },
+  function (error) {
+    // Thực thi đối với các phản hồi bị lỗi
+    // status code: 4xx, 5xx.
+    return Promise.reject(error);
+  },
+);
+```
+
+Với những ví dụ nhỏ như này, chúng ta có thể thấy tác dụng của interceptors cực kì hữu ích khi sử dụng thư viện Axios này.
+Ví dụ điển hình trong thực tế chúng ta có thể áp dụng để
+
+- [Xử lý refresh token khi token ban đầu hết hạn](https://codestus.com/posts/refresh-token-trong-axios-nhu-the-nao)
+- Transform data và error
+- ...
+
+Nhìn chung, nó khá đơn giản để tiếp cận, bài viết này mình chỉ đề cập đến một số ví dụ đơn giản.
+Hãy tận dụng sức mạnh của nó trước khi thư viện mới xuất hiện nhé :))))))))
+      

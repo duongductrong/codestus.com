@@ -1,0 +1,196 @@
+---
+title: Xây dựng chức năng kéo thả File trong React
+description: Trong bài viết này, chúng ta sẽ đi từng bước một  xây dựng một bản demo về component Drag-and-drop file upload trong React, tận dụng TypeScript để có type-safe
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-10-11T11:46:45.000Z
+createdAt: 2023-10-11T11:46:45.000Z
+updatedAt: 2024-06-03T15:50:20.620Z
+views: 100
+slug: xay-dung-chuc-nang-keo-tha-file-trong-react
+---
+
+**File Upload** là một tính tính năng không thể thiếu trong nhiều web app hiện nay, quá trình thao tác tương đối thân thiện và tốt cho trải nghiệm của người dùng. Một cách để cải thiện quy trình này tốt hơn là triển khai giao diện kéo và thả, cho phép người dụng chọn các file cần upload từ máy người dùng và kéo thả vào ứng dụng để tải lên.
+
+Trong bài viết này, chúng ta sẽ đi từng bước một  xây dựng một bản demo về component Drag-and-drop file upload trong React, tận dụng TypeScript để có type-safe. Chúng ta sẽ không dựa vào bất kì thư viện nào bên ngoài, nội dung bài viết này để cung cấp cho bạn kiến thức cơ bản, tự do tạo và tùy chỉnh giải pháp cho phù hợp với nhu cầu cụ thể của bạn.
+
+## Hiểu về HTML5 Drag and Drop API
+
+**HTML5 Drag and Drop API** cho phép các nhà phát triển định nghĩa các phần tử có thể “kéo” (draggable) và tạo ra các vùng “thả” (dropped) cho các phần tử đang được kéo (draggable). Chức năng này được cung cấp bởi **Web Browser** và bạn không phải cài bất cứ thư viện ngoài nào. Dưới đây là các sự kiện và phương pháp chính mà chúng ta sẽ sử dụng để triển khai tính năng của mình:
+
+- **dragover**: Sự kiện này được kích hoạt khi một mục được “kéo” (draggable) đang được di chuyển qua mục tiêu “thả” (drop) hợp lệ. Theo mặc định, các phần tử khác sẽ không thể là mục tiêu để thả cho các dữ liệu/phần tử đang được kéo. Để cho phép “thả”, chúng ta phải ngăn chặn việc xử lý phần tử mặc định bằng cách sử dụng `event.preventDefault()` trong khi xử lý `onDragOver`
+- **drop:** Sự kiện này được kích hoạt khi một mục được “kéo” được thả vào mục tiêu “thả” hợp lệ.
+- **DataTransfer object:** DataTransfer được sử dụng để giữ dữ liệu đang được kéo trong quá trình kéo và thả. Đối tượng này có sẵn dưới dạng `event.dataTransfer` trong tất cả các sự kiện kéo.
+
+Đây là lớp xử lý của bất kỳ thao tác kéo và thả nào chúng ta nghĩ tới. Trong phần tiếp theo, chúng ta sẽ xem cách sử dụng những thứ này để tạo thành phần kéo và thả file upload trong React.
+
+## Triển khai Drag-and-Drop Component
+
+Để tạo thành phần kéo và thả, chúng ta sẽ tạo một thành phần mới có tên FileDrop. Hãy bắt đầu với việc xác định các sự kiện thả cần thiết.
+
+```tsx
+import { DragEvent } from 'react';
+
+export function FileDrop() {
+  // Define the event handlers
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      // Here we'll handle the dropped files
+  };
+
+  return (
+      <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+      >
+          Drag and drop files here
+      </div>
+  );
+}
+```
+
+Chúng ta sử dụng `event.preventDefault()` trong mỗi trình xử lý này để ngăn hành vi mặc định của trình duyệt. `handleDrop` function sẽ là phần xử lý cuối cùng sau khi file được thả.
+
+Cuối cùng, chúng ta sẽ thêm một số style để cung cấp phản hồi trực quan khi người dùng kéo tệp qua vùng thả.
+
+```tsx
+import { DragEvent, useState } from 'react';
+
+export function FileDrop() {
+  const [dragIsOver, setDragIsOver] = useState(false);
+
+  // Define the event handlers
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragIsOver(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragIsOver(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragIsOver(false);
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50px',
+        width: '300px',
+        border: '1px dotted',
+        backgroundColor: dragIsOver ? 'lightgray' : 'white',
+      }}
+    >
+      Drag and drop some files here
+    </div>
+  );
+}
+```
+
+Ở đây, chúng ta sử dụng một phần trạng thái `dragIsOver` để xác định xem một tệp hiện có đang được kéo qua vùng thả hay không. Trạng thái này được sử dụng để thay đổi màu nền của vùng thả. Kết quả là một khu vực tải lên tập tin rất cơ bản.
+
+![Drag & Drop](https://res.cloudinary.com/xskill/image/upload/v1696959007/codestus/image_cr5tfb.png)
+
+## Đọc nội dung files
+
+Với trình xử lý sự kiện kéo và thả đã sẵn sàng, giờ đây chúng ta cần xử lý các tệp mà người dùng thả. Để thực hiện việc này, chúng ta sẽ sử dụng **API FileReader HTML5**. Hãy cập nhật hàm `handleDrop` để đọc các file được thả.
+
+```tsx
+import { DragEvent, useState } from 'react';
+
+export function FileDrop() {
+  const [isOver, setIsOver] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+
+  // Define the event handlers
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsOver(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsOver(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsOver(false);
+
+    // Fetch the files
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    setFiles(droppedFiles);
+
+    // Use FileReader to read file content
+    droppedFiles.forEach((file) => {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        console.log(reader.result);
+      };
+
+      reader.onerror = () => {
+        console.error('There was an issue reading the file.');
+      };
+
+      reader.readAsDataURL(file);
+      return reader;
+    });
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50px',
+        width: '300px',
+        border: '1px dotted',
+        backgroundColor: isOver ? 'lightgray' : 'white',
+      }}
+    >
+      Drag and drop some files here
+    </div>
+  );
+}
+```
+
+Trong hàm `handleDrop`, trước tiên chúng ta tìm nạp các tệp được thả từ `event.dataTransfer.files`. Chúng tả chuyển đổi nó thành một mảng để dễ xử lý.
+
+Sau đó, chúng ta đọc lần lượt các nội dung files với `FileReader`. Phương thức [FileReader.readAsDataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL) được sử dụng để đọc nội dung của tệp được chỉ định. Khi kết thúc quá trình đọc, sự kiện `onloadend` sẽ được gọi và trả về nội dung file trong `reader.result`. Trong trường hợp cần nội dung văn bản của file, chúng ta có thể sử dụng phương thức `FileReader.readAsText` để thay thế. 
+
+Ở đây, chúng ta chỉ ghi nội dung tệp vào `console` tab của `browser`. Trong thực tế, bạn có thể gửi dữ liệu này đến máy chủ hoặc sử dụng nó. Chúng tả cũng đang lưu trữ các tệp được thả ở trạng thái của thành phần để có thể sử dụng tiếp.
+
+## Kết luận
+
+Trong bài viết lần này, chúng ta đã biết cơ bản về cách triển khai tính năng tải tệp lên kéo và thả trong React mà không cần sự trợ giúp của các thư viện bên ngoài. Chúng ta bắt đầu với việc thiết lập các sự kiện kéo và thả cơ bản, sau đó chuyển sang đọc nội dung của các file được thả vào vùng thả.
+
+## References:
+
+- [MDN: Drag and Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API)
+- [MDN: FileReader API](https://developer.mozilla.org/en-US/docs/Web/API/FileReader)
+- [MDN: FileReader.readAsDataURL](https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL)
+- [MDN: FileReader.readAsText](https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsText)
+      

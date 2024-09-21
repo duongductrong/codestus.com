@@ -1,0 +1,182 @@
+---
+title: Typescript Event Types trong React
+description: Đôi khi, chúng ta không muốn gõ lại toàn bộ `type` , chỉ type chúng ta cần. Để trích xuất đúng `event type`, bạn sẽ cần múa đôi chút.
+tags: Typescript
+author: Trọng Dương Đức
+publishAt: 2024-02-14T01:52:00.000Z
+createdAt: 2024-02-14T01:52:28.000Z
+updatedAt: 2024-06-03T16:49:05.373Z
+views: 121
+slug: typescript-event-types-trong-react
+---
+
+## Vấn đề
+
+Khi bạn làm việc với Typescript trong React, chắc hẳn bạn sẽ thường bắt gặp kiểu lỗi như thế này:
+
+```jsx
+const onChange = (e) => {}
+// Parameter 'e' implicitly has an 'any' type.
+
+<input onChange={onChange} />
+```
+
+Không phải lúc nào cũng biết rõ kiểu `type` chúng ta nên để cho `e` bên trong hàm `onChange` là gì.
+
+Nó cũng xảy ra tương tự với `onClick`, `onSubmit`, etc… Nhưng may mắn thay là chúng ta vẫn có một vài cách giải quyết
+
+## Giải pháp 1: Hover, Then Get Type The Handler
+
+Đối với giải pháp này, chúng ta chỉ việc di chuyện vào thuộc tính, đợi nó hiển thị type (trên vscode) và lấy nóooo.
+
+```jsx
+<input onChange={onChange} />;
+//        ^
+//        |
+//        -> (property) React.InputHTMLAttributes<HTMLInputElement>.onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
+```
+
+Sau đó, bạn có thể thấy nó hiển thị `type` thật dài ngoằn như phía trên
+
+```jsx
+React.InputHTMLAttributes<HTMLInputElement>.onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined
+```
+
+Đây là phần chúng ta đang muốn lấy: `React.ChangeEventHandler<HTMLInputElement>`
+
+Chúng ta có thể sử dụng no1 để nhập vào hàm `onChange` của mình như thế này:
+
+```jsx
+import React from "react";
+ 
+const onChange: React.ChangeEventHandler<
+  HTMLInputElement
+> = (e) => {
+  console.log(e);
+};
+ 
+<input onChange={onChange} />;
+```
+
+## Giải pháp 2: Inline A Function
+
+Đôi khi, chúng ta không muốn gõ lại toàn bộ `type` , chỉ type chúng ta cần. Để trích xuất đúng `event type`, bạn sẽ cần múa đôi chút.
+
+Đầu tiên, bạn tạo một `inline function` bên trong `onChange`
+
+```jsx
+<input onChange={(e) => {}} />
+```
+
+Bây giờ, bạn có thể di chuột vào `(e)` và lấy chính xác `event type` mình cần .
+
+```jsx
+<input onChange={(e) => {}} />
+//                ^
+//                |
+//                -> (parameter) e: React.ChangeEvent<HTMLInputElement>
+```
+
+Cuối cùng, bạn có thể sao chép nó và sử dụng để nhập hàm `onChange` của mình:
+
+```jsx
+import React from "react";
+ 
+const onChange = (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  console.log(e);
+};
+ 
+<input onChange={onChange} />;
+```
+
+Tuy nhiên, điều này vẫn có vẻ chậm. Có cách nào tốt hơn?
+
+## Giải pháp 3: Sử dụng `React.ComponentProps`
+
+Là một cách để loại bỏ các bước kiểm tra type và xử lý nó một cách hơi thủ công. Sẽ thật tuyệt khi nói “Tôi muốn `type` của trình xử lý này” và để **TypeScript** tìm ra phần còn lại.
+
+```jsx
+import React from "react";
+ 
+const onChange: React.ComponentProps<"input">["onChange"] =
+  (e) => {
+    console.log(e);
+  };
+ 
+<input onChange={onChange} />;
+```
+
+Bằng cách truyền `input` vào trong `ComponentProps`, chúng ta đang nói chung TS biết rằng chúng ta đang muốn `props` của phần tử input.
+
+Và, chúng ta sẽ trích xuất thuộc tính `onChange` ra từ những `props` đó của `input`.
+
+## Giải pháp 4: Sử dụng Type Helper `EventFor`
+
+Đây mới là phần hay, nhưng chúng ta vẫn phải quay lại việc phải gõ hàm `onChange`.
+
+Điều gì sẽ xảy ra nếu chúng ta chỉ muốn trích xuất `type` từ `events`?
+
+Chúng ta kết hợp việc sử dụng `Parameters`, `NonNullable` and lấy `indexed` của type như sau:
+
+```jsx
+import React from "react";
+ 
+const onChange = (
+  e: Parameters<
+    NonNullable<React.ComponentProps<"input">["onChange"]>
+  >[0]
+) => {};
+```
+
+Rườm rà quá rồi phải không,
+
+Thay vào đó, hãy tưởng tượng chúng ta gọi một Type helper như `EventFor`
+
+```jsx
+const onChange = (e: EventFrom<"input", "onChange">) => {
+  console.log(e);
+};
+ 
+<input onChange={onChange} />;
+```
+
+Cái này sẽ lấy kiểu phần tử và kiểu xử lý rồi trả về kiểu sự kiện. Bạn sẽ được gợi ý các tham số và không cần phải gõ lại các `type`
+
+Vấn đề là bạn cần giữ một trình trợ giúp loại tương đối lớn trong cơ sở mã của mình như sau:
+
+```jsx
+type GetEventHandlers<
+  T extends keyof JSX.IntrinsicElements
+> = Extract<keyof JSX.IntrinsicElements[T], `on${string}`>;
+ 
+/**
+ * Provides the event type for a given element and handler.
+ *
+ * @example
+ *
+ * type MyEvent = EventFor<"input", "onChange">;
+ */
+export type EventFor<
+  TElement extends keyof JSX.IntrinsicElements,
+  THandler extends GetEventHandlers<TElement>
+> = JSX.IntrinsicElements[TElement][THandler] extends
+  | ((e: infer TEvent) => any)
+  | undefined
+  ? TEvent
+  : never;
+```
+
+## Giải pháp nào chúng ta nên sử dụng?
+
+Theo **Matt Pocock**, anh ấy đề cập đến giải pháp sử dụng `EventFor`. Bởi vì một số lý do sau:
+
+- Đó là nơi duy nhất bạn có thể đến để lấy loại sự kiện cho bất kỳ phần tử và trình xử lý nào
+- Bạn nhận được tự động hoàn thành trên các loại phần tử và trình xử lý.\
+  Tuy nhiên, nếu bạn không muốn có một trình trợ giúp kiểu, thì giải pháp `ComponentProps` là một giải pháp thay thế tuyệt vời.
+
+Mình đã tham khảo:
+
+- https://www.totaltypescript.com/event-types-in-react-and-typescript
+      

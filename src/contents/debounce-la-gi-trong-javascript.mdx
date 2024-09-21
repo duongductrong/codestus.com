@@ -1,0 +1,72 @@
+---
+title: Debounce là gì trong javascript?
+description: Các sự kiện như scroll, movemouse, click hao tốn  của chúng ta rất nhiều tài nguyên mỗi khi nó được gọi để thực hiện một hành động. Sử dụng `debounce` nhằm mục đích giảm hao tổn tài nguyên bằng cách ngăn một chức năng được gọi nhiều lần liên tiếp.
+tags: React,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-03-21T02:13:39.000Z
+createdAt: 2021-03-21T02:13:39.000Z
+updatedAt: 2024-06-03T21:57:44.973Z
+views: 18427
+slug: debounce-la-gi-trong-javascript
+---
+
+`debounce()` là kỹ thuật buộc một hàm phải đợi một khoảng thời gian nhất định trước khi thực thi. Trong khoản thời gian đợi, mọi tác động sẽ đều bị bỏ qua và chỉ nhận duy nhất 1 hành động diễn ra trong thời gian chúng ta định trước.
+
+![](https://res.cloudinary.com/xskill/image/upload/v1616293112/codestus/jqqvb87jz4syhq7bdova.png)
+
+Các sự kiện như `scroll`, `movemouse`, `click` hao tốn  của chúng ta rất nhiều tài nguyên mỗi khi nó được gọi để thực hiện một hành động. Sử dụng `debounce` nhằm mục đích giảm hao tổn tài nguyên bằng cách ngăn một chức năng được gọi nhiều lần liên tiếp.
+
+## Thực hiện
+`debounce` có bản chất là một **Higher Order Function**. Lưu trữ thời gian nhận sự kiện so ở hàm ngoài với thời gian xác định gọi sự kiện sau khi kết thúc và trả về một hàm con bên trong để so sánh giữa thời gian gọi sự kiện và khoảng thời gian thực để gọi hàm thực thi. 
+
+Nó sẽ có hình dạng như thế này
+
+```js
+function debounce(fn, ms) {
+	let timer;
+	
+	return function() {
+		// Nhận các đối số
+		const args = arguments;
+		const context = this;
+		
+		if(timer) clearTimeout(timer);
+		
+		timer = setTimeout(() => {
+			fn.apply(context, args);
+		}, ms)
+	}
+}
+```
+
+Trong đó,
+- fn: Là hàm được thực thi
+- ms: Khoảng thời gian giới hạn
+
+Để biết chính xác nó đã hoạt động, chúng ta thử nghiệm một vài trò nhỏ xem sao
+
+```js
+
+document.querySelector('.button').addEventListener("click", debounce((event) => {
+	console.log(event.target)
+}, 1000));
+
+```
+
+## Sử dụng thư viện lodash
+Bên trên chúng ta đã biết sơ qua về cách vận hành là logic để thực hiện kỹ thuật `debounce`. Bên cạnh đó, chúng ta cũng có thể sử dụng các thư viện nổi tiếng bên ngoài như **lodash** để sử dụng các kỹ thuật này. 
+
+Một lời khuyên nhỏ các bạn cũng nên sử dụng các thư viện này vì họ đã hỗ trợ nó tốt hơn cách chúng ta viết lại nó. Tất nhiên, sử dụng thư viện không có nghĩa chúng ta không có kiến thức về nó. Một điều nữa để mang tính thống nhất cho dự án, dễ sử dụng và làm việc nhóm, chúng ta cũng nên sử dụng thư viện thay vì viết lại những cái đã có
+
+Cách sử dụng trong lodash cũng hết sức đơn giản
+
+```js
+
+element.addEventListener("click", _.debounce(() => {
+	console.log("execute me");
+}, 500))
+
+```
+
+Không khác gì mấy so với chúng ta
+      

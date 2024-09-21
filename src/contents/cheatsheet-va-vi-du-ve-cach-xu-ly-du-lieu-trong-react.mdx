@@ -1,0 +1,114 @@
+---
+title: Cheatsheet và ví dụ về cách xử lý dữ liệu trong React
+description: Có nhiều cách để tìm nạp dữ liệu từ API bên ngoài trong React, nhưng bạn nên sử dụng cách nào cho các ứng dụng của mình vào năm 2021?
+Trong bài viết này, chúng ta hãy xem lại 5 cách phổ biến được xử dụng để xử lý tìm nạp dữ liệu với React thực hiện các yêu cầu HTTP đến các REST API
+tags: HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-21T15:46:05.000Z
+createdAt: 2021-02-21T15:46:05.000Z
+updatedAt: 2024-06-01T21:33:54.019Z
+views: 5211
+slug: cheatsheet-va-vi-du-ve-cach-xu-ly-du-lieu-trong-react
+---
+
+Có nhiều cách để tìm nạp dữ liệu từ API bên ngoài trong React, nhưng bạn nên sử dụng cách nào cho các ứng dụng của mình vào năm 2021?
+
+Trong bài viết này, chúng ta hãy xem lại 5 cách phổ biến được xử dụng để xử lý tìm nạp dữ liệu với React thực hiện các yêu cầu HTTP đến các REST API
+
+Chúng ta sẽ không chỉ đề cập đến cách tìm nạp dữ liệu. Phải thực hiện, xử lý tốt nhất trạng thái tải và lỗi khi tìm nạp dữ liệu của chúng ta.
+
+Nào, cùng bắt đầu thôi.
+
+> Đối với tất cả các ví dụ này, chúng ta sẽ sử dụng một `endpoint` từ API JSON phổ biến, hoặc bạn vẫn có thể sử dụng API của riêng mình mà bạn đã tạo (chẳng hạn như sử dụng mongodb và expressjs để xây dựng api, lưu trữ) hoặc bất kỳ API công khai nào khác.
+
+## 1. Sử dụng Fetch API
+Cách tìm nạp dễ nhất chúng ta có thể sử dụng trong React là sử dụng phương thức `fetch` mặc định mà javascript đã cung cấp.
+
+`fetch` là một công cụ được tích hợp vào hầu hết các trình duyệt hiện đại, có thể truy cập thông quá đối tượng `window` của trình duyệt bằng `window.fetch()` và cho phép chúng ta thực hiện các yêu cầu HTTP một cách dễ dàng, `fetch` trả về một Promise.
+
+[Cùng tìm hiểu về `Promise`](https://codestus.com/posts/cung-tim-hieu-ve-promise-va-asyncawait-trong-javascript?page_comment=0) nếu  bạn chưa nghe qua thuật ngữ này, còn bây giờ hãy quay lại bài viết của chúng ta.
+
+Để thực hiện một yêu cầu lấy dữ liệu (GET) với `fetch`. Chúng ta chỉ cần điền đường dẫn API vào tham số thứ nhất của `fetch`.
+
+```js
+fetch("API_ENPOINT")
+```
+
+Chúng ta sẽ thực hiện yêu cầu này, trong một React Component bằng cách đợi đối tượng component đã được `mounted` sẽ thực hiện gọi `fetch` bên trong đó
+
+Để làm như vậy, chúng ta thực hiện yêu cầu của mình trong hook useEffect đối với `functional component`, componentDidMount() đối với `class component` và chúng ta phải đảm bảo cung cấp một mảng phụ thuộc trống làm đối số thứ hai (dành cho functional component) để yêu cầu của chúng tôi chỉ được thực hiện một lần.
+
+Trong lần gọi lại .then () đầu tiên, chúng ta kiểm tra xem phản hồi (response.ok). Nếu vậy, chúng ta trả về phản hồi của mình để chuyển cho phần tiếp theo, sau đó gọi lại dưới dạng dữ liệu JSON, vì đó là dữ liệu mà chúng ta sẽ lấy lại từ API người dùng ngẫu nhiên của mình.
+
+```jsx
+
+function App() {
+	const [data, setData] = useState([]);
+	
+	useEffect(() => {
+		// API_ENDPOINT là bất kỳ đường dẫn API nào trả về dạng JSON
+		fetch("API_ENDPOINT")
+			.then(response => {
+				// Kiểm tra trạng thái phản hồi
+				if(!response.ok) {
+					throw new Error(response);
+				}
+				
+				// Phản hồi không lỗi, trả về JSON cho then tiếp theo lấy dữ liệu
+				return response.json();
+			})
+			.then(data => {
+				// Lấy dữ liệu và setState cho data
+				setData(data);
+			})
+			.catch(err => alert("Có lỗi"))
+			.finally(() => {
+				console.log("End")
+			})
+	}, [])
+	
+	return <div>Demo</demo>
+}
+```
+
+Như đoạn mã trên, chúng ta sẽ gọi hàm `fetch` bên trong useEffect hook chỉ một lần duy nhất (dependencies [] hiểu nhanh nó chỉ chạy lần đầu tiên) sau khi component đã render. 
+
+Trong đó, chúng ta thực hiện gọi đến `API_ENDPOINT` để lấy dữ liệu, trong quá trình xử lý nếu không gặp vấn đề sẽ chuyển đến `then` đầu tiên để kiểm tra trạng thái phản hồi và trả về json cho `then` tiếp theo để `setState` cho biến data lấy dữ liệu render lên giao diện. Ngược lại, nếu gặp lỗi hàm `catch` sẽ được gọi và hiển thị thông báo. Riêng `finally`, hàm này sẽ được kích hoạt sau khi `then` và `catch` đã chạy xong, chúng ta có thể tận dụng nó để làm trạng thái chờ `loading` khiến trải nghiệm người dùng tốt hơn.
+
+Sử dụng `fetch` rất tiện lợi cho dự án. Nhưng với quy mô lớn hơn, chúng ta có thể cân nhắc sử dụng một thư viện HTTP khác thay thế như `axios` được đề cập ngay bên dưới.
+
+## 2. Sử dụng thư viện Axios
+Cách tiếp cận thứ hai để thực hiện các yêu cầu với React là sử dụng thư viện `axios`.
+
+Để sử dụng nó, chúng ta cần cài đặt nó thông qua `npm`
+
+```terminal
+npm install axios
+```
+
+Sau đó chúng ta sẽ cần `import` vào đầu trang của component.
+
+Những gì `axios` cho phép chúng ta sử dụng có cú pháp giống như `fetch` đã đề cập và chúng đều trả về một `Promise`, nhưng thay vì sử dụng `then` đầu tiên để kiểm tra phản hồi và trả về `json` thì `axios` sẽ hỗ trợ chúng ta giải quyết điều đó.
+
+Ngoài ra, nó cho phép chúng ta lấy dữ liệu `json` phản hồi bằng việc truy cập `response.data`.
+
+Điều tiện lợi khi sử dụng `axios` là nó có cú pháp ngắn hơn nhiều so với `fetch` và bao gồm nhiều cài đặt, công cụ, tính năng hỗ trợ tốt hơn mà `fetch` không có. [Chi tiết về axios](https://github.com/axios/axios)
+
+Tất cả những lý do này nói lên tại sao nó trở thành thư  viện HTTP tốt nhất dành cho các nhà phát triển React.
+![Ví dụ axios](https://res.cloudinary.com/xskill/image/upload/v1613924784/codestus/cffbirsmmmkgyg9hospx.gif)
+
+## 3. Sử dụng async/await, try catch thay thế cho Promise.then, Promise.catch
+Trong phiên bản **ES7**, nó đã được đề cập để giải quyết vấn đề của promise bằng cách sử dụng `async/await`.
+
+Lợi ích của nó giúp chúng ta loại bỏ thao tác rườm rà `.then`, `.catch` và `.finally` callbacks và lấy dữ liệu, bắt lỗi cũng đơn giản hơn.
+
+Nói cách khác, chúng ta không phải dựa vào cách lệnh gọi lai khi chúng ta sử dụng `async/await`
+
+![Ví dụ async/await](https://res.cloudinary.com/xskill/image/upload/v1613925025/codestus/vodqpaswdi8lmukzfgpt.gif)
+
+Trong ví dụ này, chúng ta đã tạo một hàm `async` gọi là `getData`. Và gọi nó bên trong useEffect như vậy là có thể lấy dữ liệu từ API như mong muốn.
+
+## Kết luận
+- Như vậy là chúng ta đã có thể thực hiện tìm nạp dữ liệu trong react, nó không quá khó để thực hiện. Hãy xem chi tiết và nếu có vấn đề bạn có thể bình luận bên dưới nhé. 
+- Bạn có thể [tìm hiểu thêm về Promise và async/await](https://codestus.com/posts/cung-tim-hieu-ve-promise-va-asyncawait-trong-javascript) nếu nó còn quá xa lạ
+      

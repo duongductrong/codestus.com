@@ -1,0 +1,106 @@
+---
+title: Một số mẹo và kỹ thuật trong JavaScript nên biết (Phần 1)
+description: Trong quá trình phát triển dự án to hay nhỏ, có thể code không đủ để giải quyết hết các vấn đề, từ đó, sinh ra một số mẹo, kỹ thuật để giúp đỡ bạn trong quá trình code tốt hơn.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-01-26T06:33:34.000Z
+createdAt: 2021-01-26T06:33:34.000Z
+updatedAt: 2024-05-16T16:26:24.921Z
+views: 4873
+slug: mot-so-meo-va-ky-thuat-trong-javascript-nen-biet-phan-1
+---
+
+Trong quá trình phát triển dự án to hay nhỏ, có thể code không đủ để giải quyết hết các vấn đề, từ đó, sinh ra một số mẹo, kỹ thuật để giúp đỡ bạn trong quá trình code tốt hơn.
+
+## Required Function Parameters (Tham số đầu vào bắt buộc cho hàm)
+Các tham số đầu vào của hàm đã đặt tên sẽ được khởi tạo với giá trị mặc định nếu không có giá trị hoặc giá trị là **`undefined`** sẽ đều được thông qua. Chúng ta có thể tận dụng những ưu điểm này và tạo ra một chức năm kiểm duyệt, thông báo lỗi và gán nó làm giá trị mặc định cho các thông số lỗi.
+
+```js
+/**
+* Cách 1:
+*/
+
+// Function throw error
+const required = () => {
+	throw new TypeError('Missing required parameters(s)')
+}
+
+const foo = (bar = required()) => console.log(bar);
+
+foo(3) // console 3
+foo() // Throw error
+
+/**
+* Cách 2
+*/
+
+// Define throw error
+Object.defineProperty(self, "required", {
+	get() {
+		throw new TypeError('Missing required parameters(s)')
+	}
+})
+
+const foo = (bar = required) => console.log(bar)
+
+foo(3) // console 3
+foo() // Throw error
+
+```
+
+## Effective Data Validation (Xác thực dữ liệu)
+Tại một số thời điểm, chúng ta cần xác thực dữ liệu bên trong các phương thức. Và chúng ta có thể dụng cách bên dưới
+```js
+// This function to validate and submit message
+const throwError = (fnConditionToThrow, message) => {
+	if(fnConditionToThrow) {
+		throw new Error(message);
+	}
+}
+
+// This function to get a type of variable
+const getVariableType = variable => {
+	let toStr = Object.prototype.toString.call(variable);
+	toStr = toStr.substring(1, toStr.length - 1)
+	
+	return toStr.split(" ")[1].toLowerCase();
+}
+
+// Main function
+const createStore = initialState => {
+	// Verify that initialState props
+	throwError(!initialState, `Expected 'initialState' to be defined`);
+	
+	// Verify types
+	throwError(getVariableType(initialState) !== "object", `No regulations`)
+}
+```
+
+## Cải thiện khả năng code bất đồng bộ với async/await
+**Async/await l**à một cách mới so với **Promise** để xử lý những trường hợp bất đồng bộ trong mã nguồn. Và nó đơn giản hơn nhiều so với cách viết của Promise. 
+
+Chúng ta có thể sử dụng **async/await** thay cho cách  viết **Promise** sẽ dễ hiểu hơn, tăng khả năng **teamwork**.
+
+Thông thường chúng ta sẽ sử dụng 
+```js
+const getUser = (username) => {
+	return new Promise( (resolve, reject) => fetch(`/api/user/${username}`).then(res => res.json()).then(data => resolve(data)) )
+}
+
+getUser("codestus.com").then(response => {
+	console.log(response)
+})
+
+```
+
+Thay vào đó khi sử dụng **async/await** để xử lý trường hợp này sẽ đơn giản, dễ hiểu, ngắn gọn hơn
+```js
+const getUser = async (username) => await (await fetch(`/api/user/${username}`)).json()
+
+console.log(await getUser('codestus.com'))
+```
+
+Theo cách này, chúng ta sẽ **dễ dàng đọc code** và **debug** code hơn so với **sử dụng Promise** và **then** nhiều lần.
+
+Chúng ta sẽ tiếp tục tìm hiểu Một số mẹo và kỹ thuật vào **phần 2** trong lần tới nhé.
+      

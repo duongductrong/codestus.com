@@ -1,0 +1,174 @@
+---
+title: Một thủ thuật đơn giản để tối ưu quá trình kết xuất trong React
+description: Chúng được gọi là các đối tượng mô tả giao diện người dùng. Chúng mô tả giao diện người dùng mà React sẽ tạo ra trên DOM.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2022-02-14T08:54:00.000Z
+createdAt: 2022-02-14T08:54:22.000Z
+updatedAt: 2024-05-27T08:54:36.287Z
+views: 5374
+slug: mot-thu-thuat-don-gian-de-toi-uu-qua-trinh-ket-xuat-trong-react
+---
+
+```jsx
+// https://codesandbox.io/s/react-codesandbox-forked-ioy85?file=/src/index.js
+
+import * as React from 'react'
+import ReactDOM from 'react-dom'
+
+function Log({ label }) {
+	console.log(`${label} render`);
+
+	return null;
+}
+
+function Counter() {
+	const [count, setCount] = React.useState(0);
+
+	return (
+		<React.Fragment>
+			<button onClick={() => setCount(c => c + 1)}>Increment {count}</button>
+			<Log label="counter" />
+		</React.Fragment>
+	)
+}
+```
+
+Khi đoạn code trên được chạy, `“counter render”` sẽ dược gọi và hiển thị trên mục `console` với mỗi lần ta ấn `Increment` . Điều này xảy ra bởi vì mỗi khi nút `Increment` được ấn, trạng thái `count` sẽ bị thay đổi và React cần làm mới phần tử để hiển thị dữ liệu đã được thay đổi khi ta cập nhật trạng thái `count` với `setCount`. Đồng nghĩa với việc, khi nhận được các phần tử mới đó, nó sẽ hiển thị và chuyển chúng vào DOM.
+
+Đây là nơi mọi thứ trở nên thú vị. Chúng ta sẽ xem xét thực tế rằng `<Log label="...." />` sẽ không bao giờ thay đổi giữa các lần kết xuất lại của React. Nó cố định và không hề thay đổi. Bây giờ chúng ta hãy làm lại vấn đề trên với một cách triển khai tốt hơn?
+
+```jsx
+import * as React from 'react'
+import ReactDOM from 'react-dom'
+
+function Log({ label }) {
+	console.log(`${label} render`);
+
+	return null;
+}
+
+function Counter({ logger, ...props }) {
+	const [count, setCount] = React.useState(0);
+
+	return (
+		<React.Fragment>
+			<button onClick={() => setCount(c => c + 1)}>Increment {count}</button>
+			{ logger }
+		</React.Fragment>
+	)
+}
+
+....
+ReactDOM.render(<Counter logger={<Log label="Counter" />} />, ...);
+....  
+```
+
+Mọi thứ được cải thiện hơn đúng không?. Chúng ta có được lần hiển thị `Counter render` đầu tiên và điều bất ngờ là chúng k xuất hiện lại khi chúng ta ấn `Increment` sau đó?.
+
+## Chuyện gì đang diễn ra?
+
+Vậy điều gì gây ra sự khác biệt này?. Nó liên quan đến các phần tử React. Tại sao bạn không nghỉ ngơi nhanh chóng đọc thêm về **[“What is JSX”](https://kentcdodds.com/blog/what-is-jsx)** trước khi chúng ta tiếp tục để biết thêm về mối liên hệ giữa những điều trên hoặc cứ tiếp tục nhé.
+
+Khi React gọi `<Counter />` chúng ta sẽ nhận được một thứ tương tự như sau:
+
+```jsx
+const Counter = {
+	type: "div",
+	props: {
+		children: [
+      {
+        type: 'button',
+        props: {
+          onClick: increment, // this is the click handler function
+          children: 'Increment 0',
+        },
+      },
+      {
+        type: Log, // this is our logger component function
+        props: {
+          label: 'counter',
+        },
+      },
+    ],
+	}
+} 
+```
+
+Chúng được gọi là các đối tượng mô tả giao diện người dùng. Chúng mô tả giao diện người dùng mà React sẽ tạo ra trên **DOM**. Tiếp theo, khi chúng ta ấn `click` vào `<button>` các thay đổi sẽ hoạt động
+
+```jsx
+const Counter = {
+	type: "div",
+	props: {
+		children: [
+      {
+        type: 'button',
+        props: {
+          onClick: increment, // [+] changes
+          children: 'Increment 1', // [+] changes
+        },
+      },
+      {
+        type: Log,
+        props: {
+          label: 'counter',
+        },
+      },
+    ],
+	}
+} 
+```
+
+Có thể nói, những thay đổi duy nhất xảy ra ở đây là sự kiện `onClick` và `props children` khi chúng ta thay đổi trạng thái. Tuy nhiên, toàn bộ điều này hoàn toàn mới, kể từ lần đầu tiên sử dụng React, chúng ta đã tạo ra những đối tượng này hoàn toàn mới trên mỗi lần kết xuất (*May mắn rằng, các trình duyệt dành cho thiết bị di động cũng khá nhanh, vì vậy đó chưa bao giờ là một vấn đề về hiệu suất đáng kể, có thể coi là thế*).
+
+Thực sự có thể dễ dàng hơn khi biết được các phần tử trong `Tree React Elements` giữa mỗi lần hiển thị, ta có thể thấy được những phần tử **“Không”** thay đổi giữa các lần kết xuất lại đó.
+
+```jsx
+const Counter = {
+	type: "div", // [---] keep
+	props: {
+		children: [
+      {
+        type: 'button', // [---] keep
+        props: {
+          onClick: increment,s
+          children: 'Increment 1',
+        },
+      },
+      {
+        type: Log, // [---] keep
+        props: {
+          label: 'counter', // [---] keep
+        },
+      },
+    ],
+	}
+} 
+```
+
+Tất cả các loại phần tử đều giống nhau và  điển hình là `label` props trong phần tử `<Log />` không hề thay đổi. Tuy nhiên, bản thân của mỗi `props` sẽ thay đổi sau mỗi lần kết xuất lại. Mặc dù các thuộc tính của `new props` giống nhau so với những các thuộc tính của `props` trước đó.
+
+**Chúng ta có thể nhận ra điểm mấu chốt ở đây rằng.** Bởi vì khi giá trị `props` của `<Log />` thay đổi, React sẽ cần gọi lại hàm `Log` để đảm bảo rằng nó không nhận được bất kỳ JSX mới nào dựa trên `props` mới. **Nhưng điều gì sẽ xảy ra nếu chúng ta có thể ngăn các `props` thay đổi giữa các lần hiển thị?** Nếu `props` không thay đổi, thì React sẽ biết rằng chúng không ảnh hưởng và không cần thiết phải gọi lại và thay đổi cấu trúc, thông tin JSX. Đây chính xác là những gì React đã được viết **[tại đây](https://github.com/facebook/react/blob/d420d2ccb6223a66d5e8fe824ac0d31ed5bf87a1/packages/react-reconciler/src/ReactFiberBeginWork.js#L2571-L2575)** và theo cách đó kể từ khi React lần đầu tiên ra đời.
+
+Nhưng đây cũng là vấn đề là [**React sẽ tạo ra một nhánh `props` mới mỗi lần chúng ta tạo một ra  phần tử React.](https://github.com/facebook/react/blob/745baf2e061bdb7a07b511fa6fd8c1c5e8106313/packages/react/src/ReactElement.js#L177)** Vậy làm cách nào để đảm bảo rằng đối tượng `prop` không thay đổi giữa các lần hiển thị? Hy vọng rằng bây giờ bạn đã và hiểu tại sao ví dụ thứ hai ở trên không hiển thị nội dung trong `Log`. Nếu chúng tạ tạo phần tử JSX một lần và sử dụng lại phần tử đó, thì chúng tôi sẽ nhận được cùng một JSX mọi lúc!
+
+## Quay trở lại ví dụ thứ hai
+
+Bởi vì phần tử `<Log />` hoàn toàn không thay đổi (Vì thế `props` cũng không thay đổi), React có thể tự động cung cấp tính năng tối ưu hoá này cho chúng ta và không bận tâm đến việc hiển thị lại phần tử `<Log />` vì nó cũng không cần thiết phải kết xuất lại giữa các lần.
+
+Về cơ bản điều này giống với `React.memo` ngoại trừ sẽ kiểm tra từng `props` riêng lẻ. Ở đây, React đang kiểm tra toàn diện đối tượng `props` của phần tử.
+
+## Vậy điều này có ý nghĩa gì đối với chúng ta?
+
+Tóm lại, nếu bạn đang gặp sự cố về hiệu suất, hãy thử cách này:
+
+- “Tách” các thành phần hao tốn tài nguyên ra và mang nó lên thành phần cha, nơi nó sẽ được kết xuất lại ít thường xuyên hơn.
+- Sau đó, chuyển thành phần hao tốn tài nguyên này thông qua `props`
+
+Bạn có thể thấy làm như vậy, sẽ vẫn giải quyết được vấn đề về hiệu xuất mà không cần phải sử dụng `React.memo` phổ biến ra khắp mọi phần tử trên ứng dụng.  
+
+## Ví dụ minh hoạ
+
+Vì lý do nó khá nặng, mình sẽ đặt đường dẫn **[tại đây](https://codesandbox.io/s/react-codesandbox-qtdob?from-embed)** dể bạn có thể tìm hiểu thêm
+      

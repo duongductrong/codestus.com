@@ -1,0 +1,252 @@
+---
+title: Cùng tìm hiểu về Promise và Async/Await trong JavaScript qua các ví dụ
+description: Mọi thứ trên web hiện nay đều có xu hướng tiêu tốn thời gian, nếu bạn thực hiện một lệnh gọi API để truy vấn dữ liệu, bạn có thể sẽ cần đợi một khoảng thời gian để phía Server phản hồi. Vì thế, lập trình bất đồng một là kỹ năng cần thiết mà lập trình viên cần biết.
+tags: JavaScript,Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-20T12:41:14.000Z
+createdAt: 2021-02-20T12:41:14.000Z
+updatedAt: 2024-05-30T01:21:51.221Z
+views: 9932
+slug: cung-tim-hieu-ve-promise-va-asyncawait-trong-javascript
+---
+
+Mọi thứ trên web hiện nay đều có xu hướng tiêu tốn thời gian, nếu bạn thực hiện một lệnh gọi API để truy vấn dữ liệu, bạn có thể sẽ cần đợi một khoảng thời gian để phía Server phản hồi. Vì thế, lập trình bất đồng một là kỹ năng cần thiết mà lập trình viên cần biết.
+
+Khi làm việc với bất đồng bộ trong JavaScript, bạn sẽ thường nghe đến thuật ngữ **Promise**. Nhưng, có thể bạn sẽ gặp khó khăn để hiểu cách làm việc và sử dụng nó thế nào.
+
+Không giống như những hướng dẫn khác, bài viết này chúng ta sẽ tìm hiểu và cách vận hành nó thông qua các task:
+- Task 1: Giải thích cơ bản về Promise thông qua ngày sinh nhật
+- Task 2: Xây dựng trò chơi đoán
+- Task 3: Lấy thông tin của một vùng thông qua API
+
+## Task 1: Giải thích cơ bản về Promise thông qua ngày sinh nhật
+![](https://res.cloudinary.com/xskill/image/upload/v1613825753/codestus/yp1v5tvhp5awav7ptebh.gif)
+> Ảnh thuộc bản quyền của devchallenges.io
+
+Một người bạn tên **Kayo**, hứa sẽ làm một chiếc bánh chúng ta trong 2 tuần tiếp theo.
+
+Nếu mọi thứ diễn ra tốt đẹp và Kayo không bị bệnh. Chúng ta sẽ có một chiếc bánh kem. Ngược lại, nếu Kayo bị ốm, sẽ chẳng có chiếc bánh kem nào cả, hoặc trường hợp khác nữa là chúng ta bị ốm trong buổi sinh nhật của chính mình.
+
+Đối với câu chuyên này, chúng ta hãy phiên dịch nó thành mã, kết hợp với Promise:
+```js
+const onWeBirthday = function(sick) {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			if(!sick) {
+				resolve(2);
+			}
+			else {
+				reject(new Error("Kayo bị ốm"));
+			}
+		}, 5000)
+	})
+}
+```
+
+Trong JavaScript, chúng ta có thể tạo một Promise với `new Promise`, nhận vào một hàm với 2 đối số (resolve, reject) => {};
+
+Trong hàm này, `resolve` và `reject` là 2 đối số được cung cấp mặc định từ JavaScript.
+
+Giờ chúng ta hãy cùng xem xét kỹ hơn về hàm trên
+
+Khi chúng ta chạy hàm `onWeBirthday`, kết quả sẽ được trả về sau 5000 milisecond (5s) và chia làm 2 trường hợp:
+- Nếu kayo bị bệnh, thì chúng ta sẽ `resolve(2)` tức thời gian 2 tuần nữa
+- Nếu kayo không bị bệnh, chúng ta sẽ `reject(new Error("Kayo bị ốm"))` để thông báo lỗi rằng Kayo đã bị ốm.
+
+Ngay bây giờ, bởi vì hàm `onWeBirthday` trả về một Promise, vậy nên chúng ta có thể truy cập để lấy các trường hợp bằng các phương thức `then`, `catch` và `finally`.
+
+Và chúng ta đã có thể truy cập giá trị của các đối số, nếu không xảy ra lỗi (tức là trường hợp kayo không bị ốm)  ta có thể truy cập đối số của `resolve` từ hàm `onWeBirthday` thông qua `then`, ngược lại nếu xảy ra lỗi (Kayo bị ốm) chúng ta có thể truy cập đối số của `reject` thông qua `catch`. Còn `finally`, nó sẽ được chạy cuối cùng, dù Promise có lỗi hoặc không.
+
+Hãy cùng xem, trường hợp **Kayo** không bị ốm
+
+```js
+onWeBirthday(false)
+	.then(week => {
+		console.log(week); // Sẽ hiển thị 2
+	})
+	.catch(error => {
+		console.log(error); // Hàm này không được chạy
+	})
+	.finally(() => {
+		console.log("Kết thúc"); // Hàm này sẽ chạy sau khi đã chạy then, catch
+	})
+```
+
+Trường hợp **Kayo** bị ốm
+
+```js
+onWeBirthday(true)
+	.then(week => {
+		console.log(week); // Hàm này sẽ không được chạy
+	})
+	.catch(error => {
+		console.log(error); // Lỗi Kayo bị ốm
+	})
+	.finally(() => {
+		console.log("Kết thúc"); // Hàm này sẽ chạy sau khi đã chạy then, catch
+	})
+```
+
+Được rồi, đến đây có thể hi vọng các bạn đã hiểu cơ bản về Promise, chúng ta cùng chuyển sang Task 2 nhé.
+
+## Task 2: Xây dựng trò chơi đoán
+Yêu cầu:
+- Phía người dùng: Yêu cầu người dùng nhập 1 con số
+- Hệ thống: Hệ thống sẽ lựa chọn ngẫu nhiên một con số
+- Phía người dùng: 
+	- Nếu con số người dùng lựa chọn giống số ngẫu nhiên của hệ thống, người dùng sẽ được 2 điểm
+	- Nếu con số của người dùng lựa chọn khác với số ngẫu nhiên hệ thống 1 đơn vị, người dùng sẽ được 1 điểm, ngoài ra sẽ không có điểm nào.
+
+Bây giờ hãy tạo một hàm `enterNumber` và trả về một Promise:
+
+```js
+const enterNumber = () => {
+	return new Promise((resolve, reject) => {
+	
+	})
+}
+```
+
+Đầu tiên, chúng ta cần hỏi người dùng lựa chọn nhập con số từ 1 đến 6:
+
+```js
+const enterNumber = () => {
+	return new Promise((resolve, reject) => {
+		const fromUser = Number(window.prompt("Lựa chọn một con số từ 1-6"));
+		const fromSystem = Math.round(Math.random() * 6);
+		
+		if(isNaN(fromUser)) {
+			reject("Wrong Input")
+		}
+	})
+}
+```
+
+Điều tiếp theo, chúng ta muốn kiểm tra nếu giá trị người dùng nhập `fromUser` bằng với giá trị ngẫu nhiên của hệ thống `fromSystem` thì chúng ta sẽ +2 điểm và muốn chạy `resolve` bên trong `enterNumber` trả về { points: 2, randomNumber: fromSystem }. Lưu ý, ở đây chúng ta cũng muốn biết số ngẫu nhiên `fromSystem` when Promise resolve
+
+Trường hợp nếu số người dùng nhập khác với số ngẫu nhiên 1 đơn vị, chúng ta sẽ +1 điểm, còn lại sẽ không được cộng.
+
+```js
+const enterNumber = () => {
+	return new Promise((resolve, reject) => {
+		const fromUser = Number(window.prompt("Lựa chọn một con số từ 1-6"));
+		const fromSystem = Math.round(Math.random() * 6);
+		
+		if(isNaN(fromUser)) {
+			return reject("Wrong Input")
+		}
+		
+		// Số người dùng nhập bằng với số ngẫu nhiên
+		if(fromUser === fromSystem) {
+			resolve({points: 2, randomNumber: fromSystem})
+		}
+		// Nếu số người dùng nhập khác số ngẫu nhiên một đơn vị
+		else if(fromUser === fromSystem + 1 || fromUser === fromSystem - 1) {
+			resolve({points: 1, randomNumber: fromSystem})
+		}
+		// Không cộng điểm
+		else {
+			resolve({points: 0, randomNumber: fromSystem})
+		}
+	})
+}
+```
+
+Được rồi, hãy tạo một hàm khác để hỏi người dùng có muốn tiếp tục trò chơi không?. 
+
+```js
+const coninueGame = () => {
+	return new Promise((resolve, reject) => {
+		if(window.confirm("Bạn có muốn tiếp tục trò chơi ?") {
+			resolve(true);
+		}
+		else {
+			resolve(false);
+		}
+	})
+}
+```
+
+Lưu ý rằng chúng ta tạo là 1 Promise, nhưng nó không sử dụng `reject`. Điều này hoàn toàn ổn và bình thường.
+
+Nào bây giờ hãy tạo hàm chính để chạy trò chơi
+
+```js
+const main = () => {
+	enterNumber()
+	.then((response) => {
+		const {points, randomNumber} = response;
+		// Thông báo cộng điểm
+		alert(`Bạn được ${points} điểm`);
+		
+		// Hỏi người dùng chơi tiếp
+		continueGame().then(answer => {
+			// Tiếp tục trò chơi
+			if(answer) main()
+			// Thông báo kết thúc
+			else alert("Thanks")
+		})
+	})
+	.catch((err) => alert(err))
+}
+
+main();
+```
+
+Khi chúng ta gọi `main()`, `enterNumber()` sẽ được gọi và trả về `Promise`:
+- Nếu `Promise` resolve, chúng sẽ gọi `then` và hiển thị thông báo + điểm và hỏi tiếp tục muốn chơi game
+- Nếu `Promise` reject, chúng sẽ gọi `catch` và hiển thị thông báo lỗi
+
+Và chúng ta có thể áp dụng async/await vào trong hàm main() để rút ngắn codebase và giúp code dễ đọc hơn.
+
+```js
+const main = async () => {
+	try {
+		const resultEnter = await enterNumber();
+		
+		alert(`Bạn được ${points} điểm`);
+		
+		const isContinue = await continueGame();
+		
+		if(isContinue) main();
+		else alert("Thanks")
+		
+	} catch(err) {
+		alert(err)
+	}
+}
+
+main();
+```
+
+Như vậy là chúng ta đã hoàn thành task thứ 2. Tiếp tục đến task thứ 3 nào.
+
+## Task 3: Lấy thông tin các quốc gia thông qua API
+Bạn sẽ thấy khi chúng ta sử dụng `fetch` để lấy dữ liệu từ API, nó sẽ trả về 1 Promise.
+
+Chúng ta sẽ dùng một API mẫu có sẵn trên mạng, mở nó bằng trình duyệt của mình, bạn sẽ thấy nó có định dạng là JSON, bạn sẽ thường được xử lý API dưới dạng JSON thế này khi làm Frontend.
+
+Nào cùng thử thôi
+
+```js
+const fetchingCountry = async () => {
+	const res = fetch("https://restcountries.eu/rest/v2/alpha/col");
+	
+	const countries = await res.json();
+	
+	console.log(countries);
+}
+
+fetchingCountry();
+```
+
+Giờ hãy thử F12 -> chọn mục `console` và dán hàm vào để xem thử kết quả nhé.
+
+## Kết luận
+Như vậy là chúng ta đã hoàn thành 3 task. Đến đây, mình nghĩ các bạn cũng đã hiểu phần nào về cách hoạt động của Promise, async/await và cách sử dụng chúng.
+
+Trên thực tế, chúng ta sẽ tiếp cận hầu như mọi lúc. Và nó sẽ không còn xa lạ đối với bạn.
+
+## Có thể bạn sẽ cần
+Mình tham khảo qua bài viết: [freecodecamp](https://www.freecodecamp.org/news/learn-promise-async-await-in-20-minutes/)
+      

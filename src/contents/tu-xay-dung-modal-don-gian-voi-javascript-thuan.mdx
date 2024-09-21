@@ -1,0 +1,213 @@
+---
+title: Tự xây dựng modal đơn giản với javascript
+description: Trong bài viết lần này, mình sẽ hướng dẫn sơ lượt các bạn về cách xây dựng component modal đơn giản giống với Bootstrap 4
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-02-07T13:53:35.000Z
+createdAt: 2021-02-07T13:53:35.000Z
+updatedAt: 2024-06-03T21:34:13.219Z
+views: 8379
+slug: tu-xay-dung-modal-don-gian-voi-javascript-thuan
+---
+
+Trong bài viết lần này, mình sẽ hướng dẫn sơ lượt các bạn về cách xây dựng `component modal` gần giống với **Bootstrap 4**. Chủ đích của bài này sẽ giúp bạn hiểu thêm về cách sử dụng javascript tương tác với html. Ngoài ra cũng giúp bạn luyện thêm kỹ năng kết hợp bộ 3 `html/css/js`.
+
+**Lưu ý rằng**: Bài viết này chỉ hướng dẫn bạn cấu trúc xây dựng Modal và có tính tái sử dụng nó chứ không có thiên hướng xây dựng CSS đẹp mắt.
+
+## Xây dựng cấu trúc HTML
+Đầu tiên, chúng ta cần phải xây dựng cấu trúc `HTML` trước khi triển khai đến CSS / JavaScript.
+
+Chúng ta sẽ bắt đầu từ button bật `modal`. Hình thức xây dựng theo để tái sử dụng mã JavaScript, chúng ta sẽ không viết một đoạn mã cho duy nhất một Modal, thay vào đó sẽ xây dựng cấu trúc mã để tái sử dụng cho `n + 1` Modal mà không phải lặp lại mã JavaScript.
+
+Kết hợp data-* và aria-* chúng ta có thể truy xuất được modal và trạng thái bật tắt của nó.
+- data-trigger='modal' : Đoạn này có nghĩa giúp bạn định danh được thẻ `html` nào dùng để truy xuất, tương tác với Modal
+- data-target='id_or_class_selector': Đoạn này sẽ là thuộc tính ID hoặc class cho phép chúng ta truy xuất đến Modal đó. 
+- aria-open='false': Đây là trạng thái bật tắt mặc định của Modal.
+
+```html
+<button class="btn btn-primary" data-trigger="modal" data-target=".modal-1" aria-open="false">Modal 1</button>
+```
+
+Xem như đã hoàn thành xong button để bật modal lên, bây giờ chúng ta cần Modal được taget thông qua thuộc tính `data-taget='.modal-1'`.
+
+```html
+<div class="modal modal-1">
+  <div class="modal__backdrop"></div>
+  <div class="modal__content">
+    <div class="modal__header">
+      <h1>Header modal</h1>
+    </div>    
+    <div class="modal__main">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </div>    
+    <div class="modal__footer">
+      <div class="modal__cancel">Cancel</div>
+    </div>    
+  </div>
+</div>
+```
+
+Bây giờ, hãy cùng thêm một chút CSS (Mình dùng SCSS, cách viết nested css) cho ra dáng Modal chút.
+
+```css
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  line-height: 1.5;
+}
+
+.modal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 300ms linear;
+  
+  .modal__backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  
+  .modal__content {
+    transition: all 300ms ease-in-out;
+    width: 30%;
+    margin: auto;
+    z-index: 10;
+    position: absolute;
+    top: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    
+    
+    .modal__header {
+      border-bottom: 1px solid gray;
+      margin-bottom: 15px;
+    }
+    
+    .modal__main {
+      margin-bottom: 15px;
+    }
+    
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      & > * {
+        margin-left: 15px;
+        cursor: pointer;
+      }
+    }
+  }
+  
+  &--active {
+    opacity: 1;
+    visibility: visible;
+    
+    .modal__content {
+      top: 25%;
+    }
+  }
+}
+```
+
+- `class='modal'`: Modal khi bật lên, sẽ ngăn chặn người dùng tương tác với nội dung bên dưới, vì vậy chúng ta phải cho modal có thuộc tính `position=fixed`  để đè lên nội dung bên dưới
+- `class='modal__backdrop'`: Làm nhiệm vụ tạo một lớp backdrop mờ đục, che mờ đi phần bên dưới để tạo điểm tập trung cho nội dung hiển thị trên Modal và ngăn chặn việc người dùng tương tác được với nội dung phía dưới
+- `class='modal__content'`: Modal thường sẽ nằm giữa trang, vì vậy ta cần thêm `position, top, left` để canh giữa Modal, ngoài ra khi hiển thị cũng cần một chút hiệu ứng nên ta sẽ kết hợp thêm `transition, visibility, opacity` để tạo cảm giác không bị cứng.
+- `class='modal--active'`: Chúng ta sẽ dùng nó để kích hoạt trạng thái bật / tắt của Modal.
+- Các phần css còn lại bạn có thể tuỳ ý xây dựng để giúp nó đẹp hơn
+
+## Thêm JavaScript để xử lý trạng thái Modal
+
+Dựa theo mẫu HTML bên dưới, chúng ta sẽ dùng `JavaScript` để truy vấn những thẻ có thuộc tính data-trigger='modal' 
+
+```html
+<button class="btn btn-primary" data-trigger="modal" data-target=".modal-1" aria-open="false">Modal 1</button>
+```
+
+Tương ứng, trong JavaScript, chúng ta có
+
+```js
+// data-trigger: "modal" => Dựa vào trigger selector tất cả những thẻ nào có data-trigger='modal'
+// data-target: Mỗi một data-trigger sẽ select đến một bộ modal riêng (Phù hợp cho việc tái sử dụng)
+// aria-open: Khai báo trạng thái modal
+const btnModals = document.querySelectorAll("[data-trigger='modal']");
+```
+
+Sau khi đã lấy được nhóm các nút `modals`, tiếp theo chúng ta cần lặp qua mảng NodeList đó
+
+```js
+btnModals.forEach(btnModal => {})
+```
+
+Việc cần làm tiếp theo
+- Gán sự kiện `click` thông qua thuộc tính `addEventListener` cho các nút.
+- Selector đến Modal qua `data-target`
+- Lấy trạng thái bật/ tắt mặc định qua `aria-open`
+
+```js
+// Dựa vào data-trigger='modal' truy xuất toàn bộ nút bật modal
+btnModals.forEach(btnModal => {
+  // lấy thông tin modal
+  const modal = document.querySelector(btnModal.getAttribute("data-target"));
+  // lấy trạng thái modal
+  const open = btnModal.getAttribute("aria-open") === "true" ? true : false;
+  
+  // Khởi động trạng thái mặc định của modal được set từ aria-open của button
+  onActiveOrNot(btnModal, modal, open);
+  
+  // Bật modal thông qua button
+  btnModal.addEventListener("click", () => {
+    onActiveOrNot(btnModal, modal, !open);
+  });
+
+  // Tắt modal thông qua nút close
+  modal.querySelector(".modal__cancel").addEventListener("click", () => {
+    onActiveOrNot(btnModal, modal, !open);
+  })
+})
+```
+
+Ấy mà function `onActiveOrNot` là gì ta. Để không quá rườm rà, đây sẽ là hàm thực hiện thêm / xoá `class='modal--active'` dựa vào các sự kiện bên trên, nhận vào 3 tham số.
+- `buttonTargetModal`: Nút để trỏ đến Modal hiện tại
+- `modal`: Nội dung Modal
+- `open`: Trạng thái bật / tắt 
+
+```js
+// Hàm xử lý bật, tắt modal thông qua class cung cấp
+function onActiveOrNot(buttonTargetModal, modal, open) {
+  if(!modal.classList.contains("modal--active") && open) {
+    modal.classList.add("modal--active")
+  }
+  else {
+    modal.classList.remove("modal--active");
+  }
+  
+  // đặt lại trạng thái cho nút button khi modal active | !active
+  buttonTargetModal.setAttribute("aria-open", open);
+}
+```
+
+Thế là mình đã hoàn thành việc xử lý modal với gần 40 dòng code JavaScript, có thể tái sử dụng cho `n+1` Modal khác trong quá trình sử dụng sau này. 
+
+Nào, chúng ta cùng xem demo, mình có thể thêm `n + 1` modal tuỳ ý tương ứng với `n + 1` nút button để bật nó mà không cần thêm bất kì đoạn JavaScript nào khác.
+
+Chi tiết bản **demo**: [Xem thử kết quả tại đây](https://codepen.io/codestus/pen/abBNRRm)
+## Kết luận
+Bài viết trên mình viết dựa trên kỹ thuật mình biết, có thể còn khó hiệu và không mạch lạc nhưng có thể sẽ giúp các bạn biết cách xây dựng một `Modal` cơ bản và ngoài ra, có thể tìm cách để tái sử dụng mã bạn viết để không mất nhiều thời gian xây dựng lại làm phát sinh JavaScript dư thừa.
+      

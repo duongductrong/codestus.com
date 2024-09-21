@@ -1,0 +1,142 @@
+---
+title: 10 Kỹ thuật có thể áp dụng vào dự án thực tế
+description: Chúng ta luôn tìm kiếm những cách làm mới, ngắn hơn, tốt hơn và tối ưu hơn. Và JavaScript thì có muôn vàn cách để xử lý các vấn đề. Những kỹ thuật này bạn có thể áp dụng vào thực tế dự án của bạn.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-01-28T19:10:35.000Z
+createdAt: 2021-01-28T19:10:35.000Z
+updatedAt: 2024-05-28T06:04:16.710Z
+views: 5564
+slug: 10-ky-thuat-co-the-ap-dung-vao-du-an-thuc-te-trong-javascript
+---
+
+Chúng ta luôn tìm kiếm những cách làm mới, ngắn hơn, tốt hơn và tối ưu hơn. Và JavaScript thì có muôn vàn cách để xử lý các vấn đề. Những kỹ thuật này bạn có thể áp dụng vào thực tế dự án của bạn.
+
+## 1. Chuyển đổi đối tượng arguments thành mảng
+Đối tượng arguments trong **JavaScript** là một **Array-Like Object** cho phép truy cập bên trong hàm, nó chứa các giá trị được thông qua từ hàm. Không giống như **Array** thông thường, chúng ta có thể **truy cập giá trị** của nó và lấy độ dài như **Array**, nhưng không thể sử dụng các phương thức của **Array.prototype** vì nó là **Array-Like Object** chứ không phải là **Array**.
+
+May mắn là, chúng ta đã có cách chuyển đổi từ **Array-Like** sang **Array**.
+
+```js
+const toArray = function() {
+	return Array.prototype.slice.call(arguments)
+}
+```
+Sau khi dùng cách này, bạn đã có thể sử dụng các phương thức của **Array**.
+
+## 2. Tính tổng giá trị trong mảng
+Đây là cách đã tham khảo và sử dụng, vừa ngắn gọn vừa súc tích.
+```js
+const numbers = [1,2,3,4,5];
+const result = numbers.reduce((numb, total) => numb + total, 0);
+
+// result : 0 + 1 + 2 + 3 + 4 + 5
+```
+
+## 3. Điều kiện ngắn gọn
+Thông thường, chúng ta sẽ thường viết câu điều kiện dạng như này. Nếu Tôi đói, tôi ăn
+
+```js
+if(isHurry) {
+	toEat();
+}
+```
+
+Cách này không sai, nhưng nó dài dòng, và bạn có thể sử dụng && để thay thế cho câu điều kiện ở trên bằng
+
+```js
+isHurry && toEat()
+```
+
+Quá ngắn gọn, súc tích đúng không?
+
+## 4. Sử dụng OR (||) đặt giá trị mặt định
+Cách này có thể sử dụng trong nhiều trường hợp. Dễ thấy nhất là khi gán dữ liệu cho một biến. Nếu biến được gán với giá trị không xác định như **undefined** hay **null** nó là **falsy** thì chúng ta có thể gán cho biến đó một giá trị mặc định cần thiết bằng phép ||.
+
+Ví dụ:
+```js
+function setToken(token) {
+	localStorage.setItem("token", token || "123456");
+}
+```
+
+## 5. Toán tử comma (,)
+Toán tử **comma** đánh giá từng toán hạng của nó (từ trái sang phải) và trả về giá trị thứ hạng cuối cùng
+
+```js
+let x = 1;
+
+x = (x++, x++, x);
+
+console.log(x); // x = 3
+
+x = (3, 4);
+
+console.log(x) // x = 4
+```
+
+## 6. sử dụng .length để resize kích thước mảng
+Bạn có thể sử dụng **.length** để re**size h**oặc **làm rỗng mảng** đang tồn tại.
+
+```js
+let newArray = [1,2,3,4,5,6];
+console.log(newArray)
+
+// resize
+newArray.length = 3;
+console.log(newArray);
+
+// empty
+newArray.length = 0;
+console.log(newArray)
+```
+
+## 7. Chuyển đổi (swap) giá trị sử dụng cách thức destructuring (ES6)
+Theo cách từ thời đi học đến giờ, chúng ta sẽ thường tạo một biến tạm để gán giá trị cần **swap** vào và thực hiện chuyển đổi giá trị giữa 2 biến.
+
+Với **JavaScript** kể từ phiên bản **ES6** chúng ta không cần mắc công đến vậy, nó đơn giản hơn.
+
+```js
+let a = 6;
+let b = 12;
+
+[a,b] = [b,a]
+
+console.log(a,b) // 12, 6
+```
+
+Rất đơn giản và nhanh gọn, rút ngắn được 2 dòng code nhưng vẫn giữ được tính minh bạch cho code.
+## 8. Shuffle phần tử trong mảng
+Nhiều khi bạn cũng sẽ có nhu cầu làm xáo trộn vị trí của các phần tử trong một mảng, đây sẽ là cách giúp bạn thực hiện điều đó.
+Chúng ta sẽ dựa vào phương thức **[sort](https://developer.mozilla.org/vi/docs/Web/JavaScript/Reference/Global_Objects/Array/S%E1%BA%AFp_x%E1%BA%BFp)** và **Math.random**
+```js
+function shuffle(arr) {
+	return arr.sort((_, _) => {
+		return Math.random * 0.5;
+	})
+}
+```
+
+## 9. Key dynamic in Object
+Bạn có thể gán thuộc tính động thông qua biến làm **key** trong **object** trước khi gán cho nó một giá trị
+```js
+const key = "name";
+const value = "codestus.com";
+const obj = {
+	[key]: value
+}
+
+console.log(obj) // {name: "codestus.com"}
+```
+
+## 10. Lọc các số trùng lặp trong mảng
+Chúng ta sẽ sử dụng **Set** để chuyển đổi và loại bỏ các phần tử lặp lại trong mảng bằng cách sau
+```js
+const arr = [1,1,2,3,4,5,6,2];
+const uniqueArr = [...new Set(arr)];
+
+console.log(uniqueArr) // 1,2,3,4,5,6
+```
+
+Đây là một số cách thông dụng, để giúp các bạn xử lý code tốt hơn trong dự án.
+      

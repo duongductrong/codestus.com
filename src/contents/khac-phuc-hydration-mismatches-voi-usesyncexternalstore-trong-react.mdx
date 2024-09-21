@@ -1,0 +1,140 @@
+---
+title: Khắc phục Hydration Mismatches với useSyncExternalStore trong React
+description: Hydration mismatches là một trong số lỗi đáng sợ đối với các React Developer khi gặp phải trong việc phát triển React SSR.
+tags: React
+author: Trong Duong Duc
+publishAt: 2024-04-07T23:28:38.000Z
+createdAt: 2024-04-07T23:28:38.226Z
+updatedAt: 2024-09-21T09:27:29.016Z
+views: 117
+slug: khac-phuc-hydration-mismatches-voi-usesyncexternalstore-trong-react
+---
+
+Hydration mismatches là một trong số lỗi đáng sợ đối với các React Developer khi gặp phải
+
+> **Uncaught Error: Text content does not match server-rendered HTML.**
+
+Làm thế nào mà điều này lại xảy ra, chúng ta đã xử lý nó từ máy chủ đến máy khách, chỉ duy nhất một đoạn code cho 2 lần thực thi ở 2 nơi là máy chủ và máy khách?.
+
+Như chúng ta biết máy chủ và máy khách (hay gọi là server và client) có thể không giống nhau, nó có thể nằm khác máy chủ, khác múi giờ, locale, etc. Từ đó, nó có thể chạy ở múi giờ khác hoặc với một ngôn ngữ khác, do đó hiển thị thông tin khác với thông tin trên máy khách, ví dụ: khi Ngày có liên quan. Nó cũng không có quyền truy cập vào các API chỉ có trong Trình duyệt, như `window`.
+
+```jsx
+function LastUpdated() {
+  const date = getLastUpdated()
+  return <span>Last updated at: {date.toLocaleDateString()}</span>
+}
+```
+
+Nếu máy chủ khác `locale` với máy khách, ngày hiện tại được hiển thị (ví dụ 07/04/2024) sẽ khác với ngày hiển thị ở máy khách (04/07/2024). Khi sự không khớp như vậy xảy ra, React sẽ hét vào mặt chúng ta, vì nó muốn kết quả đầu ra của máy chủ khớp chính xác với kết quả trên máy khách để mang lại trải nghiệm người dùng tốt nhất có thể.
+
+Nhưng như chúng ta đã thấy, lỗi `mismatch` là không thể tránh khỏi trong một số trường hợp. Vậy chúng ta phải "sửa" nó như thế nào?
+
+## suppressHydrationWarning
+
+Điều này có cảm giác hơi giống cách bỏ qua lỗi eslint hoặc một lỗi @ts-expect-error và có thể sẽ ổn nếu bạn biết mình đang làm gì. Chỉ cần dán vào phần tử được đề cập `suppressHydrationWarning`.
+
+```jsx
+function LastUpdated() {
+  const date = getLastUpdated()
+  return (
+    <span suppressHydrationWarning>
+      Last updated at: {date.toLocaleDateString()}
+    </span>
+  )
+}
+```
+
+Theo các tài liệu, đây là hướng đi không nên lạm dụng. Vậy chúng ta có thể làm gì khác?
+
+## double render pass
+
+Một cách khắc phục phổ biến khác là hiển thị hai lần trên máy khách. Về cơ bản, chúng ta kết xuất trên máy chủ với thông tin chúng ta có, thông tin này sẽ tạo ra đánh dấu tĩnh. Sau đó, trên máy khách, chúng ta sẽ cố gắng tạo ra kết quả tương tự như trên máy chủ cho chu kỳ kết xuất đầu tiên. Điều này đảm bảo quá trình hydration không xảy ra lỗi. Sau đó, chúng ta sẽ kích hoạt một chu trình kết xuất khác với thông tin khách hàng "thực tế" chúng ta muốn hiển thị.
+
+Tất nhiên, nhược điểm ở đây là nội dung cần ngắn gọn.
+
+Vì múi giờ chỉ được biết trên máy khách, kết xuất của máy chủ không thể biết thời gian chính xác để hiển thị là gì, vì thời gian này khác nhau đối với mỗi người dùng, tùy thuộc vào vị trí của họ.
+
+Một biến thể khác của phương pháp này là chỉ hiển thị null trên máy chủ và chỉ để nội dung chính xác "xuất hiện" trên máy khách.
+
+Bất kể giá trị nào bạn chọn để hiển thị trên máy chủ, code thường sẽ trông giống như thế này:
+
+```jsx
+function LastUpdated() {
+  const [isClient, setIsClient] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!isClient) {
+    return null
+  }
+
+  const date = getLastUpdated()
+  return <span>Last updated at: {date.toLocaleDateString()}</span>
+}
+```
+
+Vì các hiệu ứng sẽ không chạy trên máy chủ nên `null` sẽ được trả về trước. Sau đó, đến phía máy khách, chu kỳ kết xuất đầu tiên cũng sẽ mang lại giá trị rỗng. Sau khi hiệu ứng được kích hoạt, chúng ta sẽ có thời gian hiển thị chính xác.
+
+## **useSyncExternalStore**
+
+Mặc dù trường hợp sử dụng chính của `useSyncExternalStore` là subscribe các `store` bên ngoài, nhưng nó có một đặc điểm thú vị thứ hai: nó cho phép chúng ta phân biệt giữa `serverSnapshot` và `clientSnapshot` . Hãy xem tài liệu của React nói gì về `getServerSnapshot`
+
+> <span style="color: var(--theme-ui-colors-primary)">**getServerSnapshot**</span>
+>
+> A function that returns the initial snapshot of the data in the store. It will be used only during server rendering and during hydration of server-rendered content on the client. The server snapshot must be the same between the client and the server, and is usually serialized and passed from the server to the client.
+
+Đây chính xác là cái chúng ta cần để tránh hydration errors, hơn thế nữa, nếu chúng ta chuyển sang một trang có `useSyncExternalStore` trên máy khách, `clientSnapshot` sẽ ngay lập tức được thực hiện.
+
+Chỉ có một vấn đề là chúng ta nên `subscribe` vào `store` nào? Nó có thể trông kỳ lạ nhưng câu trả lời là chúng tôi sẽ để `subscribe` trống và không bao giờ cập nhật. Dù sao đi nữa thì `clientSnapshot` sẽ được react đánh giá lại sau mỗi chu kỳ kết xuất và không cần phải đẩy các bản cập nhật từ bên ngoài React vào thành phần này.
+
+Vì tham số về `subscribe` là bắt buộc, nên code của chúng ta sẽ trông như thế này:
+
+```jsx
+const subscriber = () => () => {}
+
+function LastUpdated() {
+  const date = React.useSyncExternalStore(
+    subscriber,
+    () => lastUpdated.toLocaleDateString(),
+    () => null
+  )
+
+  return date ? <span>Last updated at: {date}</span> : null
+}
+```
+
+Vì `subscribe` cần là một stable function, nên chúng ta sẽ đặt nó bên ngoài `Component`, tránh khỏi chu kỳ kết xuất của component.
+
+Ngoài ra, pattern về `useSyncExternalStore` khá dễ dàng để chúng ta có thể xác định môi trường hiện tại của component là máy chủ hay máy khách. Ví dụ tạo ra một `ClientOnly` nơi xác định là an toàn để truy cập vào các **browsers API** ở phía máy khách.
+
+Code của chúng ta sẽ như thế này để có thể làm được điều đó:
+
+```jsx
+const subscriber = () => () => {}
+
+function ClientOnly({ children }) {
+  const isServer = React.useSyncExternalStore(
+    subscriber,
+    () => false,
+    () => true
+  )
+
+  return isServer ? null : children()
+}
+
+function App() {
+  return (
+    <main>
+      Hello Server
+      <ClientOnly>{() => `Hello Client ${window.title}`}</ClientOnly>
+    </main>
+  )
+}
+```
+
+Ngoài ra, còn khá nhiều ứng dụng về `useSyncExternalStore` mà chúng ta có thể áp dụng, nó có thể làm một `store` quản lý global state nếu bạn muốn, mặc dù với React, họ khuyến khích chúng ta chỉ sử dụng khi thật sự cần thiết, với third-party.
+
+Nguồn tham khảo: **TkDodo's blog**
+      

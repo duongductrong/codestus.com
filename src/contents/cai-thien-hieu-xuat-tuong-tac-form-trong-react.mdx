@@ -1,0 +1,315 @@
+---
+title: Cải thiện hiệu xuất tương tác form trong React
+description: Xử lý form trong các ứng dụng React hiện tại là một điều không thể thiếu. Từ đó, nó cũng mang đến nhiều hệ luỵ về hiệu xuất nếu chúng ta xử lý sai về nó. Vậy làm thế nào để cải thiện hiệu xuất của Form trong React được cho là đúng?
+tags: React
+author: Trọng Dương Đức
+publishAt: 2021-10-18T11:02:43.000Z
+createdAt: 2021-10-18T11:02:43.000Z
+updatedAt: 2024-06-03T19:53:53.920Z
+views: 5926
+slug: cai-thien-hieu-xuat-tuong-tac-form-trong-react
+---
+
+Biểu mẫu được xem là một phần quan trọng trong ứng dụng của bạn. Mọi tương tác mà người dùng thực hiện để thay đổi dữ liệu với **Backend** đều phải sử dụng biểu mẫu (Form). Đôi lúc, có thể nó rất đơn giản, nhưng thực tế cho thấy nó phức tạp hơn nhiều. Bạn sẽ cần gửi biểu mẫu thông tin người dùng đã nhập, phản hồi lỗi từ máy chủ và sàng lọc các dữ liệu được nhập (Là quá trình sau khi họ rời khỏi input đó) và đôi lúc chúng ta cũng cần xây dựng một `custom-made UI Elements` cho biểu mẫu của mình (datepickers, select multiple custom).
+
+Tất cả những thứ bổ trợ cho biểu mẫu như trên đều phải thêm nhiều JS để trình duyệt đọc và thực thi trong khi người dùng tương tác với biểu mẫu trên ứng dụng của bạn. Điều này thường sẽ dẫn đến các vấn đề về hiệu xuất. Đôi khi có một thành phần nào đó gây nên việc đó và việc tối ưu nó sẽ sữa chữa mọi thứ.
+
+Thông thường, vấn đề nằm ở việc tương tác của người dùng tạo ra trạng thái kích hoạt các thành phần (component) hiển thị lại liên tục. Đó là một phần mấu chốt để chúng ta xác định và cải thiện.
+
+Cách để giải quyết vấn đề này, chúng ta sẽ không phản ứng lại với mọi tương tác của người dùng (không sử dụng `onChange`). Thật không may, điều này không thực sự thiết thực cho nhiều trường hợp sử dụng. Chúng ta muốn hiển thị phản hồi cho người dùng khi họ tương tác với biểu mẫu của chúng ta, không phải chỉ đợi họ nhấn nút `submit`.
+
+## Thực hiện xây dựng biểu mẫu
+
+Chúng ta sẽ cùng bắt tay vào phân tích hiệu xuất của 2 biểu mẫu bên dưới dựa theo tên của nó
+
+Chi tiết về đường dẫn demo các bạn vào đây nhé: [Tại đây](https://codesandbox.io/s/form-perf-demo-240ho)
+
+<iframe src="https://codesandbox.io/embed/form-perf-demo-240ho?fontsize=14&hidenavigation=1&theme=dark"
+     style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="form-perf-demo"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+
+So sánh giữa 2 biểu mẫu trên sẽ setup ở `<App />` component:
+
+```jsx
+function App() {
+	return <div>
+			<h1>Slow Form</h1>
+      <SlowForm />
+
+      <hr />
+
+      <h1>Fast Form</h1>
+      <FastForm />
+	</div>
+}
+```
+
+2 Biểu mẫu trên sẽ hoạt động hoàn toàn giống nhau về mặt logic, hiển thị. Nhưng nếu bạn thử kiểm tra qua sẽ thấy rằng `<SlowForm />` sẽ có phản hồi chậm hơn. Những gì chúng hiển thị là một danh sách các trường đều có cùng một logic xác thực được áp dụng:
+
+- Nhập ký tự thường
+- Có độ dài từ 3 đến 10 ký tự
+- Chỉ hiển thị lỗi nếu input đã được `touched` hoặc được ấn `submit`
+- Khi `form` được gửi, tất cả dữ liệu sẽ được hiển thị trong `console`
+
+Ở đầu tệp, bạn có một vài thông dùng để kiểm tra:
+
+```jsx
+window.PENALTY = 150_000
+const FIELDS_COUNT = 10
+```
+
+`FIELDS_COUNT` kiểm soát số lượng trường được hiển thị.
+
+`PENALTY` được sử dụng trong thành phần `<Penalty />` của chúng ta khi mỗi trường hiển thị để mô phỏng một thành phần cần thêm một chút thời gian để hiển thị:
+
+```jsx
+let currentPenaltyValue = 2
+function PenaltyComp() {
+  for (let index = 2; index < window.PENALTY; index++) {
+    currentPenaltyValue = currentPenaltyValue ** index
+  }
+  return null
+}
+```
+
+Trước tiên, chúng ta sẽ xem xét qua `<SlotForm />` trước.
+
+```tsx
+/**
+ * When managing the state higher in the tree you also have prop drilling to
+ * deal with. Compare these props to the FastInput component
+ */
+function SlowInput({
+  name,
+  fieldValues,
+  touchedFields,
+  wasSubmitted,
+  handleChange,
+  handleBlur,
+}: {
+  name: string
+  fieldValues: Record<string, string>
+  touchedFields: Record<string, boolean>
+  wasSubmitted: boolean
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  handleBlur: (event: React.FocusEvent<HTMLInputElement>) => void
+}) {
+  
+	const value = fieldValues[name]
+  const touched = touchedFields[name]
+  const errorMessage = getFieldError(value)
+  const displayErrorMessage = (wasSubmitted || touched) && errorMessage
+  
+	return (
+    <div key={name}>
+      <PenaltyComp />
+      <label htmlFor={`${name}-input`}>{name}:</label> <input
+        id={`${name}-input`}
+        name={name}
+        type="text"
+        onChange={handleChange}
+        onBlur={handleBlur}
+        pattern="[a-z]{3,10}"
+        required
+        aria-describedby={displayErrorMessage ? `${name}-error` : undefined}
+      />
+      {displayErrorMessage ? (
+        <span role="alert" id={`${name}-error`} className="error-message">
+          {errorMessage}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * The SlowForm component takes the approach that's most common: control all
+ * fields and manage the state higher up in the React tree. This means that
+ * EVERY field will be re-rendered on every keystroke. Normally this is no
+ * big deal. But if you have some components that are even a little expensive
+ * to re-render, add them all up together and you're toast!
+ */
+function SlowForm() {
+  const [fieldValues, setFieldValues] = React.useReducer(
+    (s: typeof initialFieldValues, a: typeof initialFieldValues) => ({
+      ...s,
+      ...a,
+    }),
+    initialFieldValues,
+  )
+  const [touchedFields, setTouchedFields] = React.useReducer(
+    (s: typeof initialTouchedFields, a: typeof initialTouchedFields) => ({
+      ...s,
+      ...a,
+    }),
+    initialTouchedFields,
+  )
+  const [wasSubmitted, setWasSubmitted] = React.useState(false)
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formIsValid = fieldNames.every(
+      (name) => !getFieldError(fieldValues[name]),
+    )
+    setWasSubmitted(true)
+    if (formIsValid) {
+      console.log(`Slow Form Submitted`, fieldValues)
+    }
+  }
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setFieldValues({[event.currentTarget.name]: event.currentTarget.value})
+  }
+  function handleBlur(event: React.FocusEvent<HTMLInputElement>) {
+    setTouchedFields({[event.currentTarget.name]: true})
+  }
+  return (
+    <form noValidate onSubmit={handleSubmit}>
+      {fieldNames.map((name) => (
+        <SlowInput
+          key={name}
+          name={name}
+          fieldValues={fieldValues}
+          touchedFields={touchedFields}
+          wasSubmitted={wasSubmitted}
+          handleChange={handleChange}
+          handleBlur={handleBlur}
+        />
+      ))}
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
+```
+
+Xem xét qua cách mốt trí, ta có thể thấy cách tiếp cận của `<SlowForm />` theo dạng `[Controlled](https://reactjs.org/docs/forms.html#controlled-components)`. Mọi thông tin đầu vào người dùng nhập vào `input` sẽ được Form quản lý. Việc này có nghĩa khi một trong số các `input` của Form được thay đổi đồng nghĩa tất cả sẽ được yêu cầu `re-render`. 
+
+Thông thường, điều này không gây quá nhiều vấn đề đối với các Form Nhưng nếu bạn có một số thành phần input tốn thời gian tốn nhiều thời gian để xử lý và yêu cầu hiển thị lại sau đó, bạn biết điều gì xảy ra rồi đấy.
+
+Bây giờ, chúng ta hãy lập một `profile interaction` cho form trên. (Phần này nếu bạn nào chưa rõ có thể tham khảo [with profiling enabled](https://kentcdodds.com/blog/profile-a-react-app-for-performance)). Bây giờ để giữ cho thử nghiệm của chúng ta nhất quán, tương tác sẽ tập trung vào lần đầu tiên, nhập ký tự "a" và sau đó `"blur"` (kích hoạt sự kiện `blur` khi người dùng chuyển vùng `focus` khỏi `input` hiện tại).
+
+![https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/slow-performance-tab_odesxq.png](https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/slow-performance-tab_odesxq.png)
+
+Hãy xem điều này, 97 milliseconds cho sự kiện `keypress`. Hãy nhớ rằng, chúng ta chỉ có duy nhất khoảng 16ms để xử lý các phần này. Thời gian xử lý trở nên dài hơn sẽ khiến mọi thử trở nên có cảm giác trì trệ. Và ở dưới cùng, nó cho chúng ta biết rằng chúng ta đã chặn luồng chính trong 112 mili giây chỉ bằng cách nhập một ký tự và `blur` nó đi. 
+
+Đừng quên rằng đây là tốc độ chậm 6 lần, vì vậy nó sẽ không quá tệ đối với nhiều người dùng, nhưng nó vẫn là dấu hiệu của một vấn đề về hiệu suất nghiêm trọng.
+
+Hãy thử trình biên dịch React DevTools và quan sát những gì React đang làm khi chúng ta tương tác với một trong các trường biểu mẫu như vậy.
+
+![https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/slow-react-profiler_vyumda.png](https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/slow-react-profiler_vyumda.png)
+
+Có vẻ như mọi trường đều đang được kết xuất lại (re-render). Nhưng thực tế thì chúng không cần thiết! Chỉ có input mà người dùng tương tác mới thực sự cần điều này.
+
+Vậy rõ rồi, có thể đây là vấn đề và để xác định điều đó. Chúng ta cần xem xét tiếp ví dụ tiếp theo về `<FastForm />` để xác định vấn đề mà chúng ta đang nghi ngờ?
+
+## FastForm
+
+```tsx
+/**
+ * Not much we need to pass here. The `name` is important because that's how
+ * we retrieve the field's value from the form.elements when the form's
+ * submitted. The wasSubmitted is useful to know whether we should display
+ * all the error message even if this field hasn't been touched. But everything
+ * else is managed internally which means this field doesn't experience
+ * unnecessary re-renders like the SlowInput component.
+ */
+
+function FastInput({
+  name,
+  wasSubmitted,
+}: {
+  name: string
+  wasSubmitted: boolean
+}) {
+  const [value, setValue] = React.useState('')
+  const [touched, setTouched] = React.useState(false)
+  const errorMessage = getFieldError(value)
+  const displayErrorMessage = (wasSubmitted || touched) && errorMessage
+  
+	return (
+    <div key={name}>
+      <PenaltyComp />
+      <label htmlFor={`${name}-input`}>{name}:</label> <input
+        id={`${name}-input`}
+        name={name}
+        type="text"
+        onChange={(event) => setValue(event.currentTarget.value)}
+        onBlur={() => setTouched(true)}
+        pattern="[a-z]{3,10}"
+        required
+        aria-describedby={displayErrorMessage ? `${name}-error` : undefined}
+      />
+      {displayErrorMessage ? (
+        <span role="alert" id={`${name}-error`} className="error-message">
+          {errorMessage}
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * The FastForm component takes the uncontrolled approach. Rather than keeping
+ * track of all the values and passing the values to each field, we let the
+ * fields keep track of things themselves and we retrieve the values from the
+ * form.elements when it's submitted.
+ */
+function FastForm() {
+  const [wasSubmitted, setWasSubmitted] = React.useState(false)
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const fieldValues = Object.fromEntries(formData.entries())
+    const formIsValid = Object.values(fieldValues).every(
+      (value: string) => !getFieldError(value),
+    )
+    setWasSubmitted(true)
+    if (formIsValid) {
+      console.log(`Fast Form Submitted`, fieldValues)
+    }
+  }
+  
+	return (
+    <form noValidate onSubmit={handleSubmit}>
+      {fieldNames.map((name) => (
+        <FastInput key={name} name={name} wasSubmitted={wasSubmitted} />
+      ))}
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
+```
+
+Nhìn thoáng qua lần đầu, chúng ta thấy gì?. `<FastForm />` được viết theo cơ chế **[Uncontrolled](https://reactjs.org/docs/uncontrolled-components.html).** Có vẻ khả quan hơn nhưng chúng ta cần xem xét kĩ hơn để xem chuyện gì xảy ra khi ứng dụng **Uncontrolled** vào `<FastForm />`
+
+Và điều quan trọng nhất cần biết là trạng thái đang được quản lý trong chính các trường chứ không phải trong trường cha (tức là Form) như ta đã phân tích ở cái nhìn đầu tiên về `<FastForm />`. Bây giờ chúng ta hãy thử trình mô tả hiệu suất về điều này:
+
+![https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/fast-performance-tab_vnefkb.png](https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/fast-performance-tab_vnefkb.png)
+
+Mọi thứ đã được cải thiện và đúng mục tiêu chúng ta yêu cầu ban đầu. Nhưng bạn cũng có thể nhận ra thêm rằng chúng ta có 0ms trong tổng thời gian chặn trong luồng `main-thread`. Điều này tốt hơn nhiều so với 112ms và hãy nhớ rằng, chúng ta đã giảm thiểu được tốc độ chậm gấp 6 lần ban đầu mà người dùng phải trải nghiệm nó.
+
+Hãy mở React DevTools và đảm bảo rằng chúng tôi chỉ hiển thị thành phần cần được hiển thị với tương tác này:
+
+![https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/fast-react-profiler_u9arcy.png](https://res.cloudinary.com/kentcdodds-com/image/upload/f_auto,q_auto,dpr_2.0/v1622131136/epicreact.dev/articles/improve-the-performance-of-your-react-forms/fast-react-profiler_u9arcy.png)
+
+Chỉ duy nhất các thành phần được re-render lại là các thành phần thực sự cần thiết như `Input` mà ta đã làm trong ví dụ. Thực tế, `<FastForm />` đã không bị re-render trong suốt quá trình người dùng tương tác với các `Input` trong form vì các trạng thái (state) được bố trí quản lý trong chính các `Input` tương tác với người dùng. Điều này làm cải thiện rõ rệt và cũng giảm đi các luồng re-render không cần thiết khi thay đổi các dữ liệu đầu vào trong Input mà người dùng tương tác.
+
+## Lưu ý
+
+Đôi khi, bạn cũng sẽ cần biết các giá trị của các `Input` khác trong quá trình xác thực giá trị của chúng (cho ví dụ về "Confirm password" sẽ cần biết giá trị của "password" để kiểm tra giá trị có giống nhau). Trong trường hợp này, bạn sẽ có một số lựa chọn khác. Bạn có thể đưa trạng thái vào vị trí `Parent Component` ít phổ biến nhất, điều này không lý tưởng vì điều đó có nghĩa là mọi thành phần sẽ hiển thị lại khi trạng thái bên trong đó thay đổi và sau đó bạn có thể phải bắt đầu lo lắng về việc ghi nhớ (nên vui khi React cung cấp tuỳ chọn này).
+
+Một lựa chọn khác là đưa nó vào `Context Local` trong component của bạn. Sẽ chỉ duy nhất `Provider` và `Consumer` của Context đó phải re-render lại khi trạng thái thay đổi.  
+
+Một lựa chọn thứ ba là sử dụng React Ref để xử lý trường hợp này mà bạn có thể tìm hiểu.
+
+## Kết luận
+
+Vậy, điểm mấu chốt trong bài viết này chúng ta cần lưu ý trong quá trình phát triển các Form trong ứng dụng:
+
+- Lưu ý về các trạng thái được đặt ở component
+- Ứng dụng **Controlled Component** và **Uncontrolled Component** cho các trường hợp cần thiết khi các `Input` mất thời gian xử lý là nhiều hay ít.
+- Một số lựa chọn khác để cải thiện hiệu xuất như **Context, React Ref** để cải thiện hiệu xuất cho **Form**
+
+Tham khảo tại: [epicreact.dev](https://epicreact.dev/improve-the-performance-of-your-react-forms/)
+      

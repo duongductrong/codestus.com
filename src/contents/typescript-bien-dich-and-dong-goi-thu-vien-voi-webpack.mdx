@@ -1,0 +1,248 @@
+---
+title: Typescript - Biên dịch & đóng gói thư viện với Webpack 
+description: Cấu hình các files Webpack giữa các dự án có thể khác nhau vì nó là một công cụ và các nhà phát triển sẽ luôn giữ nó làm tất cả mọi việc. Nhưng một thư viện đơn giản như hiện tại, tất cả những gì chúng ta cần làm là bundle ra các mã theo chuẩn `es5`.
+tags: JavaScript,React,Frontend
+author: Trọng Dương Đức
+publishAt: 2022-08-08T00:45:00.000Z
+createdAt: 2022-08-08T00:46:55.000Z
+updatedAt: 2024-09-21T09:26:46.448Z
+views: 1419
+slug: typescript-bien-dich-and-dong-goi-thu-vien-voi-webpack
+---
+
+## ****Webpack + tsc + npm script = ♥️****
+
+Chúng ta sẽ tập trung vào 3 kết quả đầu ra khác nhau cho việc đóng gói thư viện:
+
+1. Biên dịch các `tsc` `*.d.ts` types declarations và source-map (Phần này phục cho việc phát triển và debug của chúng ta). Để hỗ trợ phần lớn các bundlers/tools chúng ta sẽ sử dụng `CommonJS` module.
+2. Tương tự phía trên, sử dụng `ES6 module` với cú pháp mới nhất, thực hiện tree shaking để giảm kích thước đóng gói.
+3. Đóng gói `umd`, được biên dịch theo tiêu chuẩn ES5, hoạt động tốt với các trình duyệt.
+
+Thông thường, chúng ta sẽ không cần cung cấp 2 loại đóng gói `umd` và `compiled source`. Vì `umd` theo định nghĩa nên phổ biến. Vấn đề xảy ra với thực tế là tệp khai báo kiểu dữ liệu không phải là tệp JavaScript hợp lệ (do đó có phần mở rộng .ts) và điều đó gây ra sự cố trong gói khi được sử dụng trong trình duyệt và môi trường không phải TS.
+
+Bằng cách mà chung ta đang làm, có thể duy trì hỗ trợ đầy đủ các ứng dụng TS cũng như đóng gói module common, fallback lại `umd` khi cần thiết.
+
+## Kết quả
+
+Giả sử thư viện của chúng ta có cấu trúc như sau:
+
+```jsx
+node_modules/
+src/
+package.json
+tsconfig.json
+README.md
+```
+
+Những gì chúng ta sẽ build và xuất bản lên npm là ba loại đóng gói mà chúng ta đã nói phía trên.
+
+```js
+_bundlers/ // UMD bundles
+lib/       // ES5(commonjs) + source + *.d.ts
+lib-esm/.  // ES5(esmodule) + source + *.d.ts
+package.json
+README.md
+```
+
+Để loại trừ phần các file, trong `npm` chúng ta có thể sử dụng `.npmignore` sẽ có công dụng tương đương với `.gitignore` mà chúng ta hay sử dụng. Nếu chúng ta không cung cấp điều này, npm sẽ bỏ qua nội dung bên trong theo `.gitignore`. Nói 1 cách tóm gọn, khi xuất bản 1 thư viện chúng ta chỉ cần bao gồm các phần đã bundle, từ đó ta có thể sử dụng `.npmignore` để làm việc này.
+
+## Cấu hình TypeScript
+
+TypeScript về cơ bản sẽ cho chúng ta cấu hình nó bên trong 1 file `tsconfig.json`.
+
+Có rất nhiều cấu hình có thể khác nhau tùy theo nhu cầu của thư viện. Chúng ta sẽ tập trung vào những cấu hình sau:
+
+```json
+{
+	"module": "commonjs",
+	"target": "es5",
+	"lib" : ["es2015", "dom"],
+	"outDir": "lib",
+
+	"sourceMap": true,
+	"declaration": true,
+}
+```
+
+### “module”: “commonjs”
+
+Chúng ta sẽ nói với `compiler` rằng mặc định, chúng ta muốn khai báo module của chúng ta theo cú pháp `commonjs`. Điều này sẽ biên dịch mọi cú pháp `import` và `export` thành `require()` và `module.exports` là các cú pháp mặc định trong môi trường Node.
+
+### “target”: “es5”
+
+Là cú pháp mà chúng ta sẽ sử dụng để viết, ở đây chúng ta có thể chọn từ `ES5` trở đi.
+
+### “lib”: [ “es2015”, “dom” ]
+
+Lib là một tập tin khai báo đặc biệt cho TS. Nó chứa các khai báo cho các cấu trúc JS phổ biến hiện diện trong thời gian chạy như ở đây chúng ta muốn là `es2015` và `DOM`.
+
+Bằng cách này, chúng ta có tất cả các cách viết của `es6` khi nhắm `target: es5`
+
+### “ourDir”: “lib”
+
+Cấu hình này nói cho compiler rằng, sau khi đóng gói các source, chúng ta muốn nó lưu ở thư mục `lib` 
+
+### “sourceMap”: true & “declaration”: true
+
+Chúng ta muốn cả `sourceMaps` và các file khai báo từ mã nguồn của chúng ta.
+
+---
+
+Với những cấu hình này, nếu chúng ta chạy nó với `tsc` command thì compiler sẽ tạo ra 3 kết quả mà chúng ta cần
+
+Chúng ta có thể tạo một `tsconfig` thứ hai chỉ dành cho mục thứ hai, nhưng vì cấu hình gần như giống hệt nhau, chúng ta sẽ sử dụng `cli` để ghi đè các tùy chọn này.
+
+```
+tsc -m es6 --outDir lib-esm
+```
+
+Trình biên dịch sẽ sử dụng module `es6` thay vì `commonjs` và đặt nó trong thư mục riêng của nó `(--ourDir lib-esm)`
+
+Chúng ta có thể kết hợp hai lệnh bằng cách thực hiện `tsc && tsc -m es6 --outDir lib-esm`.
+
+## Cấu hình Webpack
+
+Phần cuối cùng cấu hình của chúng ta sẽ là Webpack, nó sẽ thực hiện việc đóng gói. Vì Webpack sẽ không hiểu được Typescript, chúng ta sẽ cần phải bổ sung các `loader` cho nó, giống như chúng ta sẽ sử dụng `babel-loader` để hướng dẫn Webpack biên dịch mã nguồn thông qua Babel.
+
+Chúng ta sẽ lựa chọn TS Loader `awesome-typescript-loader` vì một vài lý do: Nhanh (bằng cách chuyển việc type-checking và emitter thành các quy trình riêng biệt) và tích hợp tốt với Babel trong trường hợp cần biên dịch thêm một số babel plugin khác.
+
+Cấu hình các files Webpack giữa các dự án có thể khác nhau vì nó là một công cụ và các nhà phát triển sẽ luôn giữ nó làm tất cả mọi việc. Nhưng một thư viện đơn giản như hiện tại, tất cả những gì chúng ta cần làm là bundle ra các mã theo chuẩn `es5`.
+
+Webpack và loader cũng sẽ có nhiệm vụ tạo ra source maps chứa các code TS gốc cho chúng ta, nó sẽ vô cùng hữu ích cho việc debug.
+
+Và trong phần này, tôi sẽ giả định rằng bạn đã quen thuộc với Webpack hoặc ít nhất đã thử nó trước đây sẽ bỏ qua những phần hướng dẫn quá chi tiết. 
+
+Cấu hình Webpack cơ bản của chúng ta sẽ như sau:
+
+```jsx
+// webpack.config.js
+
+module.exports = {
+  entry: {
+    lib: "./src/index.ts",
+    "lib.min": "./src/index.ts",
+  },
+  output: {
+    path: path.resolve(__dirname, "_bundles"),
+    file: "[name].js",
+    libraryTarget: "umd",
+    library: "lib",
+    umdNamedDefine: true,
+  },
+  resolve: { extensions: [".ts", ".tsx", ".js"] },
+  devtool: "source-map",
+  plugin: {
+    new webpack.optimize.UglifyJsPlugin({
+        minimize: true,
+        sourceMap: true,
+        include: /\.min\.js$/,
+      })
+  },
+  module: {
+    loaders: [
+      {
+        test: /\.tsx?$/,
+        loader: "awesome-typescript-loader",
+        exclude: /node_modules/,
+        query: {
+          declaration: false,
+        },
+      },
+    ],
+  },
+};
+```
+
+Đây là cấu hình tiêu chuẩn cho Webpack của chúng ta, đồng thời cũng cần ghi nhớ những thứ sau từ file Webpack trên.
+
+### **`output`**
+
+Chúng ta sẽ nói cho Webpack biết rằng chúng ta đang đóng gọi một thư viện với thuộc tính `library`. Giá trị của nó sẽ là tên của thư viện chúng ta. `libraryTarget` và `umdNamedDefine` sẽ cho Webpack biết rằng cần tạo một `UMD module` và đặt tên cho nó với tên của lib mà chúng ta vừa đặt.
+
+### `extensions`
+
+Webpack thông thường chỉ tiềm kiếm các file `.js` module. Vì vậy, chúng ta cần bổ sung extensions để nó tìm kiếm các file `.ts` `.tsx` cho chúng ta (`.tsx` sẽ sử dụng cho trường hợp với React + JSX).
+
+### `module`
+
+Cuối cùng, chúng ta sẽ bổ sung loader `awesome-typescriptloader` để phân tích cú pháp vào module. Điều quan trọng ở đây là sử dụng thông số `query` để tùy chỉnh `atl` và tắt đầu ra khai báo kiểu. Loader sẽ sử dụng `tsconfig.json` để hướng dẫn compiler biên dịch, tất cả những thứ chúng ta cần là ghi đè lên tệp cấu hình này.
+
+> *Tip: the RegEx `/\.tsx?$/` matches both `.ts` and `.tsx` files, so I forget about it if I later decide to use React and JSX syntax*
+> 
+
+### ****`devtool` & `plugins`**
+
+Khai báo `source-map` cho `devtool` sẽ giúp chúng ta tạo ra một `source-map` gốc từ TS, giữ cho việc debug dễ dàng.
+
+Một phiên bản thu nhỏ sẽ được tạo bởi `plugins` UglifyJSPlugin, vì vậy chúng ta phải chỉ định chúng ta cũng cần source-map cho phiên bản đó vì giá trị mặc định của plugin là `false`.
+
+---
+
+Khi tệp cấu hình được thiết lập nếu chúng ta chạy Webpack trong terminal, nó sẽ tạo thư mục _bundles với 4 tệp bên trong:
+
+```jsx
+lib.js
+lib.js.map
+lib.min.js
+lib.min.js.map
+```
+
+## Phần kết của câu chuyện
+
+Bây giờ, chúng ta đã thiết lập xong mọi thứ, chúng ta có thể tạo một số kịch bản (scripts) `npm` để tự động hoá quy trình này và dọn dẹp các thư mục mỗi khi chúng ta biên dịch.
+
+`clean`: sẽ đảm nhận việc xoá các thư mục hiện tại chuẩn bị cho đợt build mới (việc này tránh conflict khi build).
+
+Lưu ý: `shx` là command mình sử dụng cho OS của mình. Có thể cấu hình tuỳ ý
+
+```jsx
+shx rm -rf _bundles lib lib-esm
+```
+
+`build`: sẽ đảm nhận việc kết hợp mọi thứ lại với nhau:
+
+```jsx
+npm run clean && tsc && tsc -m es6 --outDir lib-esm && webpack
+```
+
+Theo thứ tự: Nó sẽ xoá hết tất cả 3 folders (nếu có) và build 1 phiên bản khác vào folders đó.
+
+### `.gitignore` & `.npmignore`
+
+Để xử lý kho lưu trữ và xuất bản lên npm, chúng ta phải nhớ thêm một số thứ bên trong tệp bỏ qua:
+
+`.gitignore`
+
+```jsx
+node_modules
+lib
+lib-esm
+_bundles
+```
+
+Là một module hoặc một bản build không nên ở trong kho lưu trữ, vì chúng ta có thể xây dựng nó cục bộ bất cứ khi nào chúng ta cần.
+
+Điều này có nghĩa rằng chúng ta chỉ giữ lại những bundled folders khi xuất bản lên `npm` 
+
+`.npmignore`
+
+```jsx
+.*
+**/tsconfig.json
+**/webpack.config.js
+node_modules/
+src/
+```
+
+Người dùng cuối cùng sẽ chỉ sử dụng các file đã biên dịch (bất kỳ phiên bản nào cần thiết) để chúng ta có thể xoá toàn bộ mã nguồn, các phần phụ thuộc và cấu hình TS / Webpack
+
+Những tệp này sẽ không gây ra bất kỳ vấn đề nào, nhưng thật tuyệt khi giảm thiểu số lượng tệp vì mỗi khi ai đó sử dụng thư viện, nó sẽ được tải xuống và điều đó sẽ chỉ gây lãng phí băng thông và bộ nhớ.
+
+## Kết luận
+
+Chắc chắn rằng có nhiều thiết lập khác cũng hoạt động tương tự như vậy, như chúng ta sử dụng công cụ này vì nó phù hợp với chúng ta và nó có thể dễ dàng định cấu hình cho các nhu cầu phức tạp hơn. 
+
+Lý tưởng là chỉ có hai đầu ra: `commonjs` và `es`. Tệp `UMD` sẽ phục vụ nhu cầu của chúng ta như là những thứ phổ biến, nếu hiện tại không có cách nào để tạo định nghĩa  trong một tệp gói duy nhất (phản ánh module UMD đi kèm).
+
+Tham khảo: [Compiling and bundling TypeScript libraries with Webpack](https://marcobotto.com/blog/compiling-and-bundling-typescript-libraries-with-webpack/)
+      

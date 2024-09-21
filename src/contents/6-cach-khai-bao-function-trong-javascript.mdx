@@ -1,0 +1,118 @@
+---
+title: 6 cách khai báo function trong JavaScript
+description: JavaScript là có thể coi một ngôn ngữ vô cùng phức tạp và vô số định nghĩa mà các người mới và các lão làng cũng phải lắc đầu. Tuy nhiên, trong sự phức tạp đấy nó mang ý nghĩa riêng cho các trường hợp mà chúng ta ứng dụng. Cách khai báo hàm trong JavaScript cũng vậy, có rất nhiều cách để chúng ta khai báo.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-06-05T00:10:26.000Z
+createdAt: 2021-06-05T00:10:26.000Z
+updatedAt: 2024-06-03T16:34:23.837Z
+views: 11011
+slug: 6-cach-khai-bao-function-trong-javascript
+---
+
+JavaScript là có thể coi một ngôn ngữ vô cùng phức tạp và vô số định nghĩa mà các người mới và các lão làng cũng phải lắc đầu. Tuy nhiên, trong sự phức tạp đấy nó mang ý nghĩa riêng cho các trường hợp mà chúng ta ứng dụng. Cách khai báo hàm trong JavaScript cũng vậy, có rất nhiều cách để chúng ta khai báo. Tuy nhiên, chúng cũng có ý nghĩa cho từng trường hợp. Mình sẽ giới thiệu cho các bạn **6 cách cơ bản để khai báo hàm trong JavaScript**. 
+
+## 1. Khai báo với function
+Một khai báo hàm được tạo bằng từ khóa `function`, theo sau là tên hàm bắt buộc, danh sách các tham số trong một cặp dấu ngoặc đơn (para1, ..., paramN) và một cặp dấu ngoặc nhọn {...} phân tách phần nội dung mã .
+
+```js
+// function declaration
+function example() {
+	console.log("Đây là ví dụ");
+}
+example();
+```
+
+Đối với việc báo bằng từ khóa `function` để tạo một hàm trong javascript, chúng ta sẽ bắt gặp một khái niệm gọi là `hoisting`. Khi thực thi một đoạn code, javascript tìm kiếm các khai báo hàm với `function` và khai báo các định danh của hàm lên trên hàng đầu tiên trước khi thực hiện đọc và thực thi các đoạn mã khác. Đó là lý do khi khai báo một hàm bằng `function`, chúng ta có thể gọi hàm đó trước khi chúng được khai báo
+
+Và ví dụ này chứng minh điều đó:
+
+```js
+example(); // "Đây là ví dụ"
+function example() {
+	console.log("Đây là ví dụ");
+}
+```
+
+## 2. Khai báo Function expression
+Khai báo một `function expression` cũng tương tự như một `function` khai báo thông thường. Chúng cũng tạo ra một hàm để thực hiện các đoạn mã bên trong mà chúng ta định nghĩa. Nhưng điểm khác biệt ở đây, một `function expression` được khai báo là một `anonymous functions` hay còn gọi là **hàm không tên**, sau đó được gán vào một **biến** hoặc một **object**.
+
+```js
+const count = function(array) { // Function expression
+  return array.length;
+}
+const methods = {
+  numbers: [1, 5, 8],
+  sum: function() { // Function expression
+    return this.numbers.reduce(function(acc, num) { // func. expression
+      return acc + num;
+    });
+  }
+}
+count([5, 7, 8]); // => 3
+methods.sum();    // => 14
+```
+
+## 3. Định nghĩa phương thức (Method Definitions)
+Bắt đầu với **ECMAScript 2015**, một cú pháp ngắn hơn cho các định nghĩa phương thức trên bộ khởi tạo đối tượng được giới thiệu. Nó là cách viết tắt của một hàm được gán là một phương thức của đối tượng **Object**.
+
+```js
+const obj = {
+  foo: function() {
+    // ...
+  },
+  bar: function() {
+    // ...
+  }
+}
+```
+
+## 4. Hàm mũi tên (Arrow Function)
+Chắc hẵn không còn xa lạ với cái tên `arrow function`. Cách khai báo này có cú pháp rất đơn giản và ngắn gọn để tạo hàm, thường tốt hơn so với Biểu thức hàm (Function Expression). Tuy nhiên, nó sẽ không tạo ra **context** bên trong nó. Vì thế, chúng ta sẽ không thể sử dụng `this` bên trong một `arrow function`, bạn sẽ phải sử dụng cách khai báo hàm bằng `function` hoặc `function expression` nếu muốn sử dụng `this`.
+
+```js
+// arrow function
+let sum = (a, b) => a + b;
+
+// function expressioon
+let sum = function(a, b) {
+  return a + b;
+};
+```
+
+So với `function expression`, `arrow function` là một lựa chọn ngắn gọn và dễ hiểu trong nhiều trường hợp.
+
+## 5. Generator function
+**Generator function** cũng là một dạng khai báo hàm trong JavaScript, nhưng có đặc điểm khác so với các cách khai báo hàm thông thường chúng ta sử dụng. Chúng có thể dừng giữa chừng và sau đó tiếp tục từ nơi nó đã dừng. Nói tóm lại, một hàm `generator function` dường như là một hàm nhưng nó hoạt động giống như một trình lặp.
+
+Và ví dụ này cho thấy khác biệt so với các kiểu khai báo hàm trên:
+```js
+function* indexGenerator(){
+  var index = 0;
+  while(true) {
+    yield index++;
+  }
+}
+const g = indexGenerator();
+console.log(g.next().value); // => 0
+console.log(g.next().value); // => 1
+```
+
+## 6. Khai báo hàm với new Function
+Cách này có vẽ đã rất lâu từ thời đầu của JS. Đến bây giờ, có thể chúng ta đã không còn ưa chuộng cách khai báo này vì sự phức tạp của nó. Tuy nhiên, biết vẫn tốt hơn không biết.
+
+Kiểu đối tượng hàm có một phương thức khởi tạo: `Function` và sử dụng `new`. Chúng ta sẽ gọi **new Function()** sau đó truyền các tham số vào bên trong `(arg, ...arg, ...., argsN]] )` để xây dựng thành một hàm hoàn chỉnh.
+
+```js
+
+const numberA = 'numberA', numberB = 'numberB';
+const sumFunction = new Function(numberA, numberB, 
+   'return numberA + numberB'
+);
+sumFunction(10, 15) // => 25
+
+```
+
+## Kết luận
+Mình đã giới thiệu cho các bạn **6 cách khai báo hàm trong JavaScript**. Bạn có thể thấy JavaScript phức tạp trong việc khai báo hàm, mặc dù vậy, nó cũng đem đến sự đa dạng khai báo trong từng phiên bản. Bạn có thể tùy chon cách sử dụng trong các trường hợp, nó linh hoạt trong nhiều trường hợp. Tuy nhiên, nó cũng có một số nhược điểm mà mình đã giới thiệu sơ trong các phần. Vì vậy, các bạn cần tìm hiểu rõ bản chất nó trước khi ứng dụng vào dự án nhé.
+      

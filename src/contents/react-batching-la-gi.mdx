@@ -1,0 +1,136 @@
+---
+title: React Batching là gì? 
+description: Batching trong React mô tả chi tiết triển khai nội bộ của React, giúp nhóm nhiều yêu cầu cập nhật trạng thái trong một lần cập nhật
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-08-15T04:30:10.000Z
+createdAt: 2023-08-15T04:30:10.000Z
+updatedAt: 2024-06-03T15:04:09.603Z
+views: 169
+slug: react-batching-la-gi
+---
+
+Batching trong React mô tả chi tiết triển khai nội bộ của React, giúp nhóm nhiều yêu cầu cập nhật trạng thái trong một lần cập nhật. Do đó, nó chỉ kích hoạt  một lần render trong phạm vi component đó, giúp cải thiện khá lớn hiệu xuất cho các ứng dụng React lớn.
+
+Bây giờ, hãy cùng thử tìm hiểu Batching trong React qua ví dụ sau:
+
+```tsx
+import * as React from 'react';
+
+const App = () => {
+  const [counter, setCounter] = React.useState(42);
+  const [clicked, setClicked] = React.useState(0);
+
+  const handleCounter = (digit) => {
+    setCounter(counter + digit);
+    setClicked(clicked + 1);
+  };
+
+  console.log('component rendering');
+
+  return (
+    <div>
+      <button type="button" onClick={() => handleCounter(1)}>
+        Increase
+      </button>
+      <button type="button" onClick={() => handleCounter(-1)}>
+        Decrease
+      </button>
+
+      <div>Counter: {counter}</div>
+      <div>Clicked: {clicked}</div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+Khi ấn vào một trong 2 nút “button” increase hoặc decrease, mặc dù có hai cập nhật trạng thái xảy ra trong `event handler` thì component App vẫn chỉ re-render duy nhất 1 lần. Bạn có thể tự xác thực nó bằng cách thử thực thi đoạn code trên.
+
+Trước React 18, điều này được kiểm soát tốt, không phải tất cả các cập nhật trạng thái đều được thực hiện hàng loạt (batched). Cho ví dụ, các states được cập nhật bất đồng bộ (e.g. Promise) hoặc Web API (e.g. setTimeout) không được batch và do đó đã kích hoạt hai re-render (đối với hai lần cập nhật state tương ứng) của thành phần.
+
+```tsx
+import * as React from 'react';
+
+const App = () => {
+  const [counter, setCounter] = React.useState(42);
+  const [clicked, setClicked] = React.useState(0);
+
+  const handleCounterIncrease = () => {
+    setTimeout(() => {
+      setCounter(counter + 1);
+      setClicked(clicked + 1);
+    }, 0);
+  };
+
+  const handleCounterDecrease = async () => {
+    await Promise.resolve();
+
+    setCounter(counter - 1);
+    setClicked(clicked + 1);
+  };
+
+  console.log('component rendering');
+
+  return (
+    <div>
+      <button type="button" onClick={handleCounterIncrease}>
+        Increase
+      </button>
+      <button type="button" onClick={handleCounterDecrease}>
+        Decrease
+      </button>
+
+      <div>Counter: {counter}</div>
+      <div>Clicked: {clicked}</div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+Với bổ sung trong React 18, [Automatic batching](https://react.dev/blog/2022/03/29/react-v18#new-feature-automatic-batching) đã được hỗ trợ. Tuy nhiên, nếu có những tình huống mà bạn muốn các state được cập nhật không theo cơ chế batching của React, bạn có thể sử dụng `flushSync` để từ chối việc đó.
+
+```tsx
+import * as React from 'react';
+import { flushSync } from 'react-dom';
+
+const App = () => {
+  const [counter, setCounter] = React.useState(42);
+  const [clicked, setClicked] = React.useState(0);
+
+  const handleCounter = (digit) => {
+    flushSync(() => {
+      setCounter(counter + digit);
+    });
+    setClicked(clicked + 1);
+  };
+
+  console.log('component rendering');
+
+  return (
+    <div>
+      <button type="button" onClick={() => handleCounter(1)}>
+        Increase
+      </button>
+      <button type="button" onClick={() => handleCounter(-1)}>
+        Decrease
+      </button>
+
+      <div>Counter: {counter}</div>
+      <div>Clicked: {clicked}</div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+`flushSync()` sẽ buộc React áp dụng đồng bộ các cập nhật các state. Do đó, buộc React phải cập nhật DOM ngay lập tức. Các bản cập nhật trạng thái đang chờ xử lý khác cũng sẽ bị áp dụng. Sau tất cả, `flushSync` nên được sử dụng một cách hợp lí (hầu như không bao giờ dùng =))))), ngoại trừ những trường hợp thực sự cần thiết, bởi vì nó đi kèm với những mệt mỏi mà React đã bỏ công cải thiện nó. 😎
+
+## Kết luận
+
+Tóm lại, Batching trong React chỉ là một triển khai để cải thiện hiệu suất của các bản cập nhật trạng thái.
+      

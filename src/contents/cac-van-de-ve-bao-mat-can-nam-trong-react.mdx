@@ -1,0 +1,89 @@
+---
+title: Các vấn đề về bảo mật cần nắm trong React
+description: Ngoài việc phát triển ứng dụng, bạn cũng phải chú ý về vấn đề bảo mật cho ứng dụng của mình. Ứng dụng có thể hoạt động tốt nhưng lại đi kèm theo khả năng bảo mật kém sẽ phát sinh nhiều rũi ro không tính trước được.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-01-24T05:23:19.000Z
+createdAt: 2021-01-24T05:23:19.000Z
+updatedAt: 2024-06-03T17:48:13.117Z
+views: 6152
+slug: cac-van-de-ve-bao-mat-can-nam-trong-react
+---
+
+Ngoài việc phát triển ứng dụng, bạn cũng phải chú ý về vấn đề bảo mật cho ứng dụng của mình. Ứng dụng có thể hoạt động tốt nhưng lại đi kèm theo khả năng bảo mật kém sẽ phát sinh nhiều rũi ro không tính trước được. 
+
+Vậy nên khi phát triển bất kỳ ứng dụng trên bất kì nền tảng nào các bạn cũng cần chú ý về vấn đề bảo mật song song với việc phát triển ứng dụng, và nếu như bạn đang tìm kiếm các kỹ thuật bảo mật thì bài viết này sẽ dành cho bạn.
+
+## Chống tấn công XSS Protection với Binding dữ liệu trong React
+Sử dụng dấu ngoặc nhọn ```{}``` để chống tấn công XSS, mặc dịnh **React** đã tự động escape các giá trị để bảo vệ mã lệnh của bạn khỏi các cuộc tấn công XSS. Nhưng có một điểm cần chú ý, nó chỉ hoạt động khi `Render` dạng `textContent` chứ không hoạt động ở dạng `HTMLAttributes`.
+
+**Hoạt động:**
+
+```html
+<div>{stateData}</div>
+```
+
+**Không hoạt động:**
+```html
+<form action={state}></form>
+```
+
+Chú ý khi sử dụng để tránh các tấn công đáng tiếc cho ứng dụng của bạn.
+
+## React render HTML
+Trong react, cần tránh truy cập DOM và hiển thị dữ liệu trực tiếp, đừng tin tưởng bất kỳ dữ liệu nào của người dùng khi hiển thị, đây sẽ là nơi tấn công hoàn hảo để chèn các đoạn `script` để khai thác thông tin cookie, session dữ liệu của bạn mà bạn không hề biết. 
+
+Nên sử dụng thuộc tính `dangerouslySetInnerHTML` bên trong thẻ html theo như khuyến cáo sử dụng của [https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml](https://reactjs.org/docs/dom-elements.html#dangerouslysetinnerhtml) kèm theo một thư viện `DOMPurify` để làm sạch đi mã **HTML** của bạn nếu bắt buộc phải thực hiện **render HTML**.
+
+**Sử dụng:**
+```js
+import purify from "dompurify";
+...
+...
+...
+<div dangerouslySetInnerHTML={{__html:purify.sanitize(state) }}></div>
+```
+**Và đừng làm như này các bạn nhé:**
+```js
+// ref
+const refPlaceRender = useRef(null);
+// ...
+refPlaceRender.current.innerHTML = stateLoadedFromApi;
+// ...
+
+// Render
+<div ref={refPlaceRender}></div>
+```
+
+## Nguy hiểm từ URLS
+Đường dẫn có thể chứa các đoạn mã độc `javascript:`. Chúng ta nên kiểm duyệt và chỉ nên tin tưởng các đường dẫn tuân thủ giao thức `http` hoặc `https` để tránh `javascript:đường dẫn chèn mã độc`
+
+Chúng ta sẽ xác thực Urls bằng cách kiểm tra đường dẫn có tuân thủ giao thức với các pháp mà chúng ta cho phép trong **whitelist**
+
+```js
+function validateUrl(url) {
+	const parsedUrl = new URL(url);
+	
+	return ["http:", "https:"].includes(parsedUrl.protocol)
+}
+
+<a href={validateUrl(url) ? url : ""}>Content</div>
+```
+
+Và đừng nên sử dụng như
+
+```html
+<a href={url}>Content</div>
+```
+## Tấn công JSON State
+Thông thường JSON sẽ được gửi từ phía máy chủ thông qua `API` đến react để render lên DOM. Bạn sẽ cần replace các ký tự < để tránh tấn công xss.
+
+```js
+window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g, "\\u003c")}
+```
+
+## Tránh dùng những thư viện chứa mã độc
+Với tốc độ phát triển hiện tại, đã sinh ra hàng triệu thư viền dưới sự phát triển của các lập trình viên, vấn đề này sẽ không thể kiểm soát triệt để được các thư viện có chứa các mã độc khai thác thông tin của bạn. Vậy nên cần chú ý lựa chọn thư viện phụ hợp và đáng tin cậy dựa vào các lượt sử dụng và đánh giá đã có từ các lập trình viên và chuyên gia khác. 
+
+Đây là cũng là một cách chọn lọc để tránh sử dụng phải thư viện chứ mã độc khai thác mã nguồn của bạn cho mục đích không tốt đẹp.
+      

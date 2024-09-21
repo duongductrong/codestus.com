@@ -1,0 +1,77 @@
+---
+title: Tìm hiểu phần tử Dialog trong HTML
+description: Diablog (được biết đến là một phương thức hộp thoại được cung cấp sẵn trong phiên bản HTML5) là một hộp thoại cho trang web. Nó cũng được gọi là Modal dialog
+tags: JavaScript,Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-01-31T13:50:26.000Z
+createdAt: 2021-01-31T13:50:26.000Z
+updatedAt: 2024-06-01T14:53:16.729Z
+views: 6719
+slug: tim-hieu-phan-tu-dialog-trong-html
+---
+
+**Diablog** (được biết đến là một hộp thoại được cung cấp sẵn trong phiên bản **HTML5**) là hộp thoại được cung cắp sẵn cho trang web. Hay còn được gọi là **Modal dialog**. Khi hiển thị, hộp thoại sẽ che khuất phần nội dung của trang web bên dưới. Mục đích để ngăn chặn tương tác của người dùng phần còn lại của nội dung trang web.
+
+Bên dưới đây là hình ảnh ví dụ điển hình về hộp thoại **Dialog**. Nền đen bên dưới hộp thoại được gọi là `backdrop cover`
+
+![Hình ảnh minh hoạ về modal dialog](https://codestus.com/uploads/images/posts/vi_du_modal13_1-Bootstrap-modal-custom-size.png)
+
+Trong bài viết này, chúng ta sẽ tìm hiểu về thẻ `<dialog>` trong HTML và cùng xem cách sử dụng nó. Chúng ta cũng sẽ tìm hiểu về một số thiếu sót và cuối cùng, hãy cùng xác nhận xem nó đã đủ tiêu chuẩn để áp dụng vào ứng dụng của bạn chưa.
+
+## Nhìn chung về `<dialog>`
+Phần tử `<dialog>` đại diện cho `dialogbox` có một số thuộc tính thuộc tính đặt biệt để kích hoạt
+- **open**: Thuộc tính này chỉ ra trạng thái kích hoạt của hộp thoại. Khi thuộc tính này không được gán vào thẻ, hộp thoại sẽ không được hiển thị cho người dùng.
+
+```html
+<dialog>
+Người dùng không thể thấy hộp thoại này
+</dialog>
+
+<dialog open>
+Người dùng có thể thấy hộp thoại này
+</dialog>
+```
+
+Ở tại thời điểm của bài viết này, `<dialog>` đã được hỗ trợ trên các phiên bản trình duyệt.
+- **Chrome**: từ 37+
+- **Edge**: từ 79+
+- **Firefox**: từ 53+
+- **Safari**: Không hỗ trợ
+
+Tìm hiểu thêm về:  [**Dialog**](https://developer.mozilla.org/vi/docs/Web/HTML/Element/dialog)
+
+## `<Dialog>` APIs
+Trong JavaScript, bạn cũng có thể kích hoạt trạng thái bật tắt của dialog bằng hai phương thức sau.
+
+```js
+const dialog = document.querySelector("dialog");
+
+// Hiển thị
+dialog.show();
+
+// Ẩn
+dialog.close();
+```
+
+Hộp thoại xuất hiện mặc định với các thuộc tính CSS cơ bản đã được cung cấp như **margin**, **border**, etc, có thể dễ dàng tuỳ chỉnh bằng **CSS**.
+
+nào, hãy cùng xem ví dụ bên dưới về phần tử **dialog** trong **HTML5**.
+
+Xem thu73 demo: [Demo on Codepen](https://codepen.io/codestus/pen/jOVEmpm)
+
+## Sử dụng showModal() thay cho show()
+Một trong những điều mong muốn khi xây dựng hộp thoại, là cách bạn xây dựng phông nền để người dùng không thể tương tác với phần còn lại của trang web. Phương thức **dialog.showModal()** đã tự động thực hiện việc đó thông qua việc bạn kích hoạt nó trong lệnh **JavaScript**.
+
+Mặc định, **backdrop** của **dialog** sẽ là một lớp **background** màu đen được làm mờ. Ngoài ra bạn cũng có thể tuỳ chỉnh lại màu nền này thông qua **::backdrop** **pseudo-element**.
+
+Ví dụ thay thế phương thức **show()** bằng **showModal()**.
+
+Xem thử demo: [Demo on Codepen](https://codepen.io/codestus/pen/RwoNgGa)
+
+## Tuỳ chỉnh thêm
+Bên trên là sơ bộ về cách hoạt động của thẻ `<dialog>` trong **HTML5**.Ngoài ra, bạn có thể thêm các **sự kiện Escape(ESC)** để lắng nghe hành động tắt **hộp thoại**, **Thêm các hiệu ứng** để chúng hoạt động thêm sinh động hơn.
+
+Nhưng hiện tại, **Dialog** vẫn chưa hỗ trợ hầu hết các trình duyệt, vậy nên các bạn cũng nên cân nhắc việc sử dụng trước khi áp dụng vào dự án thực tế nhé.
+
+<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
+      

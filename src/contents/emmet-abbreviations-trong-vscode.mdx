@@ -1,0 +1,186 @@
+---
+title: Emmet, Abbreviations trong VSCode
+description: Mức độ hiệu quả của công việc dựa vào chất lượng, năng xuất mà chúng ta bỏ ra. Trong kỹ thuật, năng xuất lập trình (phát triển phần mềm) có thể được tính dựa trên số lượng mã xây dựng và thời gian chúng ta dành cho nó, chất lượng của những dòng mã.
+tags: JavaScript,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-02-08T17:22:46.000Z
+createdAt: 2021-02-08T17:22:46.000Z
+updatedAt: 2024-05-29T16:00:35.409Z
+views: 7475
+slug: emmet-abbreviations-trong-vscode
+---
+
+Mức độ hiệu quả của công việc dựa vào chất lượng, năng xuất mà chúng ta bỏ ra. Trong kỹ thuật, năng xuất lập trình (phát triển phần mềm) có thể được tính dựa trên số lượng mã xây dựng và thời gian chúng ta dành cho nó, chất lượng của những dòng mã.
+
+Thời gian viết mã càng ít tương ứng với năng xuất phát triển tăng đáng kể. Chúng ta rút gọn thời gian viết mã bằng những công cụ, kỹ thuật, cách viết hỗ trợ từ phần mềm để giảm thời gian xây dựng mã nguồn mà vẫn đảm bảo chất lượng sản phẩm. Chúng ta hãy cùng tìm hiểu về một số công cụ, mẹo để giảm đáng kể thời gian viết mã HTML/CSS giúp tăng năng xuất, chất lượng dòng code.
+
+## VS Code - Emmet
+Visual Studio Code (hay còn gọi là VS Code) là một trong những trình soạn thảo mã nguồn hàng đầu (cũng là một IDE) và được cho là một trong những trình tốt nhất hiện nay để phát triển web. Emmet là một cơ sở hạ tầng dựa trên trình cắm có thể tạo ra các đoạn mã HTML / CSS từ các cú pháp ngắn gọn. VS Code hỗ trợ Emmet 2.0. Nó có nghĩa là bạn không cần bất kỳ tiện ích mở rộng bổ sung (**extension**) nào để sử dụng nó vì nó hoàn toàn có sẵn.
+
+## Cấu trúc HTML và Tag
+Một trong những khó khăn mà các lập trình viên phát triển web gặp phải là nhớ cấu trúc **HTML** và cú pháp thẻ **HTML**. Còn gì thú vị hơn khi chỉ sử dụng 1 ký tự duy nhất chúng ta có thể khởi tạo được cấu trúc HTML cơ bản nhất để bắt đầu cho một dự án mới.
+
+Bây giờ, hãy mở **VS Code** lên và khởi tạo file `index.html` sau đó nhập ký tự `!` như ảnh và bạn sẽ có lựa chọn **Emmet Abbreviation**.
+
+![Ví dụ Emmet Abbreviation](https://codestus.com/uploads/images/posts/character.png)
+
+Ta sẽ được cấu trúc như bên dưới
+
+![HTML Structure](https://codestus.com/uploads/images/posts/html-structure.png)
+
+Ngoài ra bạn cũng có thể sử dụng cho các loại thẻ khác trong HTML như `a`, `link`, `script`, `input`, etc.. Các gợi ý sẽ giúp bạn dễ lựa chọn hơn.
+
+## Thêm `id` và `class` cho thẻ HTML
+Đây là một cách vô cùng hiệu quả để tiết kiệm thời gian viết code trong quá trình tạo thẻ HTML với các thuộc tính `id`, `class`. Hãy thử bắt đầu với thẻ `h1` và `class='codestus'` hay `id='codestus'`
+
+```html
+h1.codestus
+h2.#codestus
+```
+
+Ta sẽ được kết quả
+
+```html
+<h1 class="codestus"></h1>
+<h2 id="codestus"></h2>
+```
+
+Ngoài ra, nếu bạn muốn tạo `class` hoặc `id` cho một `div` chúng ta vẫn có cách ngắn gọn hơn
+
+```html
+.codestus
+#codestus
+```
+
+và kết quả 
+
+```html
+<div class="codestus"></div>
+<div id="codestus"></div>
+```
+
+## Thêm Nested children trong thẻ HTML (Child >)
+Tạo cấu trúc HTML lồng nhau theo cách thủ công thông thường như này có vẻ rất tẻ nhạt và tốn thời gian
+
+```html
+<div>
+	<h1></h1>
+</div>
+```
+
+Điều gì xảy ra nếu chúng ta thử tạo cấu trúc HTML lồng nhau bằng cách chỉ nhập vài kí tự, rất đơn giản và tiết kiệm thời gian viết code của bạn. Chúng ta chỉ đơn giản sử dụng ký tự `>` để nổi giữa thẻ cha và thẻ con trong quá trình tạo. Bây giờ hãy thử với mẫu HTML phía trên.
+
+```html
+div>h1
+```
+
+Sau đó ấn `tab` và bạn sẽ nhận được kết quả bất ngờ.
+
+```html
+<div>
+	<h1></h1>
+</div>
+```
+
+Ngoài ra chúng ta cũng có thể thêm nội dung `textContent` cho thẻ `h1` trong ví dụ này bằng cách sau
+
+```html
+// emmet
+div>h1{Hello world}
+
+// Result
+<div>
+	<h1>Hello world</h1>
+</div>
+```
+
+## Tạo nhiều thẻ (Multiplication Tags)
+Bạn có thể tạo nhiều phần tử HTML cùng lúc với ký tự `*`. Giờ chúng ta cùng thử tạo một danh sách `ul` với 5 thẻ `li` cùng lúc nhé.
+
+```html
+ul>li*5
+```
+
+Kết quả nhận được
+
+```html
+<ul>
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+```
+
+## Tạo nhiều nhóm thẻ (Grouping)
+Như ví dụ trên, nhưng chúng ta muốn thêm `<a>` bên trong `<li>` trong quá trình tạo **emmet**.
+
+```html
+ul>(li>a)*5
+```
+
+Kết quả nhận được
+
+```html
+<ul>
+	<li><a href=""></a></li>
+	<li><a href=""></a></li>
+	<li><a href=""></a></li>
+	<li><a href=""></a></li>
+	<li><a href=""></a></li>
+</ul>
+```
+
+## Siblings
+Sử dụng ký tự `+` để tạo nhiều phần tử trong cùng một cấp bậc. Giả sử, chúng ta muốn tạo 3 phần tử `div` cùng bậc với những `class` khác nhau
+
+```html
+div>.one+.two+.three
+```
+
+Ta được kết quả
+
+```html
+<div>
+	<div class="one"></div>
+	<div class="two"></div>
+	<div class="three"></div>
+</div>
+```
+
+## Numbering `$`
+Chúng ta sử dụng `$` để tạo tự động `textContent` hoặc `class, id` cho thẻ
+
+```html
+div>div.item$*3
+```
+
+Kết quả mong muốn 
+
+```html
+<div>
+	<div class="item1"></div>
+	<div class="item2"></div>
+	<div class="item3"></div>
+</div>
+```
+
+##  Text `{}`
+Cách này nếu bạn để ý, mình đã sử dụng cách này cùng với mục `child >` phía trên. Rất đơn giản bạn chỉ việc đặt nội dung muốn hiển thị bên trong thẻ vào trong `{nội dung}` khi khởi tạo 
+
+```html
+div{1234}
+```
+
+Kết quả không gì khác ngoài
+
+```html
+<div>1234</div>
+```
+
+## Kết luận
+Bên trên là mình tổng kết một số cách hay sử dụng nhất, có thể bạn sẽ sử dụng nó siêng suốt trong quá trình khởi tạo mã HTML. Đây thực sự là một cách rất tiện lợi và tiết kiệm vô kể thời gian khởi tạo mã, trong thời gian tiết kiệm đó, bạn có thể tạo ra hàng ngàn sản phẩm chất lượng hơn thay vì phải bỏ công để ghi trọn vẹn mã bằng cách thủ công. 
+
+Ngoài ra, nếu bạn muốn tìm hiểu thêm về các **Abbreviations Syntax** khác, hãy tham khảo qua đường dẫn này [docs.emmet.io](https://docs.emmet.io/abbreviations/syntax/)
+      

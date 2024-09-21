@@ -12,9 +12,9 @@ const SLayout = ({ slayouttags, children }: SLayoutProps) => (
       alt="Peeps Avatar"
       width={520}
       height={520}
-      className="w-52 h-w-52 rounded-full mx-auto bg-amber-500"
+      className="w-52 h-w-52 rounded-full mx-auto bg-amber-500 mb-8"
     />
-    <div className="px-5 py-4 w-full flex justify-center flex-wrap gap-3">{slayouttags}</div>
+    {/* <div className="px-5 py-4 w-full flex justify-center flex-wrap gap-3">{slayouttags}</div> */}
     {children}
   </>
 )

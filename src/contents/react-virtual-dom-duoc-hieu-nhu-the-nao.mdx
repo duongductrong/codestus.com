@@ -1,0 +1,67 @@
+---
+title: React Virtual DOM được hiểu như thế nào 
+description: Nếu bạn sử dụng react hoặc đang trong quá trình học React, bạn sẽ nghe qua một thuật ngữ React Virtual DOM
+tags: React
+author: Trọng Dương Đức
+publishAt: 2021-09-08T09:42:00.000Z
+createdAt: 2021-09-08T09:40:00.000Z
+updatedAt: 2024-06-03T16:37:35.966Z
+views: 9194
+slug: react-virtual-dom-duoc-hieu-nhu-the-nao
+---
+
+Nếu bạn sử dụng **react** hoặc đang trong quá trình học **React**, bạn sẽ nghe qua một thuật ngữ **React Virtual DOM**. Bây giờ Virtual DOM là gì và tại sao React lại sử dụng nó?
+## Real DOM
+
+Thứ đầu tiên khi chúng ta nói về **Real DOM**. **DOM** có nghĩa là “Document Object Model”, nói đơn giản hơn nó đại diện cho giao diện của ứng dụng của bạn. Mỗi khi có sự thay đổi về trạng thái của giao diện người dùng ứng dụng của bạn, DOM sẽ được cập nhật để thể hiện sự thay đổi đó. Bây giờ việc bắt thường xuyên thao tác DOM sẽ ảnh hưởng đến hiệu suất, khiến nó trở nên chậm chạp.
+
+## Điều gì làm thao tác DOM chậm chạp
+
+**DOM** được biểu diễn dưới dạng cấu trúc dữ liệu cây. Bởi vì điều đó, các thay đổi và cập nhật đối với DOM diễn ra nhanh chóng. Nhưng sau khi thay đổi phần tử được cập nhật và phần tử con của nó phải được kết xuất lại để cập nhật giao diện người dùng ứng dụng. Việc kết xuất **(re-rendering)** hoặc sơn lại **(re-painting)** giao diện người dùng là nguyên nhân làm cho giao diện người dùng trở nên chậm chạp. Vì vậy, bạn càng có nhiều thành phần giao diện người dùng, thì các bản cập nhật DOM càng hao hơn, vì chúng sẽ cần được hiển thị lại cho mỗi bản cập nhật DOM.
+
+## Virtual DOM
+
+Khái niệm DOM ảo xuất hiện và hoạt động tốt hơn đáng kể so với DOM thực. DOM ảo chỉ là một đại diện ảo của DOM. Mỗi khi trạng thái ứng dụng của chúng tôi thay đổi, DOM ảo sẽ được cập nhật thay vì DOM thực.
+
+> Chà, bạn có thể hỏi "Có phải DOM ảo cũng đang hoạt động giống như DOM thực, điều này nghe có vẻ như làm việc gấp đôi? Làm thế nào điều này có thể nhanh hơn chỉ cập nhật DOM thực? ”
+
+Câu trả lời là DOM ảo nhanh hơn và hiệu quả hơn nhiều, đây là lý do tại sao.
+
+## Làm thế nào mà Virtual DOM nó nhanh như vậy
+
+Khi các phần tử mới được thêm vào giao diện người dùng, một DOM ảo, được biểu thị dưới dạng cây sẽ được tạo. Mỗi phần tử là một nút trên cây này. Nếu trạng thái của bất kỳ phần tử nào trong số này thay đổi, một cây DOM ảo mới sẽ được tạo. Cây này sau đó được so sánh hoặc "khác biệt" với cây DOM ảo trước đó.
+
+Khi điều này được thực hiện, DOM ảo sẽ tính toán phương pháp tốt nhất có thể để thực hiện những thay đổi này đối với DOM thực. Điều này đảm bảo tối thiểu hoạt động cập nhật trên DOM thực. Do đó, giảm hao tốn hiệu suất của việc cập nhật DOM thực.
+
+Hình ảnh dưới đây cho thấy cây DOM ảo và quá trình khác nhau.
+![Ví dụ về Virutal DOM](https://i2.wp.com/programmingwithmosh.com/wp-content/uploads/2018/11/lnrn_0201.png?w=1173&ssl=1)
+
+Các vòng tròn màu đỏ đại diện cho các nút đã thay đổi. Các nút này đại diện cho các phần tử giao diện người dùng đã bị thay đổi trạng thái. Sau đó sẽ tính toán sự khác biệt giữa phiên bản trước của cây DOM ảo so với hiện tại. Sau đó, toàn bộ cây con chính sẽ được hiển thị lại để cung cấp giao diện người dùng được cập nhật. Cây cập nhật này sau đó được cập nhật hàng loạt vào DOM thực.
+
+## React sử dụng Virutal DOM thế nào
+
+Bây giờ bạn đã hiểu rõ về **Virtual DOM** là gì và nó có thể giúp ích như thế nào đối với hiệu suất ứng dụng của bạn, hãy cùng tìm hiểu cách React tận dụng DOM ảo.
+
+Trong React, mỗi phần giao diện người dùng là một thành phần, và mỗi thành phần có một hoặc nhiều trạng thái. React tuân theo mô hình có thể quan sát được và lắng nghe các thay đổi trạng thái **(observable pattern)**. Khi một trong các trạng thái của  phần giao diện thay đổi, React cập nhật DOM ảo. Sau khi DOM ảo đã được cập nhật, React sẽ so sánh phiên bản DOM ảo hiện tại với phiên bản trước đó. Quá trình này được gọi là "diffing".
+
+Khi React biết các đối tượng DOM ảo nào đã thay đổi, sẽ tiến hành cập nhật **duy nhất** đối tượng đó vào DOM thật. Điều này làm cho hiệu xuất nhanh hơn đáng kể khi so sánh với thao tác trực tiếp với DOM thực,  làm cho React nổi bật như một thư viện JavaScript hiệu suất cao.
+
+> Nói một cách đơn giản, bạn cho React biết bạn muốn giao diện người dùng ở trạng thái nào và nó đảm bảo rằng DOM phù hợp với trạng thái đó. Lợi ích tuyệt vời ở đây là với tư cách là nhà phát triển, bạn sẽ không cần biết thao tác thuộc tính, xử lý sự kiện hoặc cập nhật DOM thủ công diễn ra như thế nào đằng sau hậu trường.
+
+Tất cả những chi tiết này đều được các nhà phát triển React tóm tắt. Tất cả những gì bạn cần làm là cập nhật trạng thái của thành phần của bạn khi cần thiết và React sẽ lo phần còn lại. Điều này đảm bảo trải nghiệm tuyệt vời của nhà phát triển khi sử dụng React.
+
+## Cập nhật hàng loạt - Batch Update
+
+React tuân theo cơ chế cập nhật hàng loạt để cập nhật DOM thực. Kể từ đây, dẫn đến tăng hiệu suất. Điều này có nghĩa là các bản cập nhật cho DOM thực được gửi theo lô, thay vì gửi các bản cập nhật cho mọi thay đổi về trạng thái.
+
+Việc `render` lại giao diện người dùng là phần tốn kém nhất và React đảm bảo hiệu quả rằng DOM thực chỉ nhận được các bản cập nhật theo đợt để `render` lại giao diện người dùng.
+
+## Tóm tắt lại
+- Thao tác DOM thường xuyên rất tốn kém và hiệu suất nặng.
+- Khi thay đổi trạng thái xảy ra, DOM ảo được cập nhật và phiên bản trước đó và phiên bản hiện tại của DOM ảo được so sánh. Điều này được gọi là "diffing".
+- Sau đó, DOM ảo sẽ gửi một bản cập nhật hàng loạt đến DOM thực để cập nhật giao diện người dùng.
+- React sử dụng DOM ảo để nâng cao hiệu suất của nó.
+- Nó sử dụng những gì có thể quan sát được để phát hiện những thay đổi trạng thái và chống đỡ.
+- React sử dụng một thuật toán `diffing` hiệu quả để so sánh các phiên bản của DOM ảo.
+- Sau đó, nó đảm bảo rằng các bản cập nhật theo đợt được gửi đến DOM thực để sơn lại hoặc kết xuất lại giao diện người dùng.
+      

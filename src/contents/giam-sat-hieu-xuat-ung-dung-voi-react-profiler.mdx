@@ -1,0 +1,147 @@
+---
+title: Giám sát hiệu xuất ứng dụng với React Profiler
+description: Sẽ tốt hơn nếu bằng cách nào đó chúng ta có thể theo dõi và đánh giá được thời gian kết xuất và gửi thông tin đến máy chủ trong ứng dụng mà, điều này giúp chúng ta có thể kiểm soát và chủ động theo dõi hoạt động của ứng dụng hơn.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2022-02-13T08:09:00.000Z
+createdAt: 2022-02-13T08:09:30.000Z
+updatedAt: 2024-05-31T15:43:06.614Z
+views: 5486
+slug: giam-sat-hieu-xuat-ung-dung-voi-react-profiler
+---
+
+Chúng ta thường quan tâm đến việc cung cấp trải nghiệm tốt cho người dùng trên sản phẩm của mình, nhưng đôi khi những điều ngược lại vẫn có thể vượt qua vòng `Review Pull Request` và và mang đến một trãi nghiệm không mong muốn cho người dùng mà chúng ta không thể biết.
+
+Sẽ tốt hơn nếu bằng cách nào đó chúng ta có thể theo dõi và đánh giá được thời gian kết xuất và gửi thông tin đến máy chủ trong ứng dụng mà, điều này giúp chúng ta có thể kiểm soát và chủ động theo dõi hoạt động của ứng dụng hơn.
+
+Có các giải pháp hiện có để theo dõi và đo lường hiệu suất của ứng dụng bất kể bạn đang sử dụng **framework** nào (Bạn có thể đo lường bằng **[Lighthouse-ci](https://github.com/GoogleChrome/lighthouse-ci)** chẳng hạn). Đội ngũ React đã tạo ra một API đặc biệt để đo lường hiệu xuất của các thành phần bên trong ứng dụng React. Nó không cung cấp cho chúng ta nhiều thông tin như **React Devtools.** thay vào đó, nó cung cấp cho chúng ta một số thông tin hữu ích giúp xác định vấn đề hiệu xuất nằm ở đâu.
+
+## Ứng dụng Profiler vào dự án
+
+Và đây là ví dụ về việc sử dụng thành phần `<Profiler />` trong React. 
+
+```jsx
+<App>
+  <Profiler id="Navigation" onRender={onRenderCallback}>
+    <Navigation />
+  </Profiler>
+  <Main />
+</App>
+```
+
+Hàm `onRenderCallback` được gọi sẽ có những tham số sau 
+
+```jsx
+function onRenderCallback(
+  id, // the "id" prop of the Profiler tree that has just committed
+  phase, // either "mount" (if the tree just mounted) or "update" (if it re-rendered)
+  actualDuration, // time spent rendering the committed update
+  baseDuration, // estimated time to render the entire subtree without memoization
+  startTime, // when React began rendering this update
+  commitTime, // when React committed this update
+  interactions // the Set of interactions belonging to this update
+) {
+  // Aggregate or log render timings...
+}
+```
+
+Điều quan trọng cần lưu ý là Nếu bạn xây dựng ứng dụng của mình mà không sử dụng **`react-dom/profiling` và `scheduler/tracing-profiling`** Thì thành phần `<Profiler />` mà chúng ta nói trên sẽ không hoạt động. Để tìm hiểu về cách xây dựng nó, hãy đọc bài viết này **[Profile a React App for Performance](https://kentcdodds.com/blog/profile-a-react-app-for-performance).** 
+
+## Gửi dữ liệu Profiler tới Monitoring
+
+Từ đây, bạn có thể gửi dữ liệu từ hàm `onRenderCallback` đến một công cụ **monitoring** nào đó. Và lưu ý rằng, viêc kết xuất giao diện diễn ra rất nhiều, vậy nên hãy nhóm chúng lại và gửi đi theo thời gian định kì. 
+
+```jsx
+// Create list queue to group tracking
+let queues = [];
+
+function onRenderCallback(
+  id,
+  phase,
+  actualDuration,
+  baseDuration,
+  startTime,
+  commitTime,
+  interactions,
+) {
+	// Save it
+  queues.push({
+    id,
+    phase,
+    actualDuration,
+    baseDuration,
+    startTime,
+    commitTime,
+    interactions,
+  })
+}
+
+// Every 10 seconds, to send Profiler To Anywhere monitoring
+setInterval(sendProfilerToMonitor, 10000);
+
+function sendProfilerToMonitor() {
+	if(!queues.length) return;
+
+	const data = [...queues];
+
+	fetch("...", { method: "POST", body: JSON.stringify(data) });
+
+	queues = [];
+}
+```
+
+Một điều cần lưu ý là vì phần mềm này đang chạy trong quá trình ứng dụng chạy, không làm ảnh hưởng đến hiệu suất khi đo lường. Bởi vì điều này, chúng ta bị hạn chế về thông tin chúng ta có thể nhận được. Vì vậy, có thể bạn sẽ muốn đặt các thành phần <Profiler /> một một cách tốt hơn trong ứng dụng của mình với các `id` hợp lý để bạn có thể xác định nguồn gốc của vấn đề hiệu suất dễ dàng hơn. 
+
+Hình dung đơn giản nó có thể là như này
+
+```jsx
+<App>
+  <Profiler id="Navigation" onRender={onRenderCallback}>
+    <Navigation />
+  </Profiler>
+  <Profiler id="Main" onRender={onRenderCallback}>
+    <Main>
+      <LeftNav />
+      <Profiler id="Content" onRender={onRenderCallback}>
+        <Content />
+      </Profiler>
+      <RightNav />
+    </Main>
+  </Profiler>
+</App>
+```
+
+Trong trường hợp này, nếu `<Content />` được kết xuất, thì `Content` và `Main` **Profiler** `onRenderCallbacks` sẽ được gọi. Nếu `<LeftNav />` được gọi, thì `Main` **Profiler** được gọi**,** Nhưng ****`Content` thì không
+
+## Dữ liệu Profiler
+
+Và cuối cùng đây là ví dụ về dữ liệu mà chúng ta nhận được sau khi sử dụng `<Profiler />` 
+
+```jsx
+
+[
+	...
+	{
+	  id: "Main",
+	  phase: "update",
+	  actualDuration: 0.09999994654208422,
+	  baseDuration: 0.3799999540206045,
+	  startTime: 104988.11499998556,
+	  commitTime: 104988.45000000438,
+	  interactions: [ // this is actually a Set, not an array
+	    {
+	      __count: 0
+	      id: 3,
+	      name: "menu click",
+	      timestamp: 104978.33499999251,
+	    }
+	  ],
+	}
+	...
+]
+```
+
+## Kết luận
+
+- Tìm hiểu thêm về React Profiler qua **[đây](https://gist.github.com/bvaughn/8de925562903afd2e7a12554adcdda16).**
+      

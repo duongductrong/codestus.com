@@ -1,0 +1,181 @@
+---
+title: Chi tiết về upload file trong HTML / Javascript
+description: Khả năng Upload file là một tính năng được yêu cầu cho một số trang web và ứng dụng phổ biến hiện nay. Từ việc Upload hình ảnh trên mảng xã hội cho avatar hay resume, lưu các file .pdf, .docx. Hầu như đã xuất hiện ở mọi nơi.
+tags: React,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-01-30T12:23:22.000Z
+createdAt: 2021-01-30T12:23:22.000Z
+updatedAt: 2024-06-03T22:46:47.140Z
+views: 29782
+slug: chi-tiet-ve-upload-file-trong-html-javascript
+---
+
+Khả năng **Upload file** là một tính năng được yêu cầu cho một số trang web và ứng dụng phổ biến hiện nay. Từ việc **Upload** hình ảnh trên mảng xã hội cho **avatar** hay **resume**, lưu các **file** .pdf, .docx. Hầu như đã xuất hiện ở mọi nơi.
+
+Là một lập trình viên web, chúng ta nên biết **HTML** hỗ trợ tính năng này cùng với một chút JavaScript để xử lý. Với HTML5, thì tính năng **Upload File (File API)** đã thêm vào `DOM`. Để sử dụng, chúng ta cần đọc `FileList` và Đối tượng **File**. Giải quyết được nhiều vấn đề về **multiples files upload**, ...v.v.
+
+## Single File Upload
+Thông thường, chúng ta chỉ cần điền `type="file"` cho thẻ `<input` trong trường hợp muốn đăng tải tệp cho ứng dụng web.
+```html
+<input type="file" id="file-upload" required />
+```
+Khi bật trạng thái **upload file** trên thẻ **input** với `type=file` người dùng sẽ được phép đăng tải một hoặc nhiều tệp. Mặc định, nó sẽ cho phép bạn **upload** một tập tin sử dụng hệ thống native của **browser**.
+
+Khi tải lên thành công, `File API` cho phép bạn đọc các thông tin của **File** dưới dạng **Object** thông qua JavaScript. Để xem được các thông tin từ đối tượng File, chúng ta cần lắng nghe chúng bằng sự kiện `change` của **file upload**.
+
+Đầu tiên, truy vấn đối tượng thông qua `id`
+
+```js
+const fileUpload = document.querySelector("#file-upload");
+```
+
+Sau đó, thêm sự kiện `change` để đọc thông tin của đối tượng **file** khi quá trình **upload** hoàn thành. Chúng ta sẽ lấy thông tin của tập tin từ `event.target.files`
+
+```js
+fileUpload.addEventListener("change", (event) => {
+	const { files } = event.target;
+	
+	console.log("files", files)
+})
+```
+
+Chú ý, Mảng **FileList** với đối tượng **File** có tất cả thông tin (metadata) về **file** được tải lên.
+![Ảnh về FileList](https://codestus.com/uploads/images/posts/File_list.png)
+
+## Multiple Files Upload
+Chúng ta có thể tải nhiều tệp cùng lúc. Để làm điều đó, chúng ta cần thêm một thuộc tính vào thẻ input là `multiple`.
+
+```html
+<input type="file" id="file-upload" multiple required />
+```
+
+Bây giờ, **Browser** sẽ cho bạn tải 1 hoặc hiều **files** cùng lúc. Giống như ví dụ trước, chúng ta có vẫn sử dụng sự kiện `change` để lắng nghe trạng thái và lấy thông tin đăng tải tập tin. **Bạn có để ý không**, `FileList` là một mảng, dành cho **multiple** và bạn có thể lấy thông tin tệp từ đó.
+![Multiple Files Upload Image Example](https://codestus.com/uploads/images/posts/File%20upload%20multiple.png)
+
+## Tìm hiểu về metadata file
+Bất cứ khi nào chúng ta đăng tải tập tin, đối tượng **file** đều có metadata chứ thông tin giống như name, size ,last update time, type, etc. Đây là những thông tin hữu ích để bạn kiểm soát và cần thiết có thể hiển thị cho người dùng.
+
+```js
+const fileUpload = document.querySelector("#file-upload");
+
+fileUpload.addEventListener("change", (e) => {
+	const files = e.target.files;
+	
+	for(const file of files) {
+		const {name, type, size, lastModified } = file;
+		// Làm gì đó với các thông tin trên
+		
+		console.log(file)
+	}
+})
+
+```
+
+## Tìm hiểu về thuộc tính accept trên file
+Chúng ta có thẻ sử dụng thuộc tính **accept** trên input thuộc type=file để giới hạn, cho phép hoặc từ chối các loại tập tin đăng tải từ phía người dùng. Có thể bạn chỉ muốn cho phép người dùng tải tệp hình ảnh thuộc định dạng `.jpg`, `.png`. Bạn có thể sử dụng thuộc tính này
+
+```html
+<input type="file" accept=".jpg, .png" multiple />
+```
+
+## Quản lý nội dung của tập tin file
+Bạn có thể sẽ muốn hiển thị nội dung hình ảnh vừa đăng tải với mục đích muốn người dùng, người sử dụng biết rõ họ vừa đăng tải đối tượng gì lên. 
+
+Chúng ta có thể sử dụng **FileReader** để chuyển đổi **tập tin file**  sang dạng **chuỗi binary**. Chúng ta sẽ sử dụng sự kiện `Load` để lắng nghe và lấy **chuỗi binary** của tập tin vừa đăng tải.
+
+- Tìm hiểu thêm về [FileReader](https://developer.mozilla.org/en-US/docs/Web/API/FileReader)
+
+```js
+// Khởi tạo đối tượng FileReader
+const reader = new FileReader();
+
+// Lắng nghe trạng thái đăng tải tệp
+fileUpload.addEventListener("change", (event) => {
+	// Lấy thông tin tập tin được đăng tải
+	const files  = event.target.files;
+	
+	// Đọc thông tin tập tin đã được đăng tải
+	reader.readAsDataURL(files[0])
+	
+	// Lắng nghe quá trình đọc tập tin hoàn thành
+	reader.addEventListener("load", (event) => {
+		// Lấy chuỗi Binary thông tin hình ảnh
+		const img = event.target.result;
+		
+		// Thực hiện hành động gì đó, có thể append chuỗi giá trị này vào thẻ IMG
+		console.log(img) // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAA........
+	})
+})
+```
+
+## Kiểm soát kích cỡ tập tin (tệp) đăng tải
+Như chúng ta đã thấy, có thể đọc được thông tin của tập tin thông qua metadata của chúng. Như vậy, chúng ta có cơ sỡ để kiểm soát, cho phép hoặc từ chối tập tin được đăng tải từ phía máy khách, điều này cũng giúp bạn giảm tải trọng cho **Server**.
+
+```js
+fileUpload.addEventListener("change", (event) => {
+	const files = event.target.files;
+	
+	const getSizeImage = files[0].size;
+	
+	if(size > 1024 * 1024) alert("Chỉ cho phép tải tệp tin nhỏ hơn 1MB");
+	else alert("Đăng tải tệp thành công");
+})
+```
+
+## Hiển thị quá trình đăng tải tệp
+Thông thường khi sử dụng, chúng ta sẽ cần hiển thị thông tin về quá trình đăng tải tệp, để người sử dụng nắm rõ. Chúng ta sẽ sử dụng **FileReader()** như lần trước để kiểm soát quá trình này.
+
+```js
+const reader = new FileReader();
+```
+
+Ngoài sự kiện `load`, để lắng nghe quy trình tải tập tin, chúng ta sẽ sử dụng sự kiện `progress`.
+
+```js
+reader.addEventListener("progress", (event) => {
+	const {loaded, total} = event;
+	
+	if(loaded && total) {
+		const percent = Math.round(loaded / total) * 100;
+		
+		document.querySelector("progress").value = percent
+	}
+})
+```
+
+## Upload directory
+Ngoài việc đăng tải tập tin, bạn cũng có quyền đăng tải cả thư mục. Wellll, nó rất khả thi nhưng có một số giới hạn, có thể với hiện tại điều này không còn đáng kể.
+
+- Tìm hiểu thêm về thuộc tính này: [webkitdirectory](https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory)
+
+Rất dễ dàng để sử dụng tính năng này, như bên dưới chỉ cần thêm thuộc tính webkitdirectory
+```html
+<input type="file" webkitdirectory />
+```
+
+## Xử lý đường dẫn file upload
+Thông thường khi bạn đăng tải tệp và lấy đường dẫn hình ảnh sẽ có dạng data:image/base64 vô cùng dài. Bạn có thể xử lý đường dẫn ngắn gọn bằng cách sử dụng URL.createObjectURL() để tạo ra đường dẫn unique cho tập tin được đăng tải. Bạn cũng có thể loại bỏ nó bằng phương thức URL.revokeObjectURL()
+
+Rất đơn giản, chúng ta chỉ cần lấy thông tin tệp vừa đọc và đặt vào bên trong **createObjectURL(here)**
+
+```js
+const reader = new FileReader()
+
+fileUpload.addEventListener("change", (event) => {
+	const files = event.target.files;
+	
+	reader.readAsDataURL(files[0])
+	
+	reader.addEventListener("load", (event) => {
+			const url = event.target.results
+			
+			document.querySelector("img").src = URL.createObjectURL(url);
+	})
+})
+```
+
+Phía trên là các trường hợp thường gặp trong quá trình xử lý tập tin được đăng tải từ máy khách. Có thể nó sẽ giúp ích cho bạn trong thời gian tới.
+
+### Có thể bạn sẽ cần
+- Mình đã tham khảo qua các bài viết: https://blog.greenroots.info/10-useful-html-file-upload-tips-for-web-developers-ckgetegpf0c7go9s123wvg7bi
+      

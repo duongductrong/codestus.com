@@ -1,0 +1,124 @@
+---
+title: Làm thế nào để chia sẻ internal refs với component khác?
+description: Thuộc tính `ref` trong React được sử dụng để truy cập một component children hoặc một DOM element. Chúng ta thường sử dụng `ref` với HOC được cung cấp từ React là `forwardRef` hoặc `useRef` hook. Nhưng bạn có bao giờ từ hỏi khi không biết 2 phương thức tương tác với `ref` ở trên có thể tồn tại trong một thời điểm hay không?.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-04-03T05:30:00.000Z
+createdAt: 2023-04-03T05:30:18.000Z
+updatedAt: 2024-06-02T10:05:44.412Z
+views: 316
+slug: lam-the-nao-de-chia-se-internal-refs-voi-component-khac
+---
+
+Thuộc tính `ref` trong React được sử dụng để truy cập một component children hoặc một DOM element. Chúng ta thường sử dụng `ref` với HOC được cung cấp từ React là `forwardRef` hoặc `useRef` hook. **Nhưng bạn có bao giờ từ hỏi khi không biết 2 phương thức tương tác với `ref` ở trên có thể tồn tại trong một thời điểm hay không**?. 
+
+Khi nhu cầu chúng ta vừa cần `internal ref` để xử lý các logic bên trong componnet đó, đồng thời cũng muốn chia sẻ `internal ref` đó cho các component khác sử dụng. Ngay lập tức, bạn sẽ phải quay lại câu hỏi phía trên.
+
+Và câu trả lời là có, chúng ta có thể sử dụng `useImperativeHandle` hook để giải quyết vấn đề này.
+
+## External refs với forwardRef
+
+Chúng ta thường sử dụng `forwardRef` để thiết kế một component cho phép các components khác tham chiếu đế các yếu tố có ý nghĩa trong một component.
+
+Cho ví dụ như sau:
+
+```jsx
+const TextSubmit = () => (
+	<div>
+		<input type="text" />
+		<button onClick={onClick}>Submit</button>
+	</div>
+)
+```
+
+Tại component này, chúng ta sẽ quyết định cho phép tham chiếu đến các thuộc tính của phần tử `input` từ component cha đang chứa nó. Vì vậy, chúng ta sẽ sử dụng `forwardRef` để chia sẽ các thuộc tính của `input` cho phần tử cha của nó như sau:
+
+```jsx
+const TextSubmit = forwardRef(({ onClick, ...props }, ref) => {(
+	<div>
+		<input ref={ref} type="text" />
+		<button onClick={onClick}>Submit</button>
+	</div>
+))
+```
+
+Với `forwardRef`, thêm `ref` vào <TextSubmit /> component, chúng ta đã cấp quyền truy cập các thuộc tính `internal` của input.
+
+```jsx
+function App() {
+	const [text, setText] = useState("");
+	const inputRef = useRef(null);
+	
+	useEffect(() => {
+		if(inputRef.current) {
+			setText(inputRef.current.value);
+		}
+	}, [inputRef.current])
+
+	return <div>
+		<TextSubmit ref={inputRef} />
+	</div>
+}
+
+export default App;
+```
+
+Ngay lúc này, chúng ta có thể tương tác với chính các thuộc tính của input bên trong `<TextSubmit />` component thông qua `inputRef`. Nếu chúng ta cần `ref` nội bộ bên trong `<TextSubmit />` trước khi `forwardRef` cho component khác thì sao?. 
+
+## Internal refs và forwardRef
+
+Ngay lúc này, chúng ta muốn nội bộ `<TextSubmit />` component sẽ tự động `focus input`. Thông thường chúng ta sẽ xử lý như sau.
+
+```jsx
+const TextSubmit = forwardRef(({ onClick, ...props }, ref) => {
+	const inputRef = useRef(null);
+	
+	useEffect(() => {
+		if(inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [inputRef.current])
+
+	return <div>
+		<input ref={inputRef} type="text" />
+		<button onClick={onClick}>Submit</button>
+	</div>
+})
+```
+
+### Vấn đề xuất hiện ngay
+
+Làm thế nào để chúng ta forward ref của useRef hook cho component cha.?
+
+## Cách giải quyết
+
+React đã ra mắt `useImperativeHandle`, chúng ta có thể forward một internal ref của một component cho component cha của nó theo cách như sau:
+
+```jsx
+const TextSubmit = forwardRef(({ onClick, ...props }, ref) => {
+	const inputRef = useRef(null);
+	
+	useEffect(() => {
+		if(inputRef.current) {
+			inputRef.current.focus();
+		}
+	}, [inputRef.current]);
+	
+	// --> Solution here
+	useImperativeHandle(ref, () => inputRef.current);
+
+	return <div>
+		<input ref={inputRef} type="text" />
+		<button onClick={onClick}>Submit</button>
+	</div>
+})
+```
+
+Khá đơn giản, bằng việc trả về giá trị trong `callback` của `useImperativeHandle` internal ref mà component đó đang sử dụng.
+
+Mình có đưa ví dụ lên codesanbox nếu bạn cần: [Codesanbox](https://codesandbox.io/s/thirsty-hooks-urlxez?file=/src/App.js)
+
+## Kết luận
+
+**useImperativeHandle hook** có công dụng khá tốt sau khi được ra mắt. Phía trên là cách chúng ta xử lý một vấn đề về sharing internal refs cho một componnet khác.
+      

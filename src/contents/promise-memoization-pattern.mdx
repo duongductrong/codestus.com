@@ -1,0 +1,86 @@
+---
+title: Promise Memoization Pattern
+description: Nếu bạn đang tìm hiểu về cách triển khai bộ nhớ đệm (caching) cho Promise, thì đây sẽ là một bài viết dành cho bạn.
+tags: JavaScript,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-02-28T10:52:26.000Z
+createdAt: 2021-02-28T10:52:26.000Z
+updatedAt: 2024-05-27T15:13:34.462Z
+views: 5532
+slug: promise-memoization-pattern
+---
+
+Nếu bạn đang tìm hiểu về cách triển khai bộ nhớ đệm (caching) cho Promise, thì đây sẽ là một bài viết dành cho bạn. 
+
+## Trường hợp sử dụng: Caching asynchronous results
+Nó có nghĩa là chúng ta sẽ lưu kết quả bất đồng bộ khi gọi api trả về và lưu chúng vào bộ nhớ đệm.
+
+```js
+// Thực hiện gọi một api để lấy dữ liệu bài viết theo ID
+const getPostById = async (postId) : Promise<Post> => {
+	const post = await (await fetch(`/api/v1/posts/${postId}`)).json();
+	return post;
+}
+```
+
+Cách này hoàn toàn bình thường. Nhưng, nếu nó ảnh hưởng đến hiểu xuất? Chúng ta nên làm gì với nó. Có thể `api/v1/posts/${postId}` sẽ phải hoạt động rất chậm để lấy được thông tin chi tiết của bài viết. Có thể chúng ta hay thường gọi đến api này để lấy thông tin bài viết như cách bạn đọc bài viết trên codestus.com.
+
+Vì nó có thể được gọi lại nhiều lần, cùng với một id để lấy chi tiết bài viết chúng ta muốn. Có lẽ chúng ta sẽ muốn thêm nó vào bộ nhớ đệm.
+
+## Cách giải quyết thông thường
+Đây là cách giải quyết mà chúng ta thường thấy:
+
+```js
+const caching = new Map<string, Post>();
+
+// Sửa đổi một chút
+// Thực hiện gọi một api để lấy dữ liệu bài viết theo ID
+const getPostById = async (postId) : Promise<Post> => {
+	
+	if(!caching.has(postId)) {
+		const post = await (await fetch(`/api/v1/posts/${postId}`)).json();
+		
+		caching.set(postId, post);
+	}
+	
+	return caching.get(postId);
+}
+```
+
+- Chúng ta điền vào bộ nhớ đệm kết quả lấy được từ api chậm chập kia, sau đó phản hồi lại cho người dùng bằng cách `get` chúng từ `caching`.
+- Trường hợp đã tồn tại trong `caching`, chúng ta chỉ cần lấy nó từ bộ nhớ ra
+
+Với cách thức vô cùng đơn giản này, chúng ta giải quyết quyết được vấn đề từ `/api/v1/posts`
+
+Cách làm này còn có một cái tên là **Singleton Promise**. Tương tự như [Design Pattern Singleton](https://codestus.com/posts/6-design-patterns-thong-dung-trong-javascript-can-biet?page_comment=0), nếu gọi cùng một Promise với cùng một id chúng sẽ lấy ra được thông tin của cùng đối tượng chúng ta lưu trong `caching` giống như  Singleton chỉ khai báo và lấy duy nhất một `instance`.
+
+```js
+Promise.all([
+	getPostById("bai-viet-1"),
+	getPostById("bai-viet-1"),
+]);
+```
+
+Như trên, chúng ta sẽ không gặp bất cứ vấn đề gì trong quá trình truy vấn.
+
+## Promise Memoization
+Nhìn từ một góc độ khác, việc triển khai bộ nhớ đệm này thực sự chỉ là ghi nhớ `getPostById()`. Khi được cung cấp thông tin đầu vào mà chúng ta đã thấy, chúng ta chỉ việc trả lại kết quả mà chúng ta đã lưu trữ từ lần đầu tiên gọi.
+
+Mặt trái của nó là có nhiều thư viện làm cho việc ghi nhớ trở nên đơn giản, bao gồm cả lodash.
+
+Chúng ta có thể đơn giản hóa giải pháp cuối cùng của mình để:
+
+```js
+import _ from 'lodash';
+
+const getPostById = _.memoize(async (postId: string): Promise<Post> => {
+  const post = await ( await fetch(`/api/v1/posts/${postId}`) ).json();
+  return post;
+});
+
+```
+
+Chúng ta đã thực hiện nó mà không triển khai bộ nhớ cache ban đầu của mình, thay thế nó bằng các bao bọc _.memoize. Rất đơn giản.
+
+- [**About Advanced Promise Patterns: Promise Memoization**](https://www.jonmellman.com/posts/promise-memoization)
+      

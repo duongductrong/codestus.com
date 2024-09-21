@@ -1,0 +1,124 @@
+---
+title: Các kỹ thuật viết code javascript mà bạn không thể không biết
+description: Từ lúc ra đời đến nay, javascript đã thay đổi rất nhiều, tính đến nay. Chúng ta có hàng chục các viết cho 1 điều kiện trong javascript, rất nhiều các để giải quyết 1 vấn đề, có thể rất dài dòng hoặc phức tạp. Đến nay, các cách giải quyết dang được các nhà sáng lập JavaScript đơn giản hoá nó bằng các cách thức đơn giản hơn qua từng phiên bản.
+tags: Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-03-13T12:56:08.000Z
+createdAt: 2021-03-13T12:56:08.000Z
+updatedAt: 2024-06-03T11:07:32.445Z
+views: 5229
+slug: cac-ky-thuat-viet-code-javascript-ma-ban-khong-the-khong-biet
+---
+
+Từ lúc ra đời đến nay, javascript đã thay đổi rất nhiều, tính đến nay. Chúng ta có hàng chục các viết cho 1 điều kiện trong javascript, rất nhiều các để giải quyết 1 vấn đề, có thể rất dài dòng hoặc phức tạp. Đến nay, các cách giải quyết dang được các nhà sáng lập JavaScript đơn giản hoá nó bằng các cách thức đơn giản hơn qua từng phiên bản.
+
+Trong bài viết này, chúng ta sẽ đào bới một số kỹ thuật giúp ta thuận lợi hơn trong quá trình code, ngoài ra cũng tăng khả năng teamwork cho bạn và partner.
+
+## Sử dụng phương thức includes
+Một câu điều kiện dài dòng thế này, có thể dài hơn sức tưởng tượng của bạn
+```js
+if (value === 'a' || value === 'b' || value === 'c') { ... }
+```
+
+Chúng ta có thể thay thế chúng, bằng phương thức `includes` của [Array.prototype.method](https://developer.mozilla.org/vi/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+```js
+if(["a", "b", "c"].includes(value)) {}
+```
+Sạch sẽ hơn và giúp bạn tránh quá nhiều điều kiện `if`
+
+## Chuyển đổi Boolean bằng Double !
+Có thể sử dụng 2 lần dấu `!` để chuyển đổi một biến bất kỳ sang dạng `boolean` để xử lý điều kiện của bạn
+
+```js
+const isLoading = null;
+const inMyMind = "<><><>"
+
+console.log(!!isLoading) // false
+console.log(!!inMyMind) // true
+```
+
+## Optional Chaining
+Trong javascript, bạn thường sẽ cần truy xuất các `key` trong `object`. Một số trường hợp chúng ta sẽ truy xuất các `key` không hề tồn tại, như thế javascript sẽ báo lỗi. Chúng ta có thể khắc phục nó bằng cách sử dụng `optional chaining`. 
+
+`optional chaining` sẽ truy xuất và trả về giá trị trước đó nếu phía sau `?.` không tồn tại.
+
+```js
+const obj = {
+	name: "a",
+	age: 20,
+}
+
+console.log("data", obj.name, obj.age); // Hiển thị dữ liệu
+console.log("Not optional chaining", obj.haha);
+console.log("Optional Chaining", obj?.nooooo);
+
+```
+
+## Không sử dụng else khi dùng if
+Thông thường, chúng ta sẽ hay viết điều kiện nếu a thì b thế này
+
+```js
+if (...) {
+  return a
+} else {
+  return a
+}
+```
+
+Chúng ta có thể thay thế bằng cách này, chuyển các điều kiện không tồn tại vào `if` và trả về điều kiện thoả như bên dưới
+
+```js
+if(!isOpen) {
+	return;
+}
+
+return "OK";
+```
+
+## Thay thế .forEach bằng .map, .filter, .reduce, .. etc
+Mình cảm thấy rất khó chịu khi sử dụng `forEach` để lọc dữ liệu một mảng hoặc thay đổi cấu trúc của phần tử trong mảng bằng `forEach`, thường sẽ phải tạo một mảng khác để chứa những dữ liệu được thay đổi. Thay vì vậy, mình sử dụng các `Array.method` đã được cung cấp hỗ trợ code tốt hơn và dễ đọc hơn rất nhiều.
+
+### .forEach vs .filter
+Thử nghiệm: Lọc mảng chỉ lấy các số khác 0
+```js
+const numbers = [1,2,23,4,5,0,1,0,2]
+// .forEach
+ let filtered = [];
+
+numbers.forEach(numb => {
+	if(numb !== 0) {
+		filtered.push(numb);
+	}
+})
+
+console.log(filtered);
+
+// .filter
+let usingFilter = numbers.filter(numb => numb !== 0);
+```
+Cùng một kết quả nhưng `.filter` nhỉnh hơn về thời gian viết code và dễ hiểu hơn.
+
+### Map
+Tương tự, mình muốn nhân các số trong mảng với 2 với `.map` chỉ cần
+```js
+let results = [1,2,3,4].map(el => el * 2);
+
+console.log(results);
+```
+
+### Reduce
+Hay là thử tính tổng một mảng nhé.
+
+```js
+let results = [1,2,3,4,5].reduce((total, numb) => total + numb, 0);
+
+console.log(results);
+```
+
+Nhìn thôi chúng ta cũng đủ thấy sự khác biệt nếu sử dụng `forEach` và các thương thức tương tự này.
+
+- Tham khảo thêm về các phương thức của mảng trong javascript: [Tại mozilla](https://developer.mozilla.org/vi/docs/Web/JavaScript/Reference/Global_Objects/Array)
+
+## Kết luận
+Hãy thử nghiệm và áp dụng vào dự án của bạn thử nhé. Sẽ tốt hơn nhiều lần so với cách viết code phức tạp mà chúng ta nghĩ ra đó.
+      

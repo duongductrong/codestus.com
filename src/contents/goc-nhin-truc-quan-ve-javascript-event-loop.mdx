@@ -1,0 +1,56 @@
+---
+title: Góc nhìn trực quan về Javascript: Event Loop
+description: Event Loop, đó là một trong những điều mà các Javascript Developers rất khó có thể hiểu nó ở lần đầu tiên, nhất là đọc các bài viết miêu tả bằng code về nó. Nhưng với miêu tả trực quan thì khó, chúng ta có thể giải thích điều đó thông qua gif hình ảnh miêu tả hoạt động của Event Loop.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-04-14T17:56:36.000Z
+createdAt: 2021-04-14T17:56:36.000Z
+updatedAt: 2024-06-03T14:49:24.098Z
+views: 6863
+slug: goc-nhin-truc-quan-ve-javascript-event-loop
+---
+
+**Event Loop**, đó là một trong những điều mà các **Javascript Developers** rất khó có thể hiểu nó ở lần đầu tiên, nhất là đọc các bài viết miêu tả bằng code về nó. Nhưng với miêu tả trực quan thì khó, chúng ta có thể giải thích điều đó thông qua **gif hình ảnh** miêu tả hoạt động của **Event Loop**.
+
+Nhưng điều đầu tiên chúng ta phải quan tâm đó là **Event Loop hay còn gọi Vòng lặp sự kiện là gì?**.
+
+Javascript là một ngôn ngữ hoạt động đơn luồng (**Single-thread**): Chỉ duy nhất 1 tác vụ được chạy trong một lần gọi. Thông thường, nó không phải là một vấn đề lớn, nhưng nếu bắt gặp một tác vụ chạy khoảng 30 giây mới hoàn thành thì... Đấy chính là vấn đề, chúng ta sẽ phải đợi 30 giây rồi tiếp tục nếu như có tác vụ khác lâu hơn (JavaScript chạy trên chuỗi chính của chình duyệt theo mặc định, vì vậy toàn bộ giao diện người dùng sẽ bị mắc kẹt 30s). Không ai trong chúng ta muốn một trang web phản hồi chậm.
+
+May mắn thay, trình duyệt cung cấp cho chúng ta một tính năng mà bản thân JavaScript không có đó là Web API. Nó bao gồm `dom api`, `settimeout`, `http request` và nhiều hơn. Giúp chúng ta tạo ra các quá trình thực thi bất đồng bộ, `non-blocking`.
+
+Khi chúng ta gọi (`invoke`) một hàm, nó sẽ được thêm vào trong `callstack`. **Callstack** là một phần của **JS Engine**, không thuộc trình duyệt. Stack là một hộp xếp chồng, chúng ta có thể hiểu như thế. Đối tượng xếp trước sẽ xuất sau [Cơ chế hoạt động last in first out](https://media.geeksforgeeks.org/wp-content/cdn-uploads/Stack-Queue.png)
+
+![Ví dụ về Event Loop](https://res.cloudinary.com/practicaldev/image/fetch/s--44yasyNX--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gid1.6.gif)
+
+Thông qua hình ảnh phía trên, chúng ta thấy hàm `respond` trả về hàm `settimeout`. Nó được cung cấp từ [WEB API](https://developer.mozilla.org/pl/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout) có chức năng trì hoãn một tác vụ mà không chặn luồng hoạt động chính. [bạn có thể coi sơ qua cách sử dụng nếu chưa biết](https://www.w3schools.com/jsref/met_win_settimeout.asp). Trong quá trình được gọi trong `callstack` hàm setTimeout sẽ gọi sang `Web API` và được đẩy ra khỏi `callstack`.
+
+![Ví dụ về Callstack và Web API](https://res.cloudinary.com/practicaldev/image/fetch/s--d_n4m4HH--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif2.1.gif)
+
+Trong `Web API`, `settimeout` sẽ gọi một bộ đếm thời gian chạy trong khoảng thời gian đối số thứ 2 chúng ta cung cấp là 1000 mili giây. Sau đó nó sẽ thi `callback` bên trong `settimeout` và đẩy chúng xuống hàng đợi `queue`. 
+
+![Ví dụ callstack, web api, queue](https://res.cloudinary.com/practicaldev/image/fetch/s--MewGMdte--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif3.1.gif)
+
+Bây giờ sẽ là phàn mà chúng ta chờ đợi từ đầu bài viết đến giờ `Event Loop`. Đến lúc, vòng lặp sự kiện (event loop) thực hiện chức năng của nó: Kết nối hàng đợi `queue` với ngăn xếp `callstack`. Trong quá trình này, nếu trong ngăn xếp `callstack` trống, `queue` sẽ nhờ vòng lặp sự kiện `event loop` đẩy lệnh chờ thực thi đầu tiên tại `queue`. Ngược lại, nếu `callstack` vẫn còn hàm thực thi thì hàng chờ `queue` sẽ vẫn phải đợi `callstack` trống sau đó mới đẩy hàng chờ thông qua `event loop`. 
+
+![Event loop](https://res.cloudinary.com/practicaldev/image/fetch/s--b2BtLfdz--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif4.gif)
+
+Cuối cùng, khi `callback` bên trong hàm `settimeout` lúc đầu được đưa vào `callstack` nó sẽ được gọi `invoke` và thực thi sau đó bị đẩy khỏi ngăn xếp `callstack`.
+
+![Event loop example](https://res.cloudinary.com/practicaldev/image/fetch/s--NYOknEYi--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif5.gif)
+
+Đến đây, sau khi đã trực quan hoá **Vòng lặp sự kiện** bằng hình ảnh, mình nghĩa các bạn có thể hiểu đoạn code bên dưới thực thi thế nào rồi nhỉ?
+
+```js
+const heyOne = () => console.log("a");
+const heyTwo = () => setTimeout(() => console.log("b"), 0);
+const heyThree = () => console.log("c");
+
+heyOne();
+heyTwo();
+heyThree();
+```
+
+Thử bình luận kết quả bạn suy luận từ đoạn code này bên dưới nhé. Chúng ta sẽ discuss về nó.
+
+- [Read article event loop](https://dev.to/lydiahallie/javascript-visualized-event-loop-3dif)
+      

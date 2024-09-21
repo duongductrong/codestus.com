@@ -1,0 +1,346 @@
+---
+title: Xây dựng Progress Bar khi Upload file với JavaScript
+description: Tính năng này đã được triển khi ở các ông lớn như facebook, google... khi đó quá trình đăng tải tệp tin của bạn sẽ được hiển thị theo tỉ lệ phần trăm để giúp người dùng biết khi nào quá trình tải tệp hoàn thành. Điều này giúp ích rất nhiều đối với việc cải thiện trải nghiệm của người dùng.
+tags: JavaScript,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-07-03T15:18:31.000Z
+createdAt: 2021-07-03T15:18:31.000Z
+updatedAt: 2024-06-03T22:29:52.421Z
+views: 8618
+slug: xay-dung-progress-bar-khi-upload-file-voi-javascript
+---
+
+Tính năng này đã được triển khi ở các ông lớn như **facebook, google...** khi đó quá trình đăng tải tệp tin của bạn sẽ được hiển thị theo tỉ lệ phần trăm để giúp người dùng biết khi nào quá trình tải tệp hoàn thành. Điều này giúp ích rất nhiều đối với việc cải thiện trải nghiệm của người dùng.
+
+Thử nghĩ một chút, nếu chúng ta đăng tải một tệp tin nào đấy và không biết khi nào nó hoàn thành, Không hiển thị bất kỳ tiến độ nào khi tải tệp tin lên hệ thống. Thoáng nghĩ, có khi bạn còn tưởng rằng tính năng đấy không hoạt động, Progress bar sinh giúp giải quyết vấn đề trải nghiệm đấy tốt hơn và cũng sinh ra bài viết này, hay bắt đầu nhé.
+
+## Cần chuẩn bị
+
+Để thực hiện được yều cầu lần này bạn sẽ cần phải có một số kiến thức về `Call api` , bởi lẽ tính năng này hoạt động khi bạn thực hiện yêu cầu đăng tải tệp tin lên hệ thống nào đó.
+
+**Lưu ý nhỏ:** Vì chúng ta chỉ xây dựng về phần giao diện, không có hệ thống xử lý đăng tải tệp tin, vì vậy, việc này chỉ thực hiện ở phía giao diện **(Frontend)**.
+
+## Hình dung về sản phẩm
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="ProgressBar Uploading" src="https://codepen.io/CodeEN/embed/preview/rNmVXQL?defaultTab=result&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/CodeEN/pen/rNmVXQL">
+  ProgressBar Uploading</a> by toicodedao (<a href="https://codepen.io/CodeEN">@CodeEN</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+Để bài viết thêm cuốn hút và thú vị, mình thoáng nghĩ chúng ta nên trau chuốt xíu cả phần giao diện để không nhàm chán khi thực hiện theo bài viết hướng dẫn lần này nhé.
+
+Và đấy sẽ là kết quả sau khi bạn đọc hết bài hướng dẫn **Xây dựng Progress Bar khi Upload file với JavaScript**
+
+![Demo upload progressing bar](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a8dd3e8d-83b4-439c-be3f-7e865cf7abbb/Screenshot_from_2021-07-03_03-20-51.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20210702%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20210702T211858Z&X-Amz-Expires=86400&X-Amz-Signature=359a66767d2ca7760223e9d5a210b492bd723863a30256e99eea53be748da5eb&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Screenshot_from_2021-07-03_03-20-51.png%22)
+
+## Xây dựng phần giao diện
+
+Dựa trên mẫu có được, chúng ta sẽ thực hiện tương tự như bên dưới. Vì mục đích chính của chúng ta là xây dựng phần tính năng, vậy nên phần này bạn có thể sao chép và dán vào mã nguồn của bạn bởi lẻ vì để xây dựng tính năng lần này. Bắt buộc bạn đã thuần thục việc phát triển giao diện với HTML và CSS. Việc chúng ta cần làm sẽ là viết thêm tính năng đấy ở JS.
+
+Bây giờ, hãy cùng thêm khung HTML bên dưới
+
+```html
+<div class="app">
+  <!--  Tiêu đề  -->
+  <h2 class="app__title">Transfer files</h2>
+  
+  <!-- Khung chứa tệp đăng tải  -->
+  <div id="app__files">
+  </div>
+  
+  <!--  Biểu mẫu chọn tệp tin  -->
+  <div class="app__upload">
+    <input type="file" multiple="true">
+    <h2 class="app__upload__title">Browse your file</h2>
+  </div>
+  
+  <!--  Nút đăng tải  -->
+  <button class="app__btn">Send</button>
+</div>
+```
+
+Trong đó:
+
+- `<div class="app">`: Là phần wrapper của cả giao diện trên ảnh
+- `<h2 class="app__title">`: Sẽ là tiêu đề
+- `<div id="app__files">`: Là nơi để hiển thị các tệp được đăng tải lên
+- `<div class="app__upload">`: Là nơi cho phép người dùng ấn vào để chọn tệp cần đăng tải
+
+Tiếp tục, giờ chúng ta thêm **CSS** vào để giao diện bắt mắt hơn, ở đây mình sử dụng **SCSS**
+
+```scss
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+$purple: #3645c9;
+$secondary: #6e6e6e;
+$yellow: #db9421;
+
+body {
+  font-family: Inter;
+  padding: 0;
+  margin: 0;
+  background: $purple;
+}
+
+// Xây dựng bộ khung
+.app {
+  max-width: 400px;
+  min-height: 500px;
+  background-color: white;
+  margin: 50px auto 0;
+  border-radius: 15px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  
+  &__title {
+    font-size: 1.25rem;
+    color: $purple;
+    text-align: center;
+  }
+  
+  #app__files {
+    overflow-y: auto;
+    max-height: 300px;
+    margin-bottom: 1rem;
+    padding-right: 0.5rem;
+  }
+  
+  &__file {
+    display: flex;
+    align-items: center;
+    marign-bottom: 1rem;
+    
+    img {
+      object-fit: contain;
+    }
+    
+    &__content {
+      margin-left: 2rem;
+      display: block;
+      width: 100%;
+      
+      .file__content {
+        display: flex;
+        align-items: center;
+
+        .file__title {
+          font-size: 0.8rem;
+          color: $secondary;
+          font-weight: 400;
+          margin-bottom: 0.5rem;
+          max-width: 300px;
+          white-space: nowrap;
+          overflow-x: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .file__percent {
+          margin-left: auto;
+          color: $yellow;
+          font-size: 0.8rem;
+        }
+      }
+      
+      .file__progress {
+        width: 100%;
+        height: 4px;
+        background-color: rgba($color: $secondary, $alpha: 0.1);
+        border-radius: 9999px;
+        overflow: hidden;
+        
+        span {
+          display: block;
+          background-color: $purple;
+          width: 0;
+          height: 100%;
+          transition: all 300ms ease;
+        }
+      }
+    }
+  }
+  
+  &__upload {
+    border-radius: 0.5rem;
+    border: 2px dashed $purple;
+    padding: 1rem;
+    margin-top: auto;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    
+    input {display: none}
+    
+    .app__upload__title {
+      font-size: 1rem;
+      color: $purple;
+      font-weight: 500;
+      pointer-event: none;
+      cursor: default;
+      
+    }
+  }
+  
+  &__btn {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background-color: $purple;
+    border-radius: 0.5rem;
+    border: 0;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+}
+```
+
+Đến đây, chúng ta đã có một giao diện chỉnh chu như thế này
+
+![Demo progressing bar](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/61b52237-65fe-4bad-8a47-92f51ff7a2d5/Screenshot_from_2021-07-03_03-47-31.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45O3KS52Y5%2F20210702%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20210702T211939Z&X-Amz-Expires=86400&X-Amz-Signature=b2c3a68172c2f3a26ac5fa984148ee4728a2ddd3be6f25dd7363bb9d4665b80a&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Screenshot_from_2021-07-03_03-47-31.png%22)
+
+### Thêm Javascript xử lý đăng tệp tin
+
+Đến đây, chúng ta vẫn còn một việc phải làm là sử dụng JS để xử lý tệp tin đăng tải và hiển thị tỉ lệ đăng tải và **progress bar** cho các tệp tin một cách độc lập.
+
+### Bước đầu tiên: Xây dựng hàm có nhiệm vụ thêm giao diện tệp tin và hiển thị thông tin
+
+```js
+// Hàm với nhiệm vụ append 1 tệp mới sau khi chọn từ máy tính / điện thoại của người dùng
+function appendFile(fileId) {
+  // Khởi tạo cấu trúc giao diện file
+  const newFile = `
+      <img width="30" height="30" src="https://findicons.com/files/icons/1579/devine/256/file.png" alt="File">
+      <div class="app__file__content">
+        <div class="file__content">
+          <h2 class="file__title">Đang tải</h2> 
+          <span class="file__percent">0%</span>
+        </div>  
+        <div class="file__progress" data-trigger="progress" data-progress="0">
+          <span></span>
+        </div>
+      </div>
+    `;
+  
+  // Bọc giao diện bởi 1 div với id = {fileId} và có class là app__file để nhận CSS được viết  
+  const div = document.createElement("DIV");
+  div.setAttribute("id", fileId);
+  div.classList.add("app__file");
+  div.innerHTML = newFile;
+  
+  // Bước cuối cùng, đẩy giao diện vào wrapper của nó  
+  document.querySelector("#app__files").append(div);
+}
+```
+
+Ở đây, mình đã xác định trước. Mỗi lần thêm 1 tệp tin mới, chúng ta sẽ đẩy nó vào `#app__files`. Trong đó:
+
+- `newFile`: sẽ là biến chứa `template string` giao diện file như hình ảnh minh họa ở đầu bài viết
+- `createElement('div')`: Khi chúng ta muốn `append` một `element` vào đối tượng HTML bất kỳ, chúng cần là một `node` để làm điều đó, vì vậy chúng ta cần tạo `node` đó từ đây.
+
+### Bước tiếp theo: Xây dựng hàm cập nhật tỉ lệ % và quá trình tải (Progress bar) của tệp tin
+
+```js
+// Hàm thực hiện cập nhật liên tục về progress và tỉ lệ % của tệp
+function fileProgressing(elementId, fileInfo, progressing) {
+  const fileRoot = document.querySelector(elementId);
+  const progressFile = fileRoot.querySelector(".file__progress");
+  const percent = fileRoot.querySelector(".file__percent");
+  const title = fileRoot.querySelector(".file__title");
+  
+  // Cập nhật các thông tin về title, percent và progress của tệp
+  progressFile.querySelector("span").style.width = progressing + "%";
+  percent.textContent = progressing + "%";
+  title.textContent = fileInfo.name ?? "khong-ro";
+}
+```
+
+`fileProgressing` thực tế đảm nhận việc cập nhật các thông tin về `fileInfo`, `progressing` cho phần tử đang được đăng tải dựa vào `elementId`, trong đó:
+
+- `elementId`: ID của tệp tin đã thêm lên giao diện thông qua `appendFile`
+- `fileInfo`: Sẽ là biến nhận vào thông tin tệp tin đang được đăng tải
+- `progressing`: Tỉ lệ phần trăm quá trình đăng tải tệp tin
+
+### Bước tiếp theo: Xây dựng hàm `load` thực hiện gọi API để đăng tệp tin
+
+```js
+// Nhiệm vụ append file lên giao diện và đăng tải tệp được chọn
+function load(newFile) {
+  // 1. Khởi tạo XHR để call API
+  const xhr = new XMLHttpRequest();
+
+	// 2. Thêm dữ liệu
+  const data = new FormData();
+  data.append("file", newFile);
+
+  // 3. Tạo id cho file và thêm nó vào giao diện
+  const randomId = document.querySelector("#app__files").childElementCount;
+  const elementId = `file-${randomId}`;
+  appendFile(elementId);
+    
+  // 4. Giả lập phương thức đăng tệp
+  xhr.open("POST", "/upload", true);
+  
+  // 5. Lắng nghe sự kiện progress lấy tỉ lệ %
+  xhr.upload.addEventListener("progress", function(event) {
+    const percent = Math.round((event.loaded / event.total) * 100);
+    fileProgressing(`#${elementId}`, newFile, percent);
+  });
+  
+	// 6. Gửi yêu cầu
+  xhr.send(data);
+}
+```
+
+Hàm `load` nhận vào 1 tham số là **tệp tin** được người dùng chọn để đăng tải. Sau đó đặt nó vào `FormData` để gửi lên `SERVER`.
+
+Ở đây, chúng ta sẽ sử dụng `XHR` or `XMLHttpRequest` (Hoặc bạn có thể dùng Axios). Để thực hiện một yêu cầu đăng tệp. Chúng ta sẽ giải thích các phần rõ hơn như bên dưới:
+
+1. Để dùng được `XHR` chúng ta sẽ cần khởi tạo nó với `new XMLHttpRequest()`
+2. Để tệp tin đăng tải thành công, chúng ta cần gửi nó lên cho `server`, ở đây, mình sẽ chọn gửi dạng `FormData`. Bạn có thể gửi nó dưới dạng `json` nhé.
+3. Phần này mình sẽ tạo `id` cho phần tử, đồng thời sẽ gọi `appendFile` để thêm phần tử lên giao diện với `id` vừa tạo
+4. Khởi tạo một yêu cầu với phương thức là `POST`, đường dẫn là `upload`
+5. Chúng ta sẽ lắng nghe quá trình tải tệp bằng `xhr.upload.addEventListener("progress")` và cập nhật tỉ lệ phần trăm đó cho tệp tin bằng hàm `fileProgressing` với `id` đã tạo ở mục 3 để chỉ định phần tử nào sẽ được cập nhật `%` và thông tin
+6. Gửi yêu cầu đăng tệp tin
+
+### Bước cuối: Kết hợp toàn bộ hàm
+
+```js
+document.addEventListener("DOMContentLoaded", () => {
+  const appUpload = document.querySelector(".app__upload");
+  const inputFile = appUpload.querySelector("input[type='file']");
+  
+	// 1. Bắt sự kiện chọn vào `Browse Your File` để mở yêu cầu tải tệp
+  appUpload.addEventListener("click", function() {
+    inputFile.click();
+  });
+  
+	// 2. Lắng nghe lựa chọn tệp tin và gọi `load` để đăng tệp tin
+  inputFile.addEventListener("change", function() {
+    // Lấy danh sách tệp (FileList)
+    const files = inputFile.files;
+    // Tải danh sách lên khung hình và hệ thống
+    for (let i = 0; i < files.length; i++) {
+      // Hàm này có nhiệm vụ append file lên giao diện và đăng tải tệp được chọn
+      load(files[i]);
+    }
+  });
+});
+```
+
+Đây sẽ là bước chúng ta kết hợp các hàm lại với nhau bằng việc lắng nghe sự kiện người dụng chọn tệp và thực hiện đăng tải nó
+
+1.  Bắt sự kiện chọn vào `Browse Your File` để mở yêu cầu tải tệp
+2. Lắng nghe lựa chọn tệp tin và gọi `load` để đăng tệp tin
+
+Như vậy, chúng ta đã hoàn thành được việc **Xây dựng Progress Bar khi Upload file với JavaScript**
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="ProgressBar Uploading" src="https://codepen.io/CodeEN/embed/preview/rNmVXQL?defaultTab=result&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/CodeEN/pen/rNmVXQL">
+  ProgressBar Uploading</a> by toicodedao (<a href="https://codepen.io/CodeEN">@CodeEN</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+      

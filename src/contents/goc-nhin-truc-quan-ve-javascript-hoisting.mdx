@@ -1,0 +1,52 @@
+---
+title: Góc nhìn trực quan về Javascript: Hoisting
+description: Hoisting là một trong những thuật ngữ thông dụng mà lập trình viên JS đều phải nghe qua. Vậy Hoisting là gìtrong javascript mà nó lại biến thành một thuật ngữ được tìm kiếm nhiều đến vậy.
+tags: Frontend,HTML/CSS
+author: Trọng Dương Đức
+publishAt: 2021-04-14T06:23:54.000Z
+createdAt: 2021-04-14T06:23:54.000Z
+updatedAt: 2024-06-03T11:07:20.704Z
+views: 5544
+slug: goc-nhin-truc-quan-ve-javascript-hoisting
+---
+
+**Hoisting** là một trong những thuật ngữ thông dụng mà lập trình viên JS đều phải nghe qua. Vậy **Hoisting là gì** trong javascript mà nó lại biến thành một thuật ngữ được tìm kiếm nhiều đến vậy.
+
+## Hoisting là gì?
+
+Nếu bạn là một người mới tiếp cận với ngôn ngữ JavaScript (JS), bạn có thể bắt gặp những hành vi "kỳ lạ" như khi gán một biến trước khi khai báo chúng. Đó được gọi là **Hoisting** và **Hoisting** thường được giải thích là đặt các biến và hàm lên đầu tệp nhưng không, đó không phải là những gì thực sự xảy ra, nhưng hành vi có thể giống như vậy.
+
+Khi **JS Engine** thực thi, điều đầu tiên là thiết lập bộ nhớ cho dữ liệu trong mã của chúng ta. Không có mã nào được thực thi tại thời điểm này, nó chỉ đơn giản là chuẩn bị mọi thứ sau đó mới thực thi. Cách khai báo hàm và biến được lưu trữ khác nhau. Các hàm được lưu trữ với một tham chiếu đến toàn bộ hàm.
+
+![Ví dụ về function trong Hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--lLfiCbTX--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif7.gif)
+
+Với biến, nó có một chút khác biệt. Giới thiệu chút về ES6 ta có 2 dạng khai báo mới là `let` và `const`. Những biến khái báo với `let` hoặc `const` được lưu trữ chưa khởi tạo `stored unitialized`.
+
+![Ví dụ Hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--vRtKMspn--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif8.gif)
+
+Những biến khai báo với `var` sẽ được lưu trữ với giá trị mặc định là `undefined`.
+
+![Ví dụ Hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--zvlaEaAo--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif9.gif)
+
+Bây giờ giai đoạn thiết lập đã xong, đến phần thực thi các đoạn mã trong mã nguồn của bạn. Hãy xem xét điều gì sẽ xảy ra nếu chúng ta đặt `console.log` lên đầu tệp mã javascript, trước khi chúng ta khai báo các `function` hoặc bất kì biến nào khác.
+
+Các `function` được lưu trự dưới dạng tham chiếu đến toàn bộ mã của hàm, chúng ta có thể gọi chúng ngay cả trước khi dòng mà chúng ta tạo ra chúng.
+
+![Ví dụ hoisting với function](https://res.cloudinary.com/practicaldev/image/fetch/s--nk1taOke--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif16.gif)
+
+Khi chúng ta tham chiếu đến một biến được khai báo với `var` trước khi chúng được khai báo, đơn giản nó sẽ trả về kết quả `undefined`  đã được lưu trữ trong quá trình **thiết lập**. Tuy nhiên, điều này cũng có thể dẫn đến kết quả `unexpected`. Trong hầu hết các trường hợp, điều này có nghĩa là bạn đang vô tình tham chiếu đến nó (có thể bạn không muốn nó thực sự có giá trị không xác định).
+
+![Ví dụ hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--2nai6XPr--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif17.gif)
+
+Để tránh việc có thể vô tình tham chiếu đến một biến `undefined`, giống như chúng ta có thể làm với từ khoá `var`, một `ReferenceError` sẽ xuất hiện bất cứ khi nào chúng ta cố gắng truy cập vào các biến chưa được khởi tạo. **"Vùng"** trước khi khai báo thực tế của chúng, được gọi là vùng chết tạm thời: bạn không thể tham chiếu các biến (điều này bao gồm cả các lớp ES6!) trước khi khởi tạo chúng
+
+![Ví dụ hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--VVPlWhGC--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif18.gif)
+
+Khi JS Engine thực thi đến dòng mà chúng ta đã khai báo các biến, các giá trị trong bộ nhớ sẽ được ghi đè bằng các giá trị mà chúng ta gán cho chúng
+
+![Ví dụ hoisting](https://res.cloudinary.com/practicaldev/image/fetch/s--LGEaCMkS--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_66%2Cw_880/https://devtolydiahallie.s3-us-west-1.amazonaws.com/gif12.gif)
+
+
+### Có thể bạn sẽ cần
+- Phiên dịch từ: [Bài đọc gốc](https://dev.to/lydiahallie/javascript-visualized-hoisting-478h)
+      

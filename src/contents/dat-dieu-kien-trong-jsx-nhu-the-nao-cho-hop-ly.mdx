@@ -1,0 +1,149 @@
+---
+title: Đặt điều kiện trong JSX như thế nào cho hợp lý?
+description: Khi phát triển các components, việc đặt các điều kiện bên trong JSX làm đoạn mã của bạn trở nên lộn xộn và khó đọc hơn
+tags: React
+author: Trọng Dương Đức
+publishAt: 2022-04-24T12:03:53.000Z
+createdAt: 2022-04-24T12:03:53.000Z
+updatedAt: 2024-05-17T14:32:43.221Z
+views: 3979
+slug: dat-dieu-kien-trong-jsx-nhu-the-nao-cho-hop-ly
+---
+
+## Vấn đề
+
+Khi phát triển các components, việc đặt các điều kiện bên trong JSX làm đoạn mã của bạn trở nên lộn xộn và khó đọc hơn. Bạn có thể thấy rõ hơn ở issue này trên [Stackoverflow mà mình tìm thấy về cách đặt điều kiện trong JSX](https://stackoverflow.com/questions/37312122/how-to-do-a-nested-if-else-statement-in-reactjs-jsx). Nếu codebase của bạn đủ lớn thì lượng điều kiện bạn phải đặt trong JSX sẽ sớm vượt qua khỏi tầm tay của bạn.
+
+Mình không muốn code của chúng ta trông như bên dưới 😃 trường hợp chúng ta phải đặt điều kiện bên trong JSX để hiển thị các thông tin, giao diện mình mong muốn. Ví dụ ở đây là nút “Thêm giỏ hàng”
+
+```jsx
+function AddToCart({ isLoggedIn, loading, ...props }) {
+	const [items, setItems] = React.useState(() => 
+		window.localStorage.getItem("carts") ?? []
+	);
+	return (
+		<>
+			{
+				loading ? (<div>
+					Loading....
+				</div>) : 
+				isLoggedIn ? 
+				<div>
+					{items.length} items in carts
+				</div> : 
+				<button>Login to view cart</button>
+			}
+		</>
+	)
+}
+```
+
+Đầu tiên, chúng ta sẽ kiểm tra trạng thái “tải trang” nếu cần sẽ hiển thị “loading...”, và ngược lại chúng ta sẽ hiển thị thông tin giỏ hàng với số lượng hiện có nếu người dùng đã đăng nhập, nếu không sẽ yêu cầu người dùng đăng nhập. 
+
+Nhìn thoáng ngang có thể bạn vẫn hiểu được, nhưng nếu bây giờ mình bổ sung thêm 1 đến 2 điều kiện kiểm tra số hàng tồn kho nếu còn thì mới hiển thị, đảm bảo bạn sẽ k thể hiểu nó ngay lần đầu ...
+
+```jsx
+function AddToCart({ isLoggedIn, loading, ...props }) {
+	const stockStatus = "IN_STOCK";
+	const [items, setItems] = React.useState(() => 
+		window.localStorage.getItem("carts") ?? []
+	);
+
+	return (
+		<>
+			{ stockStatus === "IN_STOCK" ?
+				loading ? (<div>
+					Loading....
+				</div>) : 
+				isLoggedIn ? 
+				<div>
+					{items.length} items in carts
+				</div> : 
+				<button>Login to view cart</button> :
+				stockStatus === "OUT_STOCK" ? <div>OUT OF STOCK</div> : 
+				<div>Unknown</div>
+			}
+		</>
+	)
+}
+```
+
+Hmmm!!!
+
+## Giải pháp
+
+Dưới đây là cách để đoạn mã dễ đọc hơn được lấy cảm hứng từ câu lệnh [jsx-control-statements](https://github.com/AlexGilleran/jsx-control-statements). Mình sẽ chỉ cho bạn một số mẫu hay trong JSX có thể giúp làm cho JSX sạch hơn và dễ đọc hơn.
+
+```jsx
+function AddToCart({ isLoggedIn, loading, ...props }) {
+	const stockStatus = "IN_STOCK";
+	const [items, setItems] = React.useState(() => 
+		window.localStorage.getItem("carts") ?? []
+	);
+
+	return (
+		<>
+			<If condition={stockStatus === "IN_STOCK"}>
+				<If condition={loading}>
+					<div>
+						Loading....
+					</div>
+				</If>
+
+				<If condition={!loading}>
+					<Choose>
+						<When condition={isLoggedIn}>
+							<div>
+								{items.length} items in carts
+							</div>
+						</When>
+
+						<Otherwise>
+							<button>Login to view cart</button>
+						</Otherwise>
+					<Choose>
+				</If>
+			</If>
+			<If condition={stockStatus === "IN_STOCK"}>
+				<div>OUT OF STOCK</div>
+			</If>
+		</>
+	)
+}
+```
+
+`If` component ở đây có thể được hiểu theo đúng nghĩa tên gọi của nó, tương tự với `Choose`, `When` , `Otherwise` cũng tương tự với switch case default mà chúng ta hay sử dụng. Bạn có thể truy cập vào thư viện [jsx-control-statements](https://github.com/AlexGilleran/jsx-control-statements) để xem kĩ hơn về cách dùng.
+
+Từ ý tưởng của thư viện trên, chúng ta có thể tự bắt đầu xây dựng nó một cách dễ dàng và chủ động hơn trong việc tuỳ biến nó
+
+```jsx
+// <If /> component statement condition
+function If({ condition, children }) {
+	return condition ? children : null;
+}
+```
+
+Khá dễ với <If />. Tiếp tục, chúng ta sẽ tiếp tục thực hiện với <Choose /> <When /> ngay bây giờ. Thành phần <Choose /> sẽ tìm <When /> component đầu tiên với `condition` prop là `true` và trả về children của nó. Nếu <When /> không  có điều kiện `true`. Trực quan hơn chúng ta sẽ triển khai nó ngay phía dưới.
+
+```jsx
+function When({ condition, children, ...props }) {
+  return <>{condition ? children : null}</>;
+}
+
+function Choose({ children }) {
+  const Node = null;
+  const childrens = Children.toArray(children);
+
+  for (let index = 0; index < childrens.length; index++) {
+    const child = childrens[index];
+    if (child.type.name === When.name && child.props.condition) {
+      return child;
+    }
+  }
+
+  return Node;
+}
+```
+
+Đây là một giải pháp khá tốt trong việc đọc và hiểu code một cách trực quan hơn với toán tử 3 ngôi trên JSX mà bạn có thể cân nhắc về là một giải pháp để áp dụng vào dự án của mình. Tuy nhiên, bạn có thể sử dụng thư viện [jsx-control-statements](https://github.com/AlexGilleran/jsx-control-statements) thay vì phải tự xây dựng như chúng ta đang làm.
+      

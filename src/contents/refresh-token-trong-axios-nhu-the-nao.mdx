@@ -1,0 +1,213 @@
+---
+title: Refresh token trong Axios như thế nào?
+description: Việc triển khai `refresh token` có thể không còn xa lạ đối với nhiều frontend dev trong chúng ta.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2023-04-02T02:48:48.000Z
+createdAt: 2023-04-02T02:48:48.000Z
+updatedAt: 2024-06-03T20:01:35.253Z
+views: 1670
+slug: refresh-token-trong-axios-nhu-the-nao
+---
+
+Việc triển khai `refresh token` có thể không còn xa lạ đối với nhiều frontend dev trong chúng ta.
+Sau khi đăng nhập thành công, `token`sẽ được trả lại từ API. Chúng ta sẽ lưu trữ nó lại ở localStorage, cookie, etc...
+để đính vào headers của mỗi request cho việc xác thực các request mà chúng ta gửi đi.
+
+Khi `token` này hết hạn, chúng ta sẽ cần gửi một yêu cầu để lấy một `token` mới bằng việc gửi `token` hết hạn trước đó hoặc mã `refersh token`
+ban đầu được trả về từ API. Việc này phụ thuộc vào thiết kế API đó.
+
+![](https://res.cloudinary.com/xskill/image/upload/v1680325213/codestus/CleanShot_2023-04-01_at_11.59.56_2x_jugqzc.png)
+
+Trước khi biết khi nào token hết hạn, chúng ta cần đính `token` vào mỗi request gửi đi.
+Bạn có thể hình dung việc chúng ta đính token vào mỗi request như thế này,
+để đảm bảo chúng ta luôn gửi `token` đến API để xác thực và biết khi nào token sẽ hết hạn (Tránh tự ý kiểm tra token ở client, việc đó không thực sự an toàn).
+
+```js
+axios.interceptors.request.use(
+  function (request) {
+    const token = getTokenInYourStorage();
+
+    // Đính token vào header mới
+    const newHeaders = {
+      ...request.headers,
+      Authorization: `Bearer ${token}`,
+    };
+
+    // Đính header mới vào lại request trước khi được gửi đi
+    request = {
+      ...request,
+      headers: newHeaders,
+    };
+
+    return request;
+  },
+  function (error) {
+    // Xử lý lỗi
+    return Promise.reject(error);
+  },
+);
+```
+
+Khi mỗi request cần xác thực được gửi đi với `token` kèm theo, chúng ta sẽ biết `token` đó còn hợp lệ hay không bằng việc API sẽ giúp chúng ta
+xác minh token đó. khi `token` hết hạn, thông thường chúng ta sẽ nhận được mã phản hồi là **401** hoặc **403**.
+
+Khi đó, chúng ta sẽ kiểm tra trên mỗi response nhận về. Nếu nó rơi vào các mã lỗi trên, thực hiện kịch bản `refersh token` mà chúng ta muốn.
+
+```js
+axios.interceptors.response.use(
+  function (response) {
+    // ...
+    return request;
+  },
+  function(error) {
+    const { response, config } = error;
+    const status = response?.status;
+
+    // Kiểm tra mã lỗi có phải là 401 hoặc 403 hay không
+    if(status === 401 || status === 403) {
+        // Chúng ta sẽ Thực hiện kịch bản refresh token tại đây
+    }
+
+    // Nếu không, trả lỗi về điểm cuối đã gọi api
+    return Promise.reject(error);
+);
+```
+
+Để refresh token, chúng ta sẽ cần có `token` cũ đã hết hạn trước đó, nếu không sẽ báo lỗi.
+
+```js
+// ....
+// 1. Should refresh token when status response 401
+// if status is response code 401, we need to send request token here
+if (!jwtService.getToken()) {
+  return Promise.reject(error);
+}
+// ....
+```
+
+Tiếp theo, để đảm bảo chỉ một request refresh token được tạo ra khi nhiều request với token hết hạn phát sinh khi tải trang,
+chúng ta sẽ cần sử dụng Promise để delay và chỉ tạo duy nhất một yêu cầu cuối cùng. Kèm theo đó, là kiểm tra xem có request refresh token nào đã
+được gọi thông qua biến trạng thái `isRefreshToken`
+
+```js
+// 1.1 refresh token is false, to call refresh token api
+if (!isRefreshToken) {
+  // @todo update status isRefresh to be true
+  isRefreshToken = true;
+
+  // 2. Once time to call refresh token api
+  // @todo send request to refresh token here
+  authService
+    .refreshToken()
+    .then(({ access_token }) => {
+      requestsToRefresh.forEach((callback) => {
+        callback(access_token);
+      });
+
+      // 4. Push access_token for callback in step 3
+    })
+    .catch((error) => {
+      jwtService.removeToken();
+      requestsToRefresh.forEach((cb) => cb(null));
+    })
+    .finally(() => {
+      // 5. After that, to clear all setup
+      isRefreshToken = false;
+      requestsToRefresh = [];
+    });
+}
+
+// 3. Setup callback to change token in headers authorization
+return new Promise((resolve, reject) => {
+  requestsToRefresh.push((token) => {
+    if (token) {
+      // Reset access_token for another request behind
+      config.headers.Authorization = `Bearer ${token}`;
+      resolve(instanceAxios(config));
+    }
+
+    reject(error);
+  });
+});
+```
+
+Ở đây, `jwtService` là service để tương tác get, set token với các storage. `authService` dùng để xử lý và tương tác với các API và ở trong trường hợp này
+chúng ta có phương thức `refreshToken` chỉ dùng để gọi API kèm theo `token` hết hạn của chúng ta trước đó.
+
+Tóm gọn lại, chúng ta sẽ có một hàm `refresh token` như bên dưới.
+
+```js
+let isRefreshToken = false;
+
+axios.interceptors.response.use(
+  function (response) {
+    // ...
+    return request;
+  },
+  (error) => {
+    const { response, config } = error;
+    const status = response?.status;
+
+    // The account not active
+    if (status === 406) {
+      jwtService.removeToken();
+      // return (window.location.href = "/login");
+    }
+
+    // 1. Should refresh token when status response 401
+    // if status is response code 401, we need to send request token here
+    if (status === 401) {
+      if (!jwtService.getToken()) {
+        return Promise.reject(error);
+      }
+
+      // 1.1 refresh token is false, to call refresh token api
+      if (!isRefreshToken) {
+        // @todo update status isRefresh to be true
+        isRefreshToken = true;
+
+        // 2. Once time to call refresh token api
+        // @todo send request to refresh token here
+        authService
+          .refreshToken()
+          .then(({ access_token }) => {
+            requestsToRefresh.forEach((callback) => {
+              callback(access_token);
+            });
+
+            // 4. Push access_token for callback in step 3
+          })
+          .catch((error) => {
+            jwtService.removeToken();
+            requestsToRefresh.forEach((cb) => cb(null));
+          })
+          .finally(() => {
+            // 5. After that, to clear all setup
+            isRefreshToken = false;
+            requestsToRefresh = [];
+          });
+      }
+
+      // 3. Setup callback to change token in headers authorization
+      return new Promise((resolve, reject) => {
+        requestsToRefresh.push((token) => {
+          if (token) {
+            // Reset access_token for another request behind
+            config.headers.Authorization = `Bearer ${token}`;
+            resolve(instanceAxios(config));
+          }
+
+          reject(error);
+        });
+      });
+    }
+    return Promise.reject(error);
+  },
+);
+```
+
+## Kết luận
+
+Có rất nhiều để chúng ta triển khai refresh token và phía trên là một trong số cách hiện tại mình đang sử dụng để `refresh token`.
+      

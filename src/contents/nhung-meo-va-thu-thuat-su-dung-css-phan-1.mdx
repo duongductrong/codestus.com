@@ -1,0 +1,131 @@
+---
+title: Những mẹo và thủ thuật sử dụng CSS (Phần 1)
+description: Trong bài viết lần này, chúng ta sẽ tổng hợp những mẹo và thủ thuật thường được sử dụng khi làm việc với CSS để xây dựng trang web tốt hơn. Cũng góp phần cải thiện trải nghiệm người dùng (UX) tốt hơn.
+tags: Frontend
+author: Trọng Dương Đức
+publishAt: 2021-02-27T12:38:48.000Z
+createdAt: 2021-02-27T12:38:48.000Z
+updatedAt: 2024-05-28T12:52:39.813Z
+views: 5196
+slug: nhung-meo-va-thu-thuat-su-dung-css-phan-1
+---
+
+Trong bài viết lần này, chúng ta sẽ tổng hợp những mẹo và thủ thuật thường được sử dụng khi làm việc với CSS để xây dựng trang web tốt hơn. Cũng góp phần cải thiện trải nghiệm người dùng (UX) tốt hơn.
+
+## 1. Smooth Scrolling
+Khi truy cập một số trang web bất kỳ, chúng ta thường thấy ở các bài viết thường sẽ có "Mục lục" để điều hướng người dùng xem nội dung. Khi ấn vào mục bất kỳ, sẽ có trạng thái scroll mượt mà.
+
+Để làm được như vậy, chúng ta cần thêm thuộc tính bên dưới. Khi sử dụng thẻ `<a>` để truy cập đến vị trí `id` bất kì sẽ mượt mà hơn.
+
+```css
+html {
+	scroll-behavior: smooth;
+}
+```
+
+## 2. Truncate text ...
+Đôi khi, bạn xây dựng một số component sẽ không yêu cầu hiển thị toàn bộ nội dung. Như `card`, chúng ta chỉ cho phép hiển thị một phần nội dung tiêu đề và miêu tả như thế này
+
+![Truncate text](https://res.cloudinary.com/xskill/image/upload/v1614477673/codestus/eowxlqgu46m5z1kbkx3f.png)
+
+Chúng ta sẽ sử dụng
+
+```css
+width: 250px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+```
+
+## 3. Caret Color trong input
+Để thay đổi màu sắc nội dung nhập vào thẻ `input` như thế này
+
+![Caret color](https://res.cloudinary.com/xskill/image/upload/v1614477843/codestus/igezmsdcscvifvejtkyk.jpg)
+
+Bạn có thể thể sử dụng cách này
+
+```css
+input {
+	caret-color: red;
+}
+```
+
+## 4. Box-shadow và Drop-shadow
+Thông thường chúng ta hay sử dụng `box-shadow` để đổ bóng cho các đối tượng chúng ta xây dựng. 
+
+Bạn có biết là chúng ta có thể đổ bóng cho những hình ảnh trong suốt như thế này không ?
+
+![Drop-box vs Drop-shadow](https://res.cloudinary.com/xskill/image/upload/v1614478084/codestus/mpp2vctsxbaaca0jakxt.png)
+
+Chắc hẵn bạn cũng nhận thấy sự khác biệt giữa 2 bức ảnh trên khi sử dụng 2 thuộc tính `box-shadow` và `drop-shadow`
+
+Thử tìm một bức ảnh và triển khai 2 thuộc tính này luôn nhá.
+
+```css
+// box-shadow: x y shadows color
+box-shadow: 5px 10px 20px black;
+
+// drop-shadow(x y shadows color)
+filter: drop-shadow(30px 10px 4px black)
+```
+
+## 5. Drop cap letter
+Bạn có thể đã từng thấy ở những blogs các nhân, thông thường chữ cái đầu tiên sẽ to và chiếm 1 phần kích thước xung quanh nó.
+
+![Drop cap](https://res.cloudinary.com/xskill/image/upload/v1614478520/codestus/agwxwlyfe1zl7dkhhaax.png)
+
+Chúng ta gọi đây là **Drop cap**. Bạn có thể thực hiện nó bằng cách bên dưới
+
+```css
+.drop-cap:first-child {
+	font-family: "Source Sans Pro", Arial;
+	float: left;
+	font-size: 6rem; /** font-size-base * 6 */
+	line-height: 0.65;
+	margin: 0.1em 0.1em 0.2em 0;
+}
+```
+
+## 6. Căn giữa DIV
+Căn giữa phần tử div đôi khi có thể khiến bạn nản lòng, nhưng bạn không còn phải như thế khi bỏ túi thủ thuật này. Bạn có thể căn giữa bất kỳ div nào chỉ với một vài dòng CSS.
+
+```css
+body {
+	display: grid;
+	height: 100vh;
+	margin: 0;
+	place-items: center center;
+}
+```
+
+## 7. Lấy giá trị thuộc tính thẻ html trong css
+Có thể bạn sẽ rất đau đầu vì không kiếm được cách lấy nội dung mình nhập từ thẻ html vào css động, cho phép nó tự thay đổi nội dung dựa trên thẻ html. Và vấn đề của bạn sẽ được giải quyết bằng cách sử dụng hàm `attr()` mà css đã cung cấp sẵn.
+
+Đừng lo về **browser supported**, hầu như các trình duyệt đã hỗ trợ hàm này.
+
+Bạn có thế ứng dụng nó để xây dựng đối tượng như bên dưới
+
+![](https://res.cloudinary.com/xskill/image/upload/v1614479265/codestus/qtq0rywscdlv8gypaj7y.png)
+
+```css
+/** <div class="separate" data-separate="Already have an account? View more sign in options.
+"> */
+
+.separate {
+	width: 100%;
+	height: 2px;
+	background-color: rgba(227, 227, 227);
+}
+
+.separate::after {
+	content: attr(data-separate);
+	padding: 4px;
+	background-color: white;
+}
+```
+
+Trong phần này, mình đã giới thiệu một vài thủ thuật  có thể sẽ giúp bạn giải quyết được vấn đề gặp phải khi làm việc với CSS.
+
+## Kết luận
+Nếu bạn có biết thêm những thủ thuật nào hay, hãy bình luận bên dưới nha.
+      

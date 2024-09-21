@@ -1,0 +1,159 @@
+---
+title: Sử dụng forEach trong javascript
+description: Khi làm việc với mảng bạn thường làm gì, lặp qua một mảng? 
+Trong JavaScript, chúng ta có thể sử dụng một số phương thức được cung cấp như map, reduce, etc để lặp mảng
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-02-04T14:09:52.000Z
+createdAt: 2021-02-04T14:09:52.000Z
+updatedAt: 2024-06-03T17:22:33.755Z
+views: 10488
+slug: su-dung-foreach-trong-javascript
+---
+
+Khi làm việc với mảng bạn thường làm gì, lặp qua một mảng? 
+
+Trong JavaScript, chúng ta có thể sử dụng một số phương thức được cung cấp như `map`, `reduce`, etc để lặp mảng. Nhưng, trong phạm vi bài viết này, ta chỉ làm việc với `forEach` chứ không phải 2 phương thức đã nhắc đến. Chúng ta sẽ tìm hiểu về cách sử dụng phương thức `forEach`, phạm vi áp dụng, các đối tượng thường được áp dụng
+
+## Cơ bản về forEach
+`forEach` là phương thức lặp qua từng phần tử của mảng theo thứ tự tăng dần mà không làm thay đổi kết cấu của mảng, nhận vào một **callback** đảm nhiệm nhiệm vụ lặp qua từng phần tử của mảng được cung cấp, có 3 tham số chính được cung cấp là **item, index, array**.
+
+- **item**: Giá trị của phần tử trong mảng
+- **index**: Vị trí của phần tử trong mảng
+- **array**: Mảng gốc đang được lặp từ **forEach**
+
+```js
+array.forEach(callback[, thisArg]);
+```
+
+Nào bây giờ hãy xem cách hoạt động của **forEach**.
+
+Giả sử trường hợp chúng ta nhận được mảng danh sách trái cây như sau
+
+```js
+const fruits = ["Apple", "Orange", "Banana", "Mango"];
+```
+
+Chúng ta sẽ lặp qua mảng `fruits` và `console.log` các từng phần tử trong mảng với forEach bằng cách:
+
+```js
+fruits.forEach(function(fruit) {
+	console.log(fruit); // Apple, Orange, Banna, Mango
+})
+```
+
+Hàm nằm bên trong forEach là một callback nhận vào tham số `fruit` là giá trị của từng phần tử nằm trong mảng, đây là cách rất đơn giản để ta lặp qua mảng và lấy giá trị của phần tử nằm trong một mảng bất kỳ được cung cấp thông qua dạng [Array].forEach
+
+## Vị trí của phần tử trong forEach
+Thông thường, chúng ta chỉ sử dụng tham số thứ nhất để xử lý các trường hợp gặp phải. Nhưng một số trường hợp chúng ta cũng cần đến tham số vị trí của giá trị để khai thác thông tin dữ liệu chính xác. Đây cũng là mục đích để ta tìm hiểu về vị trí của phần tử trong phương thức **forEach**, nó là tham số thứ 2, sau tham số giá trị đầu tiên trong **callback**.
+
+Ta sẽ cùng tìm hiểu cách truy xuất vị trí của các giá trị trong mảng `fruits` qua ví dụ bên dưới
+
+```js
+fruits.forEach(function (fruit, index) {
+	console.log(fruit, "Vị trí " + index);
+	// "Apple" "Vị trí 0"
+	// "Orange" "Vị trí 1"
+	// "Banner" "Vị trí 2"
+	// "Mango" "Vị trí 3"
+})
+```
+
+## Truy cập mảng gốc bên trong vòng lặp
+Để truy cập vào chính mảng đang được lặp qua, chúng ta sẽ sử dụng tham số thứ 3 bên trong hàm **callback**. Bây giờ hãy cùng thử hiển thị tham số thứ 3 `array` bên trong vòng lặp đang thực thi.
+
+```js
+fruits.forEach(function(fruit, index, array) {
+	console.log(array);
+	//  ["Apple", "Orange", "Banana", "Mango"] // 4 lần 
+})
+```
+
+Mảng tham số thứ 3 bên trong hàm `callback` là mảng mà phương thức forEach () đã gọi.
+
+## `This` bên trong callback
+Hãy chạy ví dụ sau và chú ý hiển thị giá trị của `this` và so với **window global** nhé.
+
+```js
+fruits.forEach(function(fruit, index, array) {
+	console.log(this); // window {...}
+	console.log(this === window) // true
+})
+```
+
+`this` bên trong hàm `callback` bằng **window** (window là một đối tượng toàn cục trong môi trường trình duyệt. 
+
+Trong một số tình huống, bạn sẽ cần truy cập từ khoá `this` ngay bên trong vòng lặp, có thể là một ngữ cảnh khác để tính toán lựa chọn dữ liệu cho bạn. Bằng cách đó, ta có thể chỉ ra đối tượng `this` bằng tham số thứ 2 trong **forEach**:
+
+```js
+fruits.forEach(function() {}, thisArg)
+```
+
+Hãy xem ví dụ bên dưới, giả sử mình có ngữ cảnh kho chứa chỉ có mỗi loại trái cây chuối, cần kiểm tra danh sách trái cây nào chưa có trong ngữ cảnh kho sẽ được chuyển vào đó.
+
+```js
+// Kho chứa
+let stored = {
+	stored: ["Banana"]
+}
+
+// Danh sách trái cây mới
+let fruits = ["Apple", "Orange", "Banana", "Mango"]
+
+// Lặp qua danh sách trái cây mới
+fruits.forEach(function(fruit) {
+	// Kiểm tra xem trái cây mới có tồn tại trong kho chứa, nếu không thì chuyển vào
+	if(!this.stored.includes(fruit)) {
+		this.stored.push(fruit)
+	}
+}, stored)
+
+// Kết quả mong muốn : ["Banana", "Apple", "Orange", "Mango"]
+console.log(stored) // ["Banana", "Apple", "Orange", "Mango"]
+```
+
+Ngoài ra, đối với ví dụ trên, chúng ta có thể sử dụng **arrow function** làm hàm **callback** của **forEach()** sẽ tốt hơn. Arrow function bảo toàn giá trị của `this` khỏi phạm vi `lexical scope`. Vì vậy không cần sử dụng đến đối số thứ 2 trong **forEach**.
+
+## forEach bỏ qua giá trị khoảng trống
+forEach() khi thực thi sẽ bỏ qua giá trị empty bên trong mảng.
+
+```js
+const fruits = ["Apple", , "Banana", "Mango"];
+
+console.log(fruits.length) // length = 4;
+
+fruits.forEach(function(fruit) {
+	console.log(fruit);
+	
+	// Hiển thị: "Apple", "Banana", "Mango"
+})
+```
+
+## Lặp qua Array-like object bằng forEach
+Như các phương thức `map`, `filter`, `find`, ..etc. Chúng ta không thể lặp qua một **array-like**, chỉ có **forEach** có khả năng làm điều này.
+
+```js
+const fruits = {
+	"0": "Apple",
+	"1": "Mango",
+	"length": 2
+}
+
+Array.prototype.forEach.call(fruits, function(fruit) {
+	console.log(fruit) // "Apple", "Mango"
+});
+```
+
+Ngoài ra bạn cũng có thể lặp qua **NodeList** từ DOM HTML bằng **forEach**
+
+```js
+document.querySelectorAll("img").forEach(function(element) {
+	console.log(element) // HTMLElement
+})
+```
+
+## Kết luận
+**forEach()** là một phương thức lặp qua tất cả phần tử trong mảng một cách hiệu quả. Đối số đầu tiên nó là hàm **callback**, gọi cho mọi phần trong mảng với 3 đối số `item`, `index`, `array`.
+
+**forEach()** là phương thức rất hữu ích để lặp qua tất cả giá trị trong mảng mà không làm phá vỡ cấu trúc mảng ban đầu.
+      

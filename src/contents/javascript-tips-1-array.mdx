@@ -1,0 +1,81 @@
+---
+title: Javascript Tips #1: Array
+description: Bài viết chủ yếu tổng hợp các kỹ thuật nhỏ nhưng có võ trong JS. Giúp bạn tiết kiệm thời gian và xử lý các tính huống cơ bản một cách thông minh hơn
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-06-12T01:26:33.000Z
+createdAt: 2021-06-12T01:26:33.000Z
+updatedAt: 2024-06-01T10:19:56.816Z
+views: 4576
+slug: javascript-tips-1-array
+---
+
+> Bài viết chủ yếu tổng hợp các kỹ thuật nhỏ nhưng có võ trong JS. Giúp bạn tiết kiệm thời gian và xử lý các tính huống cơ bản một cách thông minh hơn
+
+Khởi tạo mảng với `n` phần tử
+
+```jsx
+const arr = new Array(3);
+
+// result: arr = [empty x 3]
+```
+
+Khởi tạo mảng với `n` phần tử với giá trị `x`
+
+```jsx
+const arr = new Array(3);
+
+arr.fill(1); // kết quả : [1,1,1]
+```
+
+Khởi tạo mảng với `n` phần tử có giá trị từ `0...n`
+
+```jsx
+const arr = Array.from({length: 10}, (_, i) => i);
+
+// kết quả : [0,1,2,3,4,5,6,7,8,9]
+```
+
+Mảng Unique values
+
+```jsx
+const arr = [1,2,3,4,5,6,1,1,2,4,5];
+const uniques = [...new Set(arr)]; // kết quả : [1,2,3,4,5,6]
+```
+
+Làm phẳng mảng đa chiều (Flatten a Multidimensional Array)
+
+```jsx
+const arr = [1,2,3, [4,5], [6,7, [8,0]]];
+const depth = 4;
+
+const res = arr.flat(depth);
+
+// kết quả : [1,2,3,4,5,6,7,8,0]
+```
+
+Khởi tạo mảng với giá trị ngẫu nhiên
+
+```jsx
+const length = 10;
+const arr = Array.from({length}, (_, i) => Math.round(length * Math.random()))
+```
+
+Thay đổi kích thước một mảng (Resize array)
+
+```jsx
+const arr = [1,3,4,5,3,2];
+const arr2 = [1,2,3];
+
+arr.length = 2; // [1,3]
+arr2.length = 5; // [1,2,3, undefined, undefined];
+```
+
+Xóa giá trị bất kỳ trong mảng
+
+```jsx
+var arr = [1, 2, 3];
+
+arr.splice(1, 1); // [1,3]
+```
+      

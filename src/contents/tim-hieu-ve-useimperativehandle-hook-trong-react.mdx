@@ -1,0 +1,152 @@
+---
+title: Tìm hiểu về useImperativeHandle hook trong React
+description: `useImperativeHandle` được tạo ra cho các kịch bản mà bạn quyết định `refs` sẽ có và được quyền truy cập gì từ một thành phần tuỳ chỉnh.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2022-12-11T05:04:00.000Z
+createdAt: 2022-12-11T05:04:10.000Z
+updatedAt: 2024-06-03T22:43:08.487Z
+views: 4102
+slug: tim-hieu-ve-useimperativehandle-hook-trong-react
+---
+
+{% callout %}
+**Lưu ý:** React.useImperativeHandle() hook chỉ hoạt động từ React 18 trở lên.
+{% /callout %}
+
+`useImperativeHandle` có lẽ là một trong những hook khó hiểu hơn vì nó hoạt động theo một cách rất khác so với hầu hết các hooks. Bắt buộc đi ngược lại bản chất khai báo của React khiến nó trở nên khá độc. Bởi vì lý do này, nó chỉ được cân nhắc sử dụng khi cần thiết để. Không may là, có rất nhiều tình huống mà hook này là cần thiết. Vì vậy, mình sẽ trình bày trong bài viết này cùng với phần giải thích về cách thức hoạt động của nó.
+
+## React.forwardRef
+Trước khi chúng ta nói về `useImperativeHandle` trước tiên chúng ta cần hiểu cách `refs` hoạt động như thế nào?, đặc biệt là khi chuyển tiếp refs tới các thành phần tuỳ chỉnh. *Nếu bạn đã quen thuộc với cách làm việc của `refs` và `React.forwardRef` có thể bỏ qua phần này*. Nếu bạn hoàn toàn không quen với khái niệm `refs` thì hãy [tìm hiểu sơ về `useRef`](https://codestus.com/posts/tat-ca-nhung-gi-ban-can-biet-ve-ref-trong-react) trước khi tiếp tục bài viết này.
+
+Giờ hãy cùng tưởng tượng chúng ta có đoạn code bên dưới.
+
+```jsx
+function App() {
+  const [value, setValue] = useState("")
+  const inputRef = useRef()
+
+  return (
+    <>
+      <input
+        type="text"
+        ref={inputRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+      >
+      <button onClick={() => inputRef.current.focus()}>Focus</button>
+    </>
+  )
+}
+```
+
+Đây là một đoạn code đơn giản sử dụng `ref` để tham chiếu đến `input` và lắng nghe thao tác khi người dùng ấn vào `button` thì chúng ta sẽ kích hoạt sự kiện `native focus` của `input` thông qua `refs`. Đây là phần rất cơ bản về `useRef`, nhưng điều gì sẽ xảy ra nếu đầu vào của chúng ta là một thành phần tùy chỉnh.
+
+```jsx
+function App() {
+  const [value, setValue] = useState("")
+  const inputRef = useRef()
+
+  return (
+    <>
+      <CustomInput
+        ref={inputRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+      >
+      <button onClick={() => inputRef.current.focus()}>Focus</button>
+    </>
+  )
+}
+```
+
+Với đoạn code mới của chúng ta, `ref` sẽ không tự động liên kết với `input` bên trong `CustomInput` trừ khi chúng ta sử dụng `React.forwardRef` bên trong thành phần tuỳ chỉnh này để `forward` ref.
+
+```jsx
+function CustomInput(props, ref) {
+  return (
+    <input
+      ref={ref}
+      style={{ backgroundColor: "red" }}
+      {...props}
+    />
+  )
+}
+export default React.forwardRef(CustomInput)
+```
+
+Ở dòng cuối cùng của thành phần tuỳ chỉnh trên chúng ta đang gọi `React.forwardRef` và truyền vào `CustomInput`. Bằng cách này, chúng ta đang nói với React rằng thành phần này có thể nhận ref và tham số thứ hai cho `CustomInput` của chúng ta sẽ là ref được truyền vào. Sau đó, tất cả những gì chúng ta cần làm là cho React biết phần tử nào mà `ref` sẽ trỏ đến trong `CustomInput` của chúng ta.
+
+## useImperativeHandle
+Bây giờ, chúng ta đã hiểu cơ bản về các cơ chế, hành vi ứng dụng của refs. Giờ hãy cùng trao đổi thêm về `useImperativeHandle`. Chúng ta sẽ chia nhỏ thành 2 phần. Phần đầu tiên sẽ ví dụ cô bản về `useImperativeHandle` để bạn có thể hiểu nó hoạt động thế nào vì khi nào chúng ta cần đến. Phần thứ 2 sẽ về một ví dụ ứng dụng `useImperativeHandle` hook trong các kịch bản thực tế mà chúng ta cần đến hook này.
+
+Trước khi chúng ta đi đến phần ví dụ, thì chính xác `useImperativeHandle` hook sinh ra để làm gì?. Về bản chất, **useImperativeHandle** tạo ra các giá trị tuỳ chỉnh khi một thành phần kích hoạt `ref`. Tức là khi bạn truyền `ref` đến một thành phần tuỳ chỉnh nào đó, những gì bạn nhận lại là những gì thành phần đó cho phép bạn nhận thông qua việc sử dụng `useImperativeHandle`.
+
+Từ `useImperativeHandle` hook, bạn có thể làm nhiều việc hơn là chỉ gán một yếu tố `ref` đến một phần tử.
+
+## Ví dụ
+Để triển khai một `useImperativeHandle` hook trong thành phần tuỳ chỉnh như `CustomInput`, chúng ta cần.
+
+```jsx
+function CustomInput(props, ref) {
+  useImperativeHandle(ref, () => {
+    return { alertHi: () => alert("Hi") }
+  })
+
+  return (
+    <input
+      style={{ backgroundColor: "red" }}
+      {...props}
+    />
+  )
+}
+
+export default React.forwardRef(CustomInput)
+```
+
+Tại đây, trường hợp sử dụng cơ bản của `useImperativeHandle` hook có 2 tham số cần truyền vào. Tham số đầu tiên là tham số `ref` mà bạn muốn ghi đè lên và tham số thứ 2 là một `callback` trả về các giá trị mới mà bạn muốn `ref` của `CustomInput` nhận được và sử dụng nó. Trong trườn g hợp này, chúng ta trả về một `object` chứa hàm `alertHi`. Giờ hãy cùng xem cách sử dụng nó sau khi triển khai ở thành phần `App` ra sao nhé.
+
+```jsx
+function App() {
+  const [value, setValue] = useState("")
+  const inputRef = useRef()
+
+  return (
+    <>
+      <CustomInput
+        ref={inputRef}
+        value={value}
+        onChange={e => setValue(e.target.value)}
+      >
+      <button onClick={() => inputRef.current.alertHi()}>Alert</button>
+    </>
+  )
+}
+```
+
+Như bạn đã thấy, thay đổi duy nhất chúng ta thấy ở đây để gọi `alertHi` mà chúng ta đã khai báo trong `useImperativeHandle` trước đó ở `App` chỉ cần gọi đến `ref.current.alertHi()`. Về cơ bản nó là thế, hoặc có thể phức tạp hơn thế một chút.
+
+```jsx
+function CustomInput(props, ref) {
+  useImperativeHandle(ref, () => {
+    return { alertValue: () => alert(props.value) }
+  }, [props.value])
+
+  return (
+    <input
+      ref={ref}
+      style={{ backgroundColor: "red" }}
+      {...props}
+    />
+  )
+}
+
+export default React.forwardRef(CustomInput)
+```
+
+Truyền vào một `dependencies` là một `array` tương tự với các hook khác như `useEffect`, `useMemo`, .... Để quyết định việc kích hoạt lại `useImperativeHandle` khi giá trị của `props` đó thay đổi, cập nhật lại giá trị mới nhất mà chúng ta cần dể thực hiện các chức năng mà chúng ta cần.
+
+## Phần kết
+- `useImperativeHandle` được tạo ra cho các kịch bản mà bạn quyết định `refs` sẽ có và được quyền truy cập gì từ một thành phần tuỳ chỉnh.
+- `useImperativeHandle` giúp chúng ta giới hạn khả năng truy cập đến tầng native của một Component hay một Element để tránh các trường hợp có mục đích xấu.
+      

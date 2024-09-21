@@ -7,6 +7,7 @@ import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
 import postService from "@/services/post-service"
 import { ParamsProps, SearchParamsProps } from "@/types/utilities"
 import { getSpeedReading } from "@/utils/speed-reading"
+import { allPosts } from "content-collections"
 import dayjs from "dayjs"
 import compact from "lodash/compact"
 import { Metadata, ResolvingMetadata } from "next"
@@ -60,7 +61,9 @@ export async function generateMetadata(
 }
 
 const PostDetail = async ({ params: { id } }: PostDetailProps) => {
-  const post = await postService.detail(id)
+  // const post = await postService.detail(id)
+
+  const post = allPosts.find((p) => p.slug === id)
 
   if (!post) notFound()
 
@@ -72,22 +75,30 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
     name: post?.title,
     headline: post?.title,
     about: post?.title,
+    // author: {
+    //   "@type": "Person",
+    //   "@id": post?.user?.name,
+    //   address: post?.user?.email,
+    //   alternateName: post?.user?.name,
+    //   email: post?.user?.email,
+    //   image: post?.user?.avatar,
+    // },
     author: {
       "@type": "Person",
-      "@id": post?.user?.name,
-      address: post?.user?.email,
-      alternateName: post?.user?.name,
-      email: post?.user?.email,
-      image: post?.user?.avatar,
+      "@id": "duongductrong06@gmail.com",
+      alternateName: "Duong Duc Trong",
+      address: "duongductrong06@gmail.com",
+      email: "duongductrong06@gmail.com",
+      image: "https://avatars.githubusercontent.com/u/39333905?v=4",
     },
     url,
     image: post?.thumbnail,
     articleBody: post?.description,
     wordCount: post?.content?.length ?? 0,
-    dateCreated: post?.created_at,
+    dateCreated: post?.createdAt,
     thumbnailUrl: post?.thumbnail,
-    datePublished: post?.publish_at,
-    dateModified: post?.updated_at,
+    datePublished: post?.publishAt,
+    dateModified: post?.updatedAt,
     mainEntityOfPage: {
       "@type": "WebContent",
       "@id": generateUrlFormSlug(post?.slug),
@@ -98,7 +109,7 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
 
   return (
     <div className="mx-auto mb-20">
-      <HitPageViews id={id} />
+      {/* <HitPageViews id={id} /> */}
       <Text variant="h1" as="h1" className="mt-20 mb-8 text-center ml-auto mr-auto">
         {post.title}
       </Text>
@@ -106,8 +117,8 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
       <div className="flex gap-2 mb-20 justify-center">
         <p className="text-sm font-normal text-muted-foreground">
           Published at:{" "}
-          {dayjs(post.publish_at).isValid()
-            ? dayjs(post.publish_at).format("DD/MM/YYYY")
+          {dayjs(post.publishAt).isValid()
+            ? dayjs(post.publishAt).format("DD/MM/YYYY")
             : "Unknown Date."}
         </p>
         <Icon name="dot" className="w-4 h-4 text-muted-foreground" />
@@ -117,6 +128,10 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
       </div>
 
       <BlogRenderer content={content} />
+
+      {/* <article className="prose dark:prose-invert leading-8 max-w-full mx-auto">
+        <MDXContent code={post.mdx} />
+      </article> */}
 
       <Script
         id="structured-data"

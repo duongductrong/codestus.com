@@ -1,0 +1,115 @@
+---
+title: Tìm hiểu về useMomo và cách sử dụng hợp lý?
+description: Khi ứng dụng của bạn mở rộng (scales), vấn đề về hiệu xuất sẽ nhiều hơn và hơn thế nữa. Trong khi React đã làm rất tốt khả năng tối ưu và rất nhanh
+tags: JavaScript,React,Frontend
+author: Trọng Dương Đức
+publishAt: 2021-02-16T15:07:34.000Z
+createdAt: 2021-02-16T15:07:34.000Z
+updatedAt: 2024-06-03T13:36:10.576Z
+views: 9536
+slug: tim-hieu-ve-usemomo-va-cach-su-dung-hop-ly
+---
+
+Khi ứng dụng của bạn mở rộng (scales), vấn đề về hiệu xuất sẽ nhiều hơn và hơn thế nữa. Trong khi React đã làm rất tốt khả năng tối ưu và rất nhanh, điều quan trọng là phải biết các công cụ mà họ cung cấp đề làm cho mã của bạn nhanh hơn. Một trong số công cụ đó là **useMomo** hook và **useCallback**.
+
+## useMemo giải quyết vấn đề gì ?
+**useMemo** là một React hook giúp ghi nhớ kết quả đầu ra của một hàm. `useMemo` cho phép truyền vào 2 tham số: **callback** và **dependencies**. **useMemo** sẽ gọi hàm và trả về giá trị trả về của nó. Sau đó, mỗi khi bạn gọi lạ useMemo, nó sẽ kiểm tra nếu bất kì khi nào **dependencies** thay đổi nó sẽ gọi lại **callback** để thực thi nó. Nếu không, nó sẽ trả về giá trị cũ đã được lưu trong bộ nhớ cache, không gọi hàm callback.
+
+Chính xác, nếu giá trị truyền vào **dependencies** thay đổi, chúng ta gọi lại hàm đã được cung cấp để thực thi các logic bên trong. Đó là cách hoạt động của **useMemo**.
+
+Điều này sẽ nhắc nhở bạn về **useEffect**, cả **useMemo** và **useEffect** đều chấp nhận nhóm **dependencies**. Sự khác biệt duy nhất là **useEffect** được dành cho side-effects, trong khi các chức năng của useMemo được cho là **tinh khiết (pure)** và không có **side-effects**.
+
+## Sử dụng useMemo thế nào ?
+Chúng ta sẽ phải thêm `import` useMemo trước khi sử dụng nó
+
+```jsx
+import React, { useMemo } from 'react'
+```
+
+Đôi khi bạn sẽ cần tính toán một giá trị, thông qua một phép tính phức tạp hoặc bằng cách truy cập api
+ nhiều lần để thực hiện các truy vấn tốn kém.
+ 
+Khi đó, sử dụng **useMemo** là một ý hay, hoạt động thực hiện đó chỉ thực hiện là đầu tiên. Sau đó, nó sẽ tự kiểm tra nếu giá trị mới khác với giá trị đã ghi nhớ thì hoạt động ta cung cấp sẽ được lặp lại, như đã nói ở phần trên.
+
+Hãy cùng xem cách sử dụng nó thế nào
+
+```jsx
+const memoizedValue = useMemo(() => expensiveOperation(param), [param]);
+```
+
+Giả sử, hoạt động xử lý này diễn ra rất nặng nề và chúng ta không hề muốn tốn nhiều sức, chúng ta sẽ ghi nhớ các quá trình tính toán trong `expensiveOperation`, khi có bất kì tính toán nào khiến `param` truyền vào `dependencies` trong `useMemo` thay đổi. Lập tức hàm này sẽ được thực thi và trả về một giá trị mới cho biến `memoizedValue`.
+
+## Khi nào chúng ta nên sử dụng useMemo ?
+Đầu tiên, việc này rất quan trọng, mã của bạn không phụ thuộc vào **useMemo**. Nói cách khác, bạn nên thay thế **useMemo** bằng các hàm gọi trực tiếp và không thay đổi bất kì điều gì ảnh hưởng đến ứng dụng, trừ khi nó ảnh hưởng nhiều đến hiệu năng. Cách để nhất để làm điều này là hãy suy nghĩ cách viết mã mà không cần dùng đến `useMemo` trước. Sau đó, hãy thêm nó vào nếu cần thiết.
+
+Để hiểu cách ứng dụng của `useMemo` chúng ta hãy cùng xem ví dụ phía dưới:
+
+```jsx
+import React, { useState } from 'react'
+
+function App() {
+	const [length, setLength] = useState(0);
+	
+	return <div>
+		<input type="text" placeholder="Nhập số" value={length} onChange={(e) => setLength(Number(e.target.value))} />
+		
+		<ListedAllNumber length={length} />
+	</div>
+}
+
+function ListedAllNumber({length}) {
+	console.log("calculating...");
+	
+	let numbers = [];
+	
+	for(let i = 0; i < length; i++) {
+		numbers.push(i);
+	}
+	
+	return <p>Listed number: {numbers.join(",")}</p>
+}
+```
+
+Đoạn code ở trên, chỉ đơn giản mình muốn nhập số bất kì và hiển thị toàn bộ danh sách từ 0 cho đến số `length`. 
+
+Giả sử trường hợp mình nhập số nhỏ, không vấn đề gì xảy ra đúng không?. Vậy nếu mình nhập **10000** hay **100000** hay hơn thế?. Quá trình này sẽ mất nhiều thời gian tính toán hơn thông thường. Đây là một trường hợp ví dụ ảnh hưởng đến hiệu năng, chúng ta có thể **cache** tính toán này lại dựa trên giá trị `length`.
+
+```jsx
+
+import React, {useState, useMemo} from 'react'
+
+// .... App component
+
+// ListedAllNumber
+// Chúng ta sẽ có chút thay đổi cho hàm này
+function ListedAllNumber({length}) {
+	console.log("calculating...");
+	
+	let numbers = useMemo(() => {
+		let results = [];
+		for(let i = 0; i < length; i++) {
+			results.push(i);
+		}
+		
+		return results;
+	}, [length])
+	
+	return <p>Listed number: {numbers.join(",")}</p>
+}
+
+```
+
+Bụp, giờ hãy kiểm tra nó trong **VSCode** của bạn nhé.
+
+## Không lạm dụng useMemo
+Mặc dù tối ưu hiệu suất là một mục tiêu cao cả, bạn vẫn nên cân nhắc những tác động và tác dụng phụ nó mang đến. Trong trường hợp đó:
+- **The overhead**: Bản thân hook giới thiệu là một logic phức tạp, nó có thể gây ra nhiều vấn đề về hiệu xuất hơn là cách nó giải quyết. Không áp dụng `useMemo` trừ khi đây là tính toán thực sự mất nhiều công sức. Bạn nên đánh giá mức độ cần thiết trước khi cân nhắc sử dụng.
+- **No guarantees**: Theo tài liệu [React useMemo](https://reactjs.org/docs/hooks-reference.html#usememo), bạn có thể không bao giờ phụ thuộc vào các cơ chế trên `usememo`. Nói cách khác, mặc dù `useMemo` chỉ được gọi khi callback thay đổi, nhưng điều này không đảm bảo. Ứng dụng của bạn vẫn phải hoạt động, hoàn thành tốt (Mặc dù có thể chậm trễ) nếu `useMemo` gọi lại cho bạn mỗi lần hiển thị.
+
+## Kết luận
+Mục đích tối ưu hoá không xấu, các công cụ hỗ trợ bạn tối ưu hoá không xấu, mục địch bạn sử dụng nó mới là tác nhân quyết định nó tốt hay xấu. Vì trên thực tế, có những trường hợp chúng ta sẽ phải bắt buộc việc thực thi lặp lại thay vì ghi nhớ nó.
+
+## Có thể bạn sẽ cần
+
+Mình đã tham khảo qua các bài viết: [Medium](https://medium.com/javascript-in-plain-english/react-usememo-and-when-you-should-use-it-e69a106bbb02), [flaviocopes](https://flaviocopes.com/react-hook-usememo/)
+      

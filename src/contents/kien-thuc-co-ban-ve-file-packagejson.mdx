@@ -1,0 +1,143 @@
+---
+title: Kiến thức cơ bản về file package.json
+description: Tệp package.json là phần cốt lõi của hệ sinh thái Node.js và là phần cơ bản nhất để hiểu và làm việc với Node.js, npm và cả JavaScript
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2021-06-29T12:38:09.000Z
+createdAt: 2021-06-29T12:38:09.000Z
+updatedAt: 2024-06-03T18:24:42.571Z
+views: 10482
+slug: kien-thuc-co-ban-ve-file-packagejson
+---
+
+Tệp `package.json` là phần cốt lõi của hệ sinh thái Node.js và là phần cơ bản nhất để hiểu và làm việc với Node.js, npm và cả JavaScript. Nó được sử dụng như một bản kê khai thông tin ứng dụng, các modules, thư viện và nhiều thứ khác được sử dụng trong ứng dụng của chúng ta.
+
+Để làm việc hiệu quả với Node.js, JavaScript, một lập trình viên của hệ sinh thái này cần phải biết đến `package.json`.
+
+Vì sự hiểu biết cơ bản về `package.json` rất cần thiết  để phát triển với Node.js, chúng ta hãy cùng xem qua và phác thảo một số thuộc tính phổ biến và quan trọng nhất của `package.json` mà bạn sẽ cần sử dụng.
+
+## Identifying Metadata
+
+### Thuộc tính `name`
+Thuộc tính `name` trong `package.json` là một thành phần cơ bản của `package.json`. Về cốt lõi, `name` là một chuỗi xác định tên của ứng dụng, modules hiện tại mà bạn đang phát triển
+
+Và trong `package.json`, nó tương tự như thế này
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+	"name": "package-example"
+```
+
+Mặc dù vậy, vẫn có  một số hạn chế quan trọng (độ dài tối đa là 214 ký tự, không được bắt đầu bằng dấu `.` hoặc `<i>`, không có chữ hoa và không có ký tự nào không thân thiện với đường dẫn).
+
+### Thuộc tính `version`
+Thuộc tính `version` là một phần quan trọng của `package.json`, vì nó biểu thị phiên bản hiện tại của module mà `package.json` đang mô tả.
+
+Trong khi thuộc tính `version` không bắt buộc phải tuân theo `semver`. Đây là tiêu chuẩn được sử dụng bởi phần lớn các module và dự án trong Node.js 
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+ "version": "0.0.1"
+```
+
+### Thuộc tính `license`
+Thuộc tính giấy phép của `package.json` được sử dụng để mô tả thông tin về giấy phép của module. 
+
+Mặc dù có một số cách phức tạp nhưng bạn có thể sử dụng thuộc tính `license` của `package.json` để làm những việc như cấp phép kép hoặc xác định giấy phép của ứng dụng mà bạn phát triển. 
+
+Cách sử dụng điển hình nhất của nó là sử dụng số định dạng **Giấy phép SPDX** - một số ví dụ mà bạn như là **MIT**, **ISC** và **GPL-3.0**.
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+"license": "MIT"
+```
+
+### Thuộc tính `description`
+Thuộc tính `description` là một chuỗi chứa các thông tin miêu tả về dự án của bạn. Nó giúp nhà phát triển nói chung miêu tả ngắn gọn dự án, thư viện mà mình đang phát triển. Trong một số trường hợp, bạn có thể sẽ cần tải thư viện của mình lên `npm`. Ở đây `description` sẽ giúp `npm` tóm tắt được dự án của bạn phát triển cho lĩnh vực nào. Từ đó, sẽ giúp dự án của bạn tiếp cận tốt hơn đến những nhà phát triển khác.
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+"description": "The virtual"
+```
+
+### Thuộc tính `keywords`
+Thuộc tính `keywords` trong `package.json` tập hợp các từ khóa về một dự án, module, thư viện của bạn. Từ khóa có thể giúp xác định một gói thư viện, các module, phần mềm liên quan.
+
+Thuộc tính `keywrods` thường là một mảng với một hoặc nhiều chuỗi `từ khóa` miêu tả về dự án, module...
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+"keywords": [
+	"codestus",
+	"package-example"
+]
+```
+
+### Thuộc tính `main`
+Thuộc tính `main`  sẽ chỉ ra phần xử lý chính của dự án, module mà bạn phát triển. Trong một ứng dụng Node.js, mặc định khi chúng ta khởi tạo nó sẽ gọi đến một file có dạng `file.js`. Ở đây có nghĩa là nó sẽ lấy `file.js` làm phần gọi để xử lý chính của dự án, module của bạn
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+"main": "app.js"
+```
+
+### Thuộc tính `repository`
+Thuộc tính `repository` được định nghĩa là một `object` bên trong `package.json`. Thông thường, nó sẽ chứa các `type` và `url` về kho lưu trữ `github`.
+
+Một điều cần lưu ý là nó không chỉ là một `url` mà repo có thể được truy cập từ đó, mà là một `url` đầy đủ mà kiểm soát phiên bản có thể được truy cập từ đó.
+
+Bên trong `package.json`, sẽ được miêu tả tương tự bên dưới
+```json
+"repository": {
+      "type": "git",
+      "url": "https://github.com/bnb/metaverse.git"
+  }
+```
+
+### Thuộc tính `script`
+Thuộc tính `script` đơn giản là nơi để thực thi các tệp `.js`. Giả sử, trong trường hợp bạn xây dựng một ứng dụng và phần lõi của ứng dụng chạy thông qua tệp `app.js` và sẽ cần chạy một CLI là `node app.js`. 
+
+Lúc này, thuộc tính `scripts` trong `package.json` đóng vai trò hỗ trợ **Invoke** và **Execute**
+
+```json
+"scripts": {
+	"build": "node webpack --build",
+	"start": "node app.js",
+}
+```
+
+Để `scripts` được chạy trong `package.json`, các nền tảng đã định dạng các đoạn `scripts` như `"start"`, `"build"` để hỗ trợ chúng ta phát triển dự án và thực thi một cách tự động hóa.
+
+### Thuộc tính `dependencies`
+Thuộc tính `dependencies` là nơi chứa các `name` và `version` của một thư viện, một dự án nào đó hỗ trợ cho ứng dụng mà bạn đang xây dựng.
+
+Các thư viện này sẽ bị ràng buộc bởi `version` của nó cho dự án mãi mãi cho đến khi bạn thay đổi hoặc `upgrade` nó.
+
+Trong `package.json`, chúng ta có thể định dạng:
+```json
+"dependencies": {
+	"async": "^0.2.10",
+	"npm2es": "~0.4.2",
+	"optimist": "~0.6.0",
+	"request": "~2.30.0",
+	"skateboard": "^1.5.1",
+	"split": "^0.3.0",
+	"weld": "^0.2.2"
+}
+```
+
+### Thuộc tính `devDependencies`
+Thuộc tính `devDependencies` của `package.json` gần giống với thuộc tính `dependencies` về mặt cấu trúc, với một điểm khác biệt chính. Thuộc tính `dependencies` được sử dụng để xác định các thư viện phụ thuộc mà một ứng dụng, module cần để chạy khi đẩy lên phiên bản sản phẩm. Thuộc tính `devDependencies` thường được sử dụng để xác định các phụ thuộc mà module cần để chạy trong quá trình phát triển.
+
+Trong `package.json`, `devDependencies` có dạng:
+```json
+"devDependencies": {
+	"escape-html": "^1.0.3",
+	"lucene-query-parser": "^1.0.1"
+}
+```
+
+
+## Kết luận
+Nếu bạn đang học về Node.js, npm thì `package.json` là một thứ không thể thiếu trong toàn bộ quá trình phát triển và sản xuất ứng dụng của mình. `package.json` đóng vai trò vô cùng quan trọng.
+      
