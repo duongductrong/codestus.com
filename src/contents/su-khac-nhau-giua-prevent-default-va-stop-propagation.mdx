@@ -1,0 +1,66 @@
+---
+title: PreventDefault và StopPropagation khác nhau thế nào?
+description: Khi nào làm việc với JavaScript, bạn sẽ gặp phải các sự kiện (event) và các phương thức (method) liên quan đến chúng. Trong bài viết này, chúng ta sẽ tìm hiểu về sự khác nhau giữa `preventDefault` và `stopPropagation`.
+tags: React
+author: Trọng Dương Đức
+views: 0
+publishAt: 2024-09-21T16:22:47.245Z
+createdAt: 2024-09-21T16:22:47.245Z
+updatedAt: 2024-09-21T16:22:47.245Z
+slug: su-khac-nhau-giua-prevent-default-va-stop-propagation
+---
+
+Khi nào làm việc với JavaScript, bạn sẽ gặp phải các sự kiện (event) và các phương thức (method) liên quan đến chúng. Trong bài viết này, chúng ta sẽ tìm hiểu về sự khác nhau giữa `preventDefault` và `stopPropagation`.
+
+## 1. `preventDefault`
+
+`preventDefault` là một phương thức được sử dụng để ngăn chặn hành động mặc định của một sự kiện. Nó được gọi trên đối tượng sự kiện (event object) để ngăn chặn hành động mặc định của sự kiện đó.
+
+Ví dụ, khi bạn click vào một liên kết (link), mặc định là trang web sẽ chuyển hướng đến trang đích. Tuy nhiên, bằng cách gọi `preventDefault` trên sự kiện click, bạn có thể ngăn chặn hành động này và thực hiện một hành động khác thay vì chuyển hướng.
+
+```javascript
+const link = document.getElementById("myLink")
+
+link.addEventListener("click", function (event) {
+  event.preventDefault()
+  console.log("Link clicked, but not redirected")
+})
+```
+
+Trong ví dụ này, `preventDefault` được gọi để ngăn chặn hành động điều hướng mặc định của thẻ `<a>` khi người dùng click vào nó.
+Điều này cho phép chúng ta kiểm soát và thay đổi hành động mặc định của sự kiện.
+
+## 2. `stopPropagation`
+
+`stopPropagation` là một phương thức được sử dụng để ngăn chặn sự lan truyền của sự kiện đến phần tử cha của nó.
+
+Ví dụ, khi bạn click vào một phần tử con, sự kiện click cũng sẽ được truyền đến phần tử cha của nó.
+Tuy nhiên, bằng cách gọi `stopPropagation` trong phần tử con, bạn có thể ngăn chặn sự lan truyền của sự kiện đó đến phần tử cha.
+
+Hãy xem ví dụ sau:
+
+```javascript
+const parentDiv = document.getElementById("parentDiv")
+
+parentDiv.addEventListener("click", function (event) {
+  console.log("Parent div clicked")
+})
+
+const childDiv = document.getElementById("childDiv")
+
+childDiv.addEventListener("click", function (event) {
+  event.stopPropagation()
+  console.log("Child div clicked")
+})
+```
+
+Trong ví dụ này, `stopPropagation` được gọi để ngăn chặn sự lan truyền của sự kiện click từ phần tử con đến phần tử cha.
+Lúc này, bạn sẽ thấy console.log của phần tử con được in ra, còn console.log của phần tử cha thì không,
+vì sự kiện click đã bị ngăn chặn ở phần tử con và không thể bubble lên phần tử cha.
+
+## 3. Sự khác nhau giữa `preventDefault` và `stopPropagation`
+
+- `preventDefault`: Ngăn chặn **hành động mặc định** của sự kiện.
+- `stopPropagation`: Ngăn chặn **sự lan truyền** của sự kiện đến phần tử cha.
+
+Tóm lại, `preventDefault` được sử dụng để ngăn chặn hành động mặc định của sự kiện, trong khi `stopPropagation` được sử dụng để ngăn chặn sự lan truyền của sự kiện đến phần tử cha.
