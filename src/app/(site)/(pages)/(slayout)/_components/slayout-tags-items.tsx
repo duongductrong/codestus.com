@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "@/components/ui/router"
 import { PAGE_URLS } from "@/constants/urls"
-import { Tag } from "@prisma/client"
+// import { Tag } from "@prisma/client"
 import { usePathname } from "next/navigation"
 import { useCallback, useMemo } from "react"
 
 export interface SLayoutTagsItemsProps {
-  tags: Tag[]
+  tags: any[]
 }
 
 const SLayoutTagsItems = ({ tags }: SLayoutTagsItemsProps) => {
