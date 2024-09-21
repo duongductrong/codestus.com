@@ -20,14 +20,13 @@ const posts = defineCollection({
     createdAt: z.string().transform((date) => dayjs(date).toISOString()),
     updatedAt: z.string().transform((date) => dayjs(date).toISOString()),
   }),
-  transform: async (document, context) => {
-    const mdx = await compileMDX(context, document)
-    return {
+  transform: async (document, context) =>
+    // const mdx = await compileMDX(context, document)
+    ({
       ...document,
       slug: document.slug || document._meta.path,
-      mdx,
-    }
-  },
+      // mdx,
+    }),
 })
 
 export default defineConfig({
