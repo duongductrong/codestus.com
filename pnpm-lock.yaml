@@ -59,9 +59,6 @@ importers:
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0
-      prisma:
-        specifier: ^5.3.1
-        version: 5.19.1
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -5464,9 +5461,11 @@ snapshots:
     optionalDependencies:
       prisma: 5.19.1
 
-  '@prisma/debug@5.19.1': {}
+  '@prisma/debug@5.19.1':
+    optional: true
 
-  '@prisma/engines-version@5.19.1-2.69d742ee20b815d88e17e54db4a2a7a3b30324e3': {}
+  '@prisma/engines-version@5.19.1-2.69d742ee20b815d88e17e54db4a2a7a3b30324e3':
+    optional: true
 
   '@prisma/engines@5.19.1':
     dependencies:
@@ -5474,16 +5473,19 @@ snapshots:
       '@prisma/engines-version': 5.19.1-2.69d742ee20b815d88e17e54db4a2a7a3b30324e3
       '@prisma/fetch-engine': 5.19.1
       '@prisma/get-platform': 5.19.1
+    optional: true
 
   '@prisma/fetch-engine@5.19.1':
     dependencies:
       '@prisma/debug': 5.19.1
       '@prisma/engines-version': 5.19.1-2.69d742ee20b815d88e17e54db4a2a7a3b30324e3
       '@prisma/get-platform': 5.19.1
+    optional: true
 
   '@prisma/get-platform@5.19.1':
     dependencies:
       '@prisma/debug': 5.19.1
+    optional: true
 
   '@radix-ui/react-compose-refs@1.1.0(@types/react@18.3.8)(react@18.3.1)':
     dependencies:
@@ -8532,6 +8534,7 @@ snapshots:
       '@prisma/engines': 5.19.1
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   prop-types@15.8.1:
     dependencies:
