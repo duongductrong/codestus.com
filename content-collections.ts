@@ -1,5 +1,4 @@
 import { defineCollection, defineConfig } from "@content-collections/core"
-import { compileMDX } from "@content-collections/mdx"
 import dayjs from "dayjs"
 
 const posts = defineCollection({
@@ -19,6 +18,7 @@ const posts = defineCollection({
     views: z.number().default(0).optional(),
     createdAt: z.string().transform((date) => dayjs(date).toISOString()),
     updatedAt: z.string().transform((date) => dayjs(date).toISOString()),
+    tags: z.string(),
   }),
   transform: async (document, context) =>
     // const mdx = await compileMDX(context, document)

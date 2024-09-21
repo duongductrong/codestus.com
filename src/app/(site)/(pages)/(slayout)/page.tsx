@@ -22,6 +22,7 @@ const Blog = async () => (
           description={post.description || ""}
           href={PAGE_URLS.POST_DETAIL.replace(":id", post.slug)}
           publishedAt={post.publishAt}
+          tags={post.tags.split(",")}
         />
       ))}
   </section>
