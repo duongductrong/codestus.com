@@ -24,4 +24,4 @@ const withMDX = nextMDX({
   extension: /\.mdx?$/,
 })
 
-export default withMDX(withContentCollections(nextConfig))
+export default withContentCollections(withMDX(nextConfig))
