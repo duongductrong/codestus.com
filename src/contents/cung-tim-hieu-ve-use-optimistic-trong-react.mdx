@@ -1,0 +1,296 @@
+---
+title: Cùng tìm hiểu về useOptimistic hook trong React
+description: asdasd
+tags: React, Typescript
+author: Trọng Dương Đức
+views: 0
+publishAt: 2024-12-01T16:22:47.245Z
+createdAt: 2024-12-01T16:22:47.245Z
+updatedAt: 2024-12-01T16:22:47.245Z
+slug: cung-tim-hieu-ve-use-optimistic-trong-react
+---
+
+## Lời nói đầu
+
+> Lưu ý: Hiện tại mình đang test useOptimistic trên các phiên bản sử dụng phiên bản React ^18.2.0, ^18.3.1, và ^19.0.0-rc-66855b96-20241106
+
+Trong phiên bản React 19 sắp tới nay, chúng ta sẽ sắp được sử dụng chính thức một hook mới đó là `useOptimistic`.
+Đây là một built-in hook cung cấp một cách đơn giản để xử lý các bản cập nhật UI Optimistic thay vì
+sử dụng nhiều state để quản lý việc cập nhật dữ liệu.
+
+Ấy mà Optimistic update là gì đã?
+
+## Optimistic Update là gì?
+
+Optimistic update (cập nhật lạc quan) là một kỹ thuật trong lập trình giao diện người dùng, đặc biệt là trong các ứng dụng web, để cải thiện trải nghiệm người dùng bằng cách giả định rằng một hành động sẽ thành công và cập nhật giao diện người dùng ngay lập tức, trước khi nhận được phản hồi từ máy chủ. Điều này giúp giao diện người dùng phản hồi nhanh hơn và tạo cảm giác mượt mà hơn cho người dùng.
+
+### Lợi ích của Optimistic Update
+
+1. **Cải thiện trải nghiệm người dùng**: Người dùng không phải chờ đợi phản hồi từ máy chủ để thấy kết quả của hành động của họ. Điều này làm cho ứng dụng cảm thấy nhanh hơn và mượt mà hơn.
+2. **Giảm tải cho máy chủ**: Bằng cách cập nhật giao diện người dùng ngay lập tức, số lượng yêu cầu gửi đến máy chủ có thể giảm, vì người dùng có thể không cần phải thực hiện lại hành động nếu họ thấy kết quả ngay lập tức.
+3. **Đơn giản hóa logic giao diện người dùng**: Thay vì phải quản lý nhiều trạng thái khác nhau cho các yêu cầu đang chờ xử lý, bạn có thể cập nhật giao diện người dùng ngay lập tức và xử lý lỗi nếu có sau đó.
+
+### Cách hoạt động của Optimistic Update
+
+1. **Cập nhật giao diện người dùng ngay lập tức**: Khi người dùng thực hiện một hành động, giao diện người dùng được cập nhật ngay lập tức để phản ánh kết quả dự kiến của hành động đó.
+2. **Gửi yêu cầu đến máy chủ**: Sau khi cập nhật giao diện người dùng, một yêu cầu được gửi đến máy chủ để thực hiện hành động thực tế.
+3. **Xử lý phản hồi từ máy chủ**: Nếu yêu cầu thành công, không cần làm gì thêm. Nếu yêu cầu thất bại, giao diện người dùng sẽ được cập nhật lại để phản ánh trạng thái thực tế và thông báo lỗi cho người dùng.
+
+### Ví dụ về Optimistic Update
+
+Giả sử bạn có một danh sách các công việc cần làm (to-do list) và bạn muốn thêm một công việc mới vào danh sách này. Thay vì chờ đợi phản hồi từ máy chủ, bạn có thể sử dụng optimistic update để thêm công việc mới vào danh sách ngay lập tức.
+Sau đó cập nhật dữ liệu thực tế từ máy chủ trả về để đảm bảo tính chính xác.
+
+## useOptimistic hook trong React là gì?
+
+Như đã đề cập về **Optimistic Update**, về cơ bản `useOptimistic` hook cũng sử dụng mục đích tương tự là giúp chúng ta cập nhật giao diện người dùng
+ngay lập tức trước khi nhận được phản hồi từ máy chủ.
+
+## Sử dụng useOptimistic hook khi nào?
+
+Sẽ có khá nhiều trường hợp ứng dụng cần sử dụng Optimistic Update, ví dụ như:
+
+- **Nhu cầu phản hồi tức thì**: Khi bạn muốn cung cấp một phản hồi tức thì cho một tác vụ cụ thể mà người dùng thao tác, bạn có thể ứng dụng Optimistic Update. Ví dụ cụ thể như là tính năng Reaction của Facebook.
+- **Xử lý vấn đề mạng**: Đôi khi máy chủ phản hồi quá lâu cho một yêu cầu, bạn có thể sử dụng cơ chế này để cập nhật thông tin đó trước trong quá trình chờ phản hồi từ máy chủ.
+
+### Cấu trúc cơ bản của useOptimistic
+
+Trong phiên bản gần đây nhất của React, chúng ta sẽ sử dụng `useOptimistic` hook qua 2 cách như sau:
+
+```tsx
+const [optimisticValue, updateOptimisticValue] = useOptimistic(initialValue)
+
+// Hoặc
+
+const [optimisticValue, updateOptimisticValue] = useOptimistic(
+  initialValue,
+  (prevValue, newValue) => {
+    // Xử lý logic cập nhật
+    return newValue
+  }
+)
+```
+
+Trong đó:
+
+- `initialValue`: Giá trị khởi tạo ban đầu của state.
+- `reducer(state, action)`: Hàm xử lý logic cập nhật.
+
+Trong các trường hợp, theo kinh nghiệm cá nhân mình khuyến khích sử dụng cách các khai báo và xử lý logic cập nhật trong reducer (tức cách khai báo 2)
+vì nó sẽ giúp chúng ta dễ dàng quản lý, kiểm soát được state và có thể đoán được state sẽ trả về như thế nào.
+
+## Ví dụ minh họa
+
+Chúng ta sẽ thực hiện một ví dụ minh họa đơn giản với Todo list. Dữ liệu của chúng ta sẽ có dạng như sau:
+
+```ts
+export interface Todo {
+  id: string
+  title: string
+  done?: boolean
+  isSending?: boolean
+}
+```
+
+Trong đó:
+
+- `isSending` là một trạng thái được sử dụng để thông báo cho người dùng biết rằng việc thêm một công việc mới vào danh sách đang được gửi đến máy chủ, và nó sẽ được thay đổi khi có phản hồi từ máy chủ.
+
+Bây giờ chúng ta sẽ cần khởi tạo dữ liệu gốc trong `useState` (ở đây mình sử dụng `uuid` là hàm random id để tạo ra các id cho các công việc).
+
+```tsx
+// Khởi tạo mã unique id
+const uuid = () => Math.rand().toString(36).substring(2)
+
+const [todos, setTodos] = useState<Todo[]>([
+  {
+    id: uuid(),
+    title: "Learn React",
+    done: false,
+    isSending: false,
+  },
+  {
+    id: uuid(),
+    title: "Learn Typescript",
+    done: false,
+    isSending: false,
+  },
+])
+```
+
+Tiếp theo, chúng ta sẽ cần một giao diện cơ bản để người dùng có thể thêm công việc mới vào danh sách.
+
+```tsx
+return (
+  <div className="flex flex-col gap-2">
+    <button type="button" onClick={handleAddNewTodo}>
+      Add new
+    </button>
+    {todos.map((todo, index) => (
+      <span className="block" key={index}>
+        {todo.title}
+        {todo.isSending && <span className="ml-2">Sending...</span>}
+      </span>
+    ))}
+  </div>
+)
+```
+
+Trong đó:
+
+- `handleAddNewTodo` là một hàm xử lý sự kiện khi người dùng click vào button "Add new".
+- `todos` là một mảng các công việc được hiển thị trên giao diện.
+- `todo.isSending` là một trạng thái được sử dụng để thông báo cho người dùng biết rằng việc thêm một công việc mới vào danh sách đang được gửi đến máy chủ.
+
+Đã đến lúc chúng ta dùng đến `useOptimistic` áp dụng nó để xử lý việc thêm một công việc mới vào danh sách. Chúng ta cần cập nhật lại một chút code của chúng ta như sau:
+
+```tsx
+// Bên dưới todos state, bổ sung useOptimistic hook nhận đầu vào dữ liệu là todos state
+const [optimisticTodos, addOptimisticTodos] = useOptimistic<Todo[], { type: "add"; payload: Todo }>(
+  todos,
+  (state, action) => {
+    switch (action.type) {
+      case "add":
+        // Tại đây, chúng ta thêm todo item mới vào cuối và mặc định giá trị isSending là true
+        // Để thông báo cho người dùng biết dữ liệu này đang được gửi đi và chờ phản hồi
+        return [...state, { ...action.payload, isSending: true }]
+      default:
+        return state
+    }
+  }
+)
+```
+
+Trong đó:
+
+- `optimisticTodos` là một mảng các công việc được hiển thị trên giao diện.
+- `addOptimisticTodos` là một hàm xử lý sự kiện khi người dùng click vào button "Add new".
+
+Bổ sung thêm hàm `handleAddNewTodo` để xử lý việc thêm một công việc mới vào danh sách.
+
+```tsx
+const handleAddNewTodo = () => {
+  const newItem = {
+    id: uuid(),
+    title: `New todo ${uuid()}`,
+    done: false,
+  }
+
+  startTransition(async () => {
+    try {
+      addOptimisticTodos({ payload: newItem, type: "add" })
+
+      // Hàm xử dụng để fake gửi api và phản hồi chậm
+      await fakeApiSlowly()
+
+      setTodos((previousTodos) => [...previousTodos, { ...newItem, isSending: false }])
+    } catch (error) {
+      // Nếu có lỗi xảy ra, chúng ta sẽ revert lại state về trạng thái trước đó
+      setTodos((previousTodos) => previousTodos.filter((td) => td.id !== newItem.id))
+    }
+  })
+}
+```
+
+Trong đó:
+
+- `startTransition`: Theo React, tiến trình ứng dụng sẽ được chia thành các tiến trình nhỏ hơn để có thể xử lý các tác vụ nhỏ hơn, điều này sẽ giúp cho việc cập nhật giao diện người dùng trở nên mượt mà hơn.
+- `fakeApiSlowly`: Hàm xử dụng để fake gửi api và phản hồi chậm.
+- `setTodos`: Hàm sử dụng để cập nhật lại state của todos trên dữ liệu thực tế.
+- `addOptimisticTodos`: Hàm sử dụng để cập nhật lại state của todos trên dữ liệu giả định trong quá trình dữ liệu được gửi lên máy chủ, và đợi phản hồi, cập nhật vào dữ liệu gốc tại `todos` thông qua `setTodos`.
+
+Mọi thứ hơi rời rạc và khó có thể hình dung, vậy nên đây là kết quả hoàn chỉnh của chúng ta:
+
+```tsx
+import { startTransition, useCallback, useOptimistic, useState } from "react"
+
+const uuid = () => Math.random().toString(36).substring(2)
+
+export interface Todo {
+  id: string
+  title: string
+  done?: boolean
+  isSending?: boolean
+}
+
+const UseOptimisticExample = () => {
+  const [todos, setTodos] = useState<Todo[]>([
+    {
+      id: uuid(),
+      title: "Learn React",
+      done: false,
+      isSending: false,
+    },
+    {
+      id: uuid(),
+      title: "Learn Typescript",
+      done: false,
+      isSending: false,
+    },
+  ])
+
+  const [optimisticTodos, addOptimisticTodos] = useOptimistic<
+    Todo[],
+    { type: "add"; payload: Todo }
+  >(todos, (state, action) => {
+    switch (action.type) {
+      case "add":
+        return [...state, { ...action.payload, isSending: true }]
+      default:
+        return state
+    }
+  })
+
+  const handleAddNewTodo = () => {
+    const newItem = {
+      id: uuid(),
+      title: `New todo ${uuid()}`,
+      done: false,
+    }
+
+    startTransition(async () => {
+      try {
+        addOptimisticTodos({ payload: newItem, type: "add" })
+
+        await fakeApiSlowly()
+
+        setTodos((previousTodos) => [...previousTodos, { ...newItem, isSending: false }])
+      } catch (error) {
+        // Nếu có lỗi xảy ra, chúng ta sẽ revert lại state về trạng thái trước đó
+        setTodos((previousTodos) => previousTodos.filter((td) => td.id !== newItem.id))
+      }
+    })
+  }
+
+  const fakeApiSlowly = useCallback(
+    () =>
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve(null)
+        }, 1000)
+      }),
+    []
+  )
+
+  return (
+    <div className="flex flex-col gap-2">
+      <button type="button" onClick={handleAddNewTodo}>
+        Add new
+      </button>
+      {optimisticTodos.map((todo, index) => (
+        <span className="block" key={index}>
+          {todo.title}
+          {todo.isSending && <span className="ml-2">Sending...</span>}
+        </span>
+      ))}
+    </div>
+  )
+}
+```
+
+Ngoài ra, bạn có thể xem thêm ví dụ minh họa trên [CodeSandbox](https://codesandbox.io/p/sandbox/hsvs2d) của chính chủ React.
+
+## Kết luận
+
+`useOptimistic` là một hook hữu ích để cập nhật giao diện người dùng ngay lập tức trước khi nhận được phản hồi từ máy chủ, giúp cải thiện trải nghiệm người dùng và giảm tải cho máy chủ.
+Tuy nhiên, cũng không nên lạm dụng nó để sử dụng trong mọi trường hợp quá mức cần thiết. Hãy cân nhắc kĩ nó trong mỗi trường hợp cụ thể để có thể sử dụng một cách hiệu quả nhất.
