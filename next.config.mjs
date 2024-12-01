@@ -1,4 +1,5 @@
-const { withContentCollections } = require("@content-collections/next")
+import { withContentCollections } from "@content-collections/next"
+import nextMDX from "@next/mdx"
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -19,5 +20,8 @@ const nextConfig = {
   },
 }
 
-const withMDX = require("@next/mdx")()
-module.exports = withMDX(withContentCollections(nextConfig))
+const withMDX = nextMDX({
+  extension: /\.mdx?$/,
+})
+
+export default withMDX(withContentCollections(nextConfig))
