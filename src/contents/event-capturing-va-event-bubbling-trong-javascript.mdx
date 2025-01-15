@@ -1,0 +1,163 @@
+---
+title: Event Capturing và Event Bubbling trong JavaScript
+description: Khi một sự kiện xảy ra tại một phần tử, nó chạy các trình xử lý trên bản thân, rồi đến phần tử cha của nó, sau đó cứ tiếp tục đến các phần tử tổ tiên của nó ở ngoài cùng. Giả sử chúng ta có 3 phần tử lồng nhau FORM > DIV > P với một trình xử lý trên mỗi phần tử
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2025-01-15T16:23:21.000Z
+createdAt: 2025-01-15T16:23:21.000Z
+updatedAt: 2025-01-15T16:23:21.000Z
+views: 1512
+slug: event-capturing-va-event-bubbling-la-gi-trong-javascript
+---
+
+Chúng ta sẽ bắt đầu với một ví dụ đơn giản.
+
+Hàm xử lý bên dưới được đính vào thẻ `<div>`, tuy nhiên,
+nếu ấn vào 2 thẻ nested bên trong `<div>` sự kiện sẽ vẫn được diễn ra.
+
+```js
+<div onclick="alert('The handler!')">
+  <em>
+    If you click on <code>EM</code>, the handler on <code>DIV</code> runs.
+  </em>
+</div>
+```
+
+Điều này lạ lùng nhỉ? Tại sau hàm xử lý sự kiên trong thẻ `<div>` được thực thi trong
+cả 2 trường hợp khi chúng ta click vào thẻ `<em>` hay `<code>`?
+
+## Bubbling Event
+
+Về cơ bản, nó là một cơ chế được gọi là Bubbling trong JavaScript.
+Khi một sự kiện xảy ra tại một phần tử, nó chạy các trình xử lý trên bản thân,
+rồi đến phần tử cha của nó, sau đó cứ tiếp tục đến các phần tử tổ tiên của nó ở ngoài cùng.
+
+Giả sử chúng ta có 3 phần tử lồng nhau FORM > DIV > P với một trình xử lý trên mỗi phần tử:
+
+```js
+<form onclick="alert('Form!')">
+  <div onclick="alert('Div!')">
+    <p onclick="alert('P!')">Click me!</p>
+  </div>
+</form>
+```
+
+Khi bạn nhấp chuột vào phần tử `<p>`, các trình xử lý sẽ được thực thi theo thứ tự:
+
+1. `<p>`: Trình xử lý sự kiện cho phần tử `<p>` được thực thi đầu tiên.
+2. `<div>`: Tiếp theo, trình xử lý sự kiện cho phần tử cha `<div>` được thực thi.
+3. `<form>`: Sau đó, trình xử lý sự kiện cho phần tử cha `<form>` được thực thi.
+4. `document`: Cuối cùng, trình xử lý sự kiện cho `document` được thực thi.
+
+Vậy nên, khi bạn nhấp chuột vào phần tử `<p>` Click me! thì các
+trình xử lý sự kiện sẽ được thực thi theo thứ tự trên.
+
+```bash
+p -> div -> form -> document
+```
+
+Quá trình này gọi là **bubbling**, nó mô tả hoạt động bong bóng bên trong nước, di chuyển từ bên trong ra bên ngoài.
+
+## Event.target
+
+Trình xử lý trên một phần tử "cha" luôn có thể biết được chi tiết nơi phần tử con nào đã kích hoạt sự kiện.
+
+Phần tử lồng nhau sâu nhất gây ra sự kiện được gọi là **phần tử mục tiêu**, có thể truy cập dưới dạng `event.target`.
+
+Lưu ý có điểm khác biệt ở đây giữa `event.target` và `this(=event.currentTarget)`
+
+- `event.target` luôn trỏ đến phần tử con nơi gây ra sự kiện.
+- `this(=event.currentTarget)` luôn trỏ đến phần tử nơi trình xử lý sự kiện diễn ra.
+
+Ví dụ, nếu chúng ta có một trình xử lý đơn lẻ **form.onclick**,
+thì nó có thể “bắt” tất cả các lần nhấp chuột bên trong form đó.
+Bất kể nhấp chuột xảy ra ở đâu, nó sẽ nổi lên `<form>` và chạy trình xử lý.
+
+Trong trình xử lý **form.onclick** thì:
+
+- `this` (=`event.currentTarget`) là phần tử `<form>`, vì trình xử lý chạy trên phần tử đó.
+- `event.target` là phần tử thực tế bên trong biểu mẫu đã được nhấp vào.
+
+## Stop bubbling
+
+Một sự kiện `bubbling` thường đi từ phần tử mục tiêu (target) thẳng lên phần tử cha ngoài cùng.
+Thông thường nó sẽ đi lên cho đến `<html>` và sau đó đến `document`, một số sự kiện thậm chí còn đến đối tượng `window`.
+
+Nhưng ở đây, bất kì sự kiện nào cũng có thể quyết định dừng việc `bubbling`.
+Để thực hiện việc này, chúng ta có thể sử dụng `event.stopPropagation()`.
+
+Cho một ví dụ, đặt `body.onclick` và `div.onclick` và `p.onclick` như sau:
+
+```js
+<body onclick="alert('Body!')">
+  <div onclick="alert('Div!')">
+    <p onclick="event.stopPropagation()">Click me!</p>
+  </div>
+</body>
+```
+
+Khi bạn nhấp chuột vào phần tử `<p>`, trình xử lý sự kiện cho phần tử `<p>` được thực thi, tại đây
+chúng ta sử dụng `event.stopPropagation()` để dừng việc bubbling.
+Ngay lập tức, bạn sẽ nhận thấy rằng sau khi nhấp chuột vào phần tử `<p>`,
+sự kiện tại phần tử `<div>` hay `<body>` đã không được thực thi tiếp theo vì
+sự kiện đã bị dừng lại bởi `event.stopPropagation()`.
+
+Tham khảo thêm về `event.stopPropagation()` tại: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Event/stopPropagation)
+
+Bonus thêm: `event.stopImmediatePropagation()` là một phương thức khác có thể dừng việc bubbling.
+Nó dừng việc bubbling và cũng ngăn chặn các trình xử lý sự kiện khác được gắn vào phần tử đó.
+
+Tham khảo thêm về `event.stopImmediatePropagation()` tại: [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Event/stopImmediatePropagation)
+
+## Capturing Event
+
+Đây là một giai đoạn xử lý khác gọi là `capturing`. Nó hiếm khi (rarely) được sử dụng trong thực tế,
+nhưng đôi lúc sẽ hữu ích trong một số trường hợp.
+
+Capturing là một cơ chế ngược lại với bubbling.
+Nó bắt đầu từ phần tử cha ngoài cùng và di chuyển xuống phần tử con. Mô tả 3 giai đoạn lan truyền sự kiện (event propagation)
+
+1. Capturing phase - Giai đoạn sự kiện đi xuống các phần tử con.
+2. Target phase - Giai đoạn sự kiện đến phần tử mục tiêu.
+3. Bubbling phase - Giai đoạn sự kiện đi lên các phần tử cha.
+
+![Capturing Event](https://i.imgur.com/qtO6UcB.png)
+
+Dựa vào giai đoạn trên, giả xử bạn click vào một thẻ `<td>` trong bảng `<table>`,
+sự kiện đầu tiên được thực thi từ phần tử cha (tổ tiên)
+đến phần tử con được target nằm trong giai đoạn `capturing`,
+Sau đó, khi đi xuống và chạm đến phần tử con được target, giai đoạn này gọi là `target phase`,
+cuối cùng quay trở ngược lên là `bubbling phase`.
+
+Trên thực tế, `capturing phase` hầu như vô hình với chúng ta, bởi vì chúng ta hầu hết đều sử dụng `on<event>`, hay listener `addEventListener` để xử lý sự kiện
+và không nhận thức về giai đoạn `capturing` này.
+
+Để bắt một sự kiện trong giai đoạn này, chúng ta cần đặt tùy chọn của nó vào trình xử lý thành true:
+
+```js
+elem.addEventListener(..., { capture: true })
+
+// or, just "true" is an alias to {capture: true}
+elem.addEventListener(..., true)
+```
+
+Có hai giá trị có thể có của tùy chọn capture:
+
+Nếu nó là false (mặc định), thì trình xử lý được đặt ở giai đoạn bubbling.
+Nếu nó là true, thì trình xử lý được đặt ở giai đoạn capturing.
+Lưu ý rằng mặc dù chính thức có 3 giai đoạn, giai đoạn thứ 2 ("giai đoạn mục tiêu": sự kiện đã đến phần tử) không được xử lý riêng biệt: 
+các trình xử lý ở cả hai giai đoạn capturing và bubbling đều kích hoạt ở giai đoạn đó.
+
+## Kết luận
+
+Bất kì sự kiện nào cũng có thể được ngăn chặn bằng cách gọi `event.stopPropagation()` 
+hoặc `event.stopImmediatePropagation()`, nhưng nó không được khuyến khích sử dụng. 
+Bởi vì bạn không thể thực sự chắc chắn rằng bạn thực sự không cần sự kiện đó bubbling lên phía trên, 
+có thể sẽ cần nó bubbling để thực hiện một tác vụ khác.
+
+Giai đoạn capture rất hiếm khi được sử dụng, thông thường chúng ta xử lý các sự kiện trên bubbling. 
+Và có một lời giải thích hợp lý cho điều đó.
+
+Bubbling và capturing đặt nền tảng cho khái niệm "Event Delegation" một mẫu xử lý sự kiện cực kỳ mạnh mẽ mà chúng ta sẽ tìm hiểu trong lần tới.
+
+Mình đã tham khảo nguồn từ: [javascript.info](https://javascript.info/bubbling-and-capturing)
