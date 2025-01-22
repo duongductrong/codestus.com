@@ -1,0 +1,96 @@
+---
+title: Throttle trong JavaScript - "Phanh" hiệu quả cho các sự kiện
+description: Bạn đã bao giờ gặp tình huống ứng dụng bị lag khi người dùng cuộn chuột liên tục, hay nhấn nút submit nhiều lần một cách vô tội vạ? Đây chính là lúc throttle phát huy sức mạnh! hãy thử tìm hiểu hiểu cách "kiềm chế" các sự kiện "dồn dập" này nhé.
+tags: JavaScript
+author: Trọng Dương Đức
+publishAt: 2025-01-22T13:50:26.000Z
+createdAt: 2025-01-22T13:50:26.000Z
+updatedAt: 2025-01-22T14:53:16.729Z
+views: 823
+slug: throttle-trong-javascript-phanh-hieu-qua-cho-cac-su-kien
+---
+
+Khi làm việc với JavaScript, chắc hẳn bạn đã từng gặp trường hợp ứng dụng bị chậm hoặc lag do xử lý quá nhiều sự kiện liên tục như `scroll`, `resize`, hay click nút. Lúc này, **throttle** chính là giải pháp bạn cần! Cùng mình tìm hiểu cách áp dụng kỹ thuật này để ứng dụng chạy mượt mà hơn nhé!
+
+## **Throttle là gì?**
+
+Throttle là kỹ thuật giới hạn tần suất gọi một hàm trong một khoảng thời gian xác định. Ví dụ: Dù người dùng cuộn trang liên tục, hàm xử lý sự kiện `scroll` **chỉ được gọi 1 lần mỗi giây** nếu bạn áp dụng throttle. Điều này giúp giảm tải cho ứng dụng, tránh lãng phí tài nguyên.
+
+## **Tại sao cần throttle?**
+
+Các sự kiện như `scroll` hoặc `resize` có thể kích hoạt **hàng trăm lần mỗi giây**. Nếu không kiểm soát, chúng sẽ:
+
+- 🚫 **Tốn tài nguyên**: Gây lãng phí bộ nhớ và CPU.
+- 🐢 **Giảm hiệu năng**: Ứng dụng trở nên chậm chạp, đặc biệt khi xử lý logic phức tạp.
+- 💥 **Gây crash**: Nếu hàm xử lý gọi API hoặc thực hiện tính toán nặng.
+
+Throttle giúp bạn **điều chỉnh tần suất** gọi hàm, cân bằng giữa hiệu năng và trải nghiệm người dùng.
+
+## **Cách triển khai throttle**
+
+Dưới đây là cách triển khai throttle cơ bản bằng JavaScript:
+
+```javascript
+function throttle(func, delay) {
+  let lastExecuted = 0
+  return function (...args) {
+    const now = Date.now()
+    if (now - lastExecuted >= delay) {
+      func.apply(this, args)
+      lastExecuted = now
+    }
+  }
+}
+
+// Sử dụng:
+const handleResize = throttle(() => {
+  console.log("Xử lý thay đổi kích thước cửa sổ...")
+}, 1000) // Giới hạn 1 lần/giây
+
+window.addEventListener("resize", handleResize)
+```
+
+**Giải thích:**
+
+- `lastExecuted`: Lưu thời điểm gần nhất hàm được gọi.
+- Hàm `func` chỉ được thực thi nếu thời gian từ lần gọi cuối **vượt quá** `delay`.
+
+## **Ví dụ thực tế: Xử lý cuộn trang**
+
+Giả sử bạn cần cập nhật giao diện khi người dùng cuộn trang. Không dùng throttle, hàm này sẽ chạy liên tục, gây tốn tài nguyên. Áp dụng throttle:
+
+```javascript
+const updateUIOnScroll = throttle(() => {
+  // Logic cập nhật giao diện
+  console.log("Cập nhật UI...")
+}, 200) // Giới hạn 5 lần/giây
+
+window.addEventListener("scroll", updateUIOnScroll)
+```
+
+Kết quả: Ứng dụng của bạn có thể mang trải nghiệm mượt mà hơn mà CPU không bị quá tải, vì phải xử lý nhiều yêu cầu dồn dập không cần thiết.
+
+## **Lợi ích khi dùng throttle**
+
+1. ✅ **Tối ưu hiệu năng**: Giảm đáng kể số lần gọi hàm không cần thiết.
+2. 🌟 **Trải nghiệm người dùng tốt hơn**: Ứng dụng phản hồi nhanh, không giật lag.
+3. ⚡️ **Dễ tích hợp**: Triển khai nhanh với code đơn giản.
+
+## **Pitfall (cạm bẫy) cần tránh**
+
+1. **Chọn sai thời gian delay**:
+
+   - Delay quá ngắn (ví dụ: 50ms) → Không giải quyết triệt để vấn đề.
+   - Delay quá dài (ví dụ: 2000ms) → Ứng dụng phản hồi chậm trễ.  
+     → **Giải pháp**: Thử nghiệm với các giá trị delay khác nhau (100ms - 500ms thường phù hợp).
+
+2. **Nhầm lẫn giữa throttle và debounce**:
+   - **Throttle**: Đảm bảo hàm được gọi **đều đặn** sau mỗi khoảng thời gian.
+   - **Debounce**: Chỉ gọi hàm **sau khi ngừng sự kiện** một khoảng thời gian.  
+     → **Giải pháp**: Phân tích kỹ nhu cầu trước khi chọn kỹ thuật.
+
+## **Kết luận**
+
+Throttle là một công cụ mạnh mẽ để tối ưu hóa hiệu năng ứng dụng JavaScript, đặc biệt khi xử lý các sự kiện diễn ra liên tục. Bằng cách giới hạn tần suất gọi hàm, bạn không chỉ tiết kiệm tài nguyên mà còn mang lại trải nghiệm mượt mà hơn cho người dùng.
+
+Nếu bạn chưa áp dụng throttle, hãy thử ngay với ví dụ mình đã chia sẻ nhé! Đừng quên để lại câu hỏi hoặc kinh nghiệm của bạn ở phần bình luận - mình rất muốn lắng nghe từ bạn!
