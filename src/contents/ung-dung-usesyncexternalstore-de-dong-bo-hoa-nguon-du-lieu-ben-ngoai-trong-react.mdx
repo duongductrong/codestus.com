@@ -1,0 +1,215 @@
+---
+title: Ứng dụng useSyncExternalStore để động bộ hóa nguồn dữ liệu bên ngoài trong React
+description: Việc quản lý trạng thái nội bộ đã trở nên quen thuộc với `useState` hay `useReducer`. Nhưng khi ứng dụng của bạn cần tương tác với **các hệ thống bên ngoài** (WebSocket, trình duyệt API, hoặc thư viện state management của bên thứ ba), mọi thứ trở nên phức tạp hơn. Làm sao để React "hòa hợp" với những nguồn dữ liệu này mà không phá vỡ nguyên tắc reactivity? Câu trả lời nằm ở `useSyncExternalStore` - một hook "hạng nặng" được thiết kế cho các tình huống phức tạp.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2025-01-23T10:26:00.000Z
+createdAt: 2025-01-23T10:26:23.000Z
+updatedAt: 2025-01-23T09:26:42.322Z
+views: 214
+slug: ung-dung-usesyncexternalstore-de-dong-bo-hoa-nguon-du-lieu-ben-ngoai-trong-react
+---
+
+Việc quản lý trạng thái nội bộ đã trở nên quen thuộc với `useState` hay `useReducer`. Nhưng khi ứng dụng của bạn cần tương tác với **các hệ thống bên ngoài** (WebSocket, trình duyệt API, hoặc thư viện state management của bên thứ ba), mọi thứ sẽ trở nên phức tạp hơn. Làm sao để React "hòa hợp" với những nguồn dữ liệu này mà không phá vỡ nguyên tắc reactivity? Câu trả lời nằm ở `useSyncExternalStore` - một hook "hạng nặng" được thiết kế cho các tình huống phức tạp.
+
+---
+
+### **1. Bản chất kỹ thuật: Subscription và Snapshot**
+
+`useSyncExternalStore` hoạt động dựa trên hai nguyên lý cốt lõi:
+
+- **Subscription (Cơ chế đăng ký):** Theo dõi sự thay đổi từ external store.
+- **Snapshot (Chụp trạng thái):** Lấy giá trị hiện tại của store một cách nhất quán.
+
+#### **Cơ chế hoạt động chi tiết:**
+
+1. **Đăng ký thay đổi:**
+
+   ```javascript
+   const unsubscribe = subscribe(callback)
+   ```
+
+   - `subscribe` nhận một hàm `callback` và trả về hàm `unsubscribe`.
+   - Khi external store thay đổi, `callback` được gọi → React lên lịch re-render.
+
+2. **Chụp trạng thái:**
+
+   ```javascript
+   const snapshot = getSnapshot()
+   ```
+
+   - React gọi `getSnapshot` sau mỗi lần store thay đổi hoặc component re-render.
+   - Giá trị trả về được so sánh **theo tham chiếu** (===) với giá trị trước đó. Nếu khác nhau → Re-render.
+
+3. **Ngăn chặn tearing trong Concurrent Mode:**
+   - Trong Concurrent Mode, các cập nhật có thể bị gián đoạn. `useSyncExternalStore` đảm bảo mọi render đều dùng cùng một snapshot → Tránh hiển thị UI không nhất quán.
+
+---
+
+### **2. Ứng dụng chuyên sâu: Kết nối với WebSocket**
+
+WebSocket là external store điển hình - dữ liệu thay đổi không theo chu kỳ React. Dưới đây là cách tích hợp an toàn và tối ưu:
+
+#### **Triển khai WebSocket Store:**
+
+```javascript
+let socket = null
+let messages = []
+
+const websocketStore = {
+  subscribe(callback) {
+    socket = new WebSocket("wss://api.real-time.com")
+
+    // Xử lý nhận tin nhắn
+    socket.onmessage = (event) => {
+      messages = [...messages, JSON.parse(event.data)]
+      callback() // Kích hoạt re-render
+    }
+
+    // Hủy đăng ký khi unmount
+    return () => {
+      socket.close()
+      socket = null
+    }
+  },
+
+  getSnapshot() {
+    // Trả về tham chiếu ổn định để tránh re-render không cần thiết
+    return messages
+  },
+}
+```
+
+#### **Component sử dụng:**
+
+```javascript
+function RealTimeFeed() {
+  const messages = useSyncExternalStore(websocketStore.subscribe, websocketStore.getSnapshot)
+
+  return (
+    <div>
+      {messages.map((msg) => (
+        <div key={msg.id}>{msg.content}</div>
+      ))}
+    </div>
+  )
+}
+```
+
+#### **Phân tích kỹ thuật:**
+
+- **Quản lý kết nối:** WebSocket được khởi tạo và đóng gói trong `subscribe` → Đảm bảo kết nối chỉ tồn tại khi component được mount.
+- **Tối ưu hiệu năng:**
+  - `getSnapshot` trả về cùng tham chiếu `messages` cho đến khi có tin nhắn mới → Tránh re-render không cần thiết.
+  - Sử dụng **immutable update** (`[...messages, newMessage]`) để React nhận biết thay đổi.
+
+---
+
+### **3. Tích hợp với Browser API: Theo dõi kích thước màn hình**
+
+Browser APIs như `window.resize` hoặc `navigator.geolocation` là external stores. Ví dụ theo dõi kích thước màn hình:
+
+#### **Triển khai resize listener:**
+
+```javascript
+const screenSizeStore = {
+  subscribe(callback) {
+    const handleResize = () => callback()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  },
+
+  getSnapshot() {
+    // Trả về primitive value để tối ưu so sánh
+    return window.innerWidth
+  },
+}
+```
+
+#### **Component sử dụng:**
+
+```javascript
+function ResponsiveLayout() {
+  const screenWidth = useSyncExternalStore(screenSizeStore.subscribe, screenSizeStore.getSnapshot)
+
+  return <div>{screenWidth >= 1024 ? <DesktopView /> : <MobileView />}</div>
+}
+```
+
+#### **Tối ưu hóa:**
+
+- **Debounce sự kiện resize:** Tránh re-render liên tục khi người dùng kéo thả màn hình.
+  ```javascript
+  subscribe(callback) {
+    const debouncedCallback = debounce(callback, 300);
+    window.addEventListener('resize', debouncedCallback);
+    return () => window.removeEventListener('resize', debouncedCallback);
+  }
+  ```
+
+---
+
+### **4. Best Practices và Pitfalls**
+
+#### **a. Tránh memory leak**
+
+- **Sai lầm:** Quên trả về hàm `unsubscribe` trong `subscribe`.
+- **Giải pháp:** Luôn đảm bảo cleanup logic:
+  ```javascript
+  subscribe(callback) {
+    const eventListener = () => callback();
+    document.addEventListener('click', eventListener);
+    return () => document.removeEventListener('click', eventListener);
+  }
+  ```
+
+#### **b. Tối ưu hiệu năng với snapshot**
+
+- **Sai lầm:** Trả về object mới mỗi lần `getSnapshot` → Re-render không kiểm soát.
+- **Giải pháp:**
+
+  ```javascript
+  // ❌ Tạo object mới mỗi lần
+  getSnapshot: () => ({ width: window.innerWidth })
+
+  // ✅ Trả về primitive value
+  getSnapshot: () => window.innerWidth
+
+  // ✅ Sử dụng memoization nếu cần object
+  getSnapshot: () => ({ current: window.innerWidth })
+  ```
+
+#### **c. Xử lý SSR (Server-Side Rendering)**
+
+- **Vấn đề:** Trên server, browser APIs không tồn tại → Gây lỗi.
+- **Giải pháp:** Cung cấp giá trị mặc định qua `getServerSnapshot`:
+  ```javascript
+  const width = useSyncExternalStore(
+    subscribe,
+    () => window.innerWidth,
+    () => 1024 // Giá trị mặc định khi render trên server
+  )
+  ```
+
+---
+
+### **5. So sánh với các phương pháp khác**
+
+| **Tiêu chí**             | **useSyncExternalStore**    | **useEffect + useState**      |
+| ------------------------ | --------------------------- | ----------------------------- |
+| **Quản lý subscription** | Tự động, tích hợp sẵn       | Thủ công, dễ gây memory leak  |
+| **Tearing Prevention**   | Hỗ trợ sẵn                  | Không đảm bảo                 |
+| **SSR Support**          | Có, qua `getServerSnapshot` | Phức tạp, cần custom logic    |
+| **Performance**          | Tối ưu nhờ snapshot so sánh | Phụ thuộc vào cách triển khai |
+
+---
+
+### **Kết luận**
+
+`useSyncExternalStore` không chỉ là một hook - nó là **giải pháp kiến trúc** để React giao tiếp an toàn với thế giới bên ngoài. Bằng cách nắm vững cơ chế subscription/snapshot, bạn có thể:
+
+- Tích hợp mọi nguồn dữ liệu (WebSocket, trình duyệt API, thư viện bên thứ ba).
+- Đảm bảo UI luôn đồng bộ với dữ liệu mới nhất.
+- Tối ưu hiệu năng và tránh các lỗi phổ biến.
+
+Hãy thử áp dụng vào các bài toán thực tế như real-time dashboard, ứng dụng theo dõi vị trí, hoặc tích hợp với các hệ thống legacy.
