@@ -1,0 +1,175 @@
+---
+title: Tìm hiểu về useInsertionEffect hook trong React
+description: useInsertionEffect là một Hook được giới thiệu từ React 18, chủ yếu dành cho các thư viện **CSS-in-JS** để tối ưu việc chèn stylesheet vào DOM. Hook này được kích hoạt **trước khi các hiệu ứng layout (như `useLayoutEffect`) chạy**, giúp giảm thiểu hiện tượng "layout thrashing"
+tags: JavaScript
+author: Trọng Dương Đức
+createdAt: 2025-01-26T00:00:00.000Z
+updatedAt: 2025-01-26T00:00:00.000Z
+publishAt: 2025-01-26T00:00:00.000Z
+views: 0
+slug: tim-hieu-ve-useinsertioneffect-hook-trong-react
+---
+
+## 1. Tổng quan về `useInsertionEffect`
+
+`useInsertionEffect` là một Hook được giới thiệu từ React 18, chủ yếu dành cho các thư viện **CSS-in-JS** để tối ưu việc chèn stylesheet vào DOM. Hook này được kích hoạt **trước khi các hiệu ứng layout (như `useLayoutEffect`) chạy**, giúp giảm thiểu hiện tượng "layout thrashing" (hiệu ứng giật lag do tính toán layout nhiều lần).
+
+**Đặc điểm chính**:
+
+- **Thời gian thực thi**: Chạy **trước khi DOM được cập nhật**, sớm hơn cả `useLayoutEffect` và `useEffect` .
+- **Mục đích chính**: Chèn các phần tử (như thẻ `<style>`) vào DOM trước khi các hiệu ứng layout được kích hoạt .
+- **Hạn chế**:
+  - Không thể truy cập `refs` hoặc cập nhật state (vì DOM có thể chưa sẵn sàng) .
+  - Không chạy trong môi trường server-side rendering (SSR) .
+
+---
+
+## 2. So sánh thời gian thực thi
+
+Thứ tự thực thi của các Hook liên quan đến DOM:
+
+1. **`useInsertionEffect`**: Chạy đầu tiên, ngay sau khi component render nhưng trước khi DOM cập nhật.
+2. **`useLayoutEffect`**: Chạy sau khi DOM cập nhật nhưng trước khi trình duyệt vẽ (paint).
+3. **`useEffect`**: Chạy cuối cùng, sau khi trình duyệt hoàn tất vẽ .
+
+**Ví dụ**:
+
+```javascript
+function Component() {
+  useInsertionEffect(() => {
+    console.log("1. useInsertionEffect")
+  })
+  useLayoutEffect(() => {
+    console.log("2. useLayoutEffect")
+  })
+  useEffect(() => {
+    console.log("3. useEffect")
+  })
+  return <div>Example</div>
+}
+// Output: 1 → 2 → 3
+```
+
+---
+
+## 3. Cách sử dụng chính
+
+### a. Chèn stylesheet động
+
+`useInsertionEffect` thường được dùng để chèn các style dựa trên state hoặc props của component, đặc biệt trong các thư viện CSS-in-JS như styled-components:
+
+```javascript
+function useDynamicStyles(rule) {
+  useInsertionEffect(() => {
+    const style = document.createElement("style")
+    style.textContent = rule
+    document.head.appendChild(style)
+    return () => document.head.removeChild(style) // Cleanup
+  }, [rule]) // Re-run khi `rule` thay đổi
+}
+
+function StyledComponent() {
+  const className = "dynamic-style"
+  useDynamicStyles(`.${className} { background: #f0f0f0; }`)
+  return <div className={className}>Nội dung</div>
+}
+```
+
+### b. Tối ưu hiệu suất cho CSS-in-JS
+
+- **Cache stylesheet**: Sử dụng `Map` để lưu trữ các style đã tạo, tránh chèn trùng lặp .
+- **Batch injection**: Dùng `requestAnimationFrame` để nhóm các thay đổi style vào một lần render .
+
+**Ví dụ cache**:
+
+```javascript
+const styleCache = new Map()
+function useOptimizedStyles(styles) {
+  const key = useMemo(() => JSON.stringify(styles), [styles])
+  useInsertionEffect(() => {
+    if (!styleCache.has(key)) {
+      const style = document.createElement("style")
+      style.textContent = styles
+      styleCache.set(key, style)
+      document.head.appendChild(style)
+    }
+    return () => {
+      /* Logic dọn dẹp */
+    }
+  }, [key])
+}
+```
+
+---
+
+## 4. Ứng dụng thực tế
+
+### a. Hệ thống theme
+
+```javascript
+function useThemeStyles(theme) {
+  const themeStyles = useMemo(
+    () => `
+    :root {
+      --primary-color: ${theme.primary};
+      --secondary-color: ${theme.secondary};
+    }
+  `,
+    [theme]
+  )
+
+  useInsertionEffect(() => {
+    const style = document.createElement("style")
+    style.textContent = themeStyles
+    // Xóa theme cũ
+    const oldTheme = document.querySelector("style[data-theme]")
+    if (oldTheme) oldTheme.remove()
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [themeStyles])
+}
+```
+
+### **b. Component động với props**
+
+```javascript
+function DynamicComponent({ width, height, color }) {
+  const styles = useMemo(
+    () => `
+    .dynamic-component {
+      width: ${width}px;
+      height: ${height}px;
+      background: ${color};
+    }
+  `,
+    [width, height, color]
+  )
+
+  useInsertionEffect(() => {
+    const style = document.createElement("style")
+    style.textContent = styles
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [styles])
+
+  return <div className="dynamic-component" />
+}
+```
+
+## 5. Lưu ý quan trọng
+
+- **Không cập nhật state**: Việc gọi `setState` trong `useInsertionEffect` sẽ gây re-render vô hạn .
+- **Hạn chế truy cập DOM**: Ref chưa được gán khi Hook này chạy, nên tránh thao tác DOM phức tạp .
+- **Server-side rendering**: Hook không chạy trên server, cần xử lý riêng bằng cách kiểm tra `typeof window === 'undefined'` .
+
+## 6. So sánh với các Hook khác
+
+| Hook                 | Thời gian thực thi     | Mục đích chính            | Truy cập DOM |
+| -------------------- | ---------------------- | ------------------------- | ------------ |
+| `useInsertionEffect` | Trước khi DOM cập nhật | Chèn style                | Hạn chế      |
+| `useLayoutEffect`    | Sau khi DOM cập nhật   | Đo đạc/chỉnh sửa DOM      | Có           |
+| `useEffect`          | Sau khi trình duyệt vẽ | Side effects (API, event) | Có           |
+
+## Kết luận
+
+`useInsertionEffect` là công cụ mạnh mẽ cho các thư viện CSS-in-JS, giúp tối ưu hiệu suất bằng cách chèn style sớm và tránh tính toán layout nhiều lần. Tuy nhiên, nó **không dành cho phần lớn ứng dụng thông thường** mà tập trung vào trường hợp chuyên sâu . Để sử dụng hiệu quả, cần kết hợp với các kỹ thuật cache và batch processing.
