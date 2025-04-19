@@ -1,0 +1,111 @@
+---
+title: Tại sao mọi người lại đổ xô dùng Zustand thay Redux?
+description: Nếu bạn từng xài Redux thời hoàng kim (khoảng 2017–2020), chắc cũng từng rơi vào cảnh mới lưu một cái count mà phải viết 3 file, 50 dòng code Đúng vậy, Redux từng là ông hoàng quản lý state — nhưng rồi thời thế đổi thay.
+tags: React
+author: Trọng Dương Đức
+publishAt: 2025-04-19T00:11:19.000Z
+createdAt: 2025-04-19T00:11:19.000Z
+updatedAt: 2025-04-19T00:11:19.000Z
+views: 2838
+slug: tai-sao-moi-nguoi-lai-do-xo-dung-zustand-thay-redux
+---
+
+Nếu bạn từng xài Redux thời hoàng kim (khoảng 2017–2020), chắc cũng từng rơi vào cảnh: "mới lưu một cái count mà phải viết 3 file, 50 dòng code". Đúng vậy, Redux từng là ông hoàng quản lý state — nhưng rồi thời thế đổi thay, và **Zustand** xuất hiện như một “người bạn mới” nhẹ nhàng, đơn giản, mà vẫn đủ mạnh mẽ.
+
+Vậy tại sao bây giờ người ta lại đổ xô dùng Zustand? Cùng mình tìm hiểu nhé!
+
+## 1. Không cần boilerplate, viết state như người bình thường
+
+**Redux**: Để update state, bạn cần: action type → action creator → reducer → dispatch → mapStateToProps (nếu là class).  
+**Zustand**: Dùng 1 hook là xong.
+
+👉 **Ví dụ:**
+
+**Redux (giản lược):**
+
+```ts
+// actions.js
+export const increment = () => ({ type: "INCREMENT" })
+
+// reducer.js
+const counter = (state = 0, action) => {
+  switch (action.type) {
+    case "INCREMENT":
+      return state + 1
+    default:
+      return state
+  }
+}
+
+// component.jsx
+const dispatch = useDispatch()
+const count = useSelector((state) => state.counter)
+```
+
+**Zustand:**
+
+```ts
+// store.js
+import { create } from "zustand"
+
+const useStore = create((set) => ({
+  count: 0,
+  increment: () => set((state) => ({ count: state.count + 1 })),
+}))
+
+// component.jsx
+const { count, increment } = useStore()
+```
+
+👉 3 dòng đã xong store. Không cần reducer, không action type, không middleware đau đầu.
+
+## 2. Không cần Provider, vẫn dùng được ở bất cứ đâu
+
+Redux cần `<Provider>` bao quanh toàn bộ app để hoạt động.  
+**Zustand** thì không — store là một hook độc lập. Bạn gọi ở đâu, nó chạy ở đó.
+
+Điều này cực tiện cho:
+
+- Library nội bộ
+- Widget nhỏ không cần liên kết với root app
+- Micro-frontend
+
+## 3. Hiệu năng tốt hơn trong nhiều trường hợp
+
+Zustand chỉ re-render component nào **thực sự dùng state đã thay đổi**. Trong khi Redux, nếu không tối ưu (e.g. `React.memo`, `reselect`), rất dễ bị re-render không cần thiết.
+
+Zustand hỗ trợ:
+
+- **Selector** (chỉ chọn một phần state)
+- **Shallow compare**
+- **Middleware logging, persist, devtools** sẵn có mà không cần setup phức tạp
+
+## 4. Dễ học, dễ xài, dev mới tiếp cận cực nhanh
+
+Redux dù mạnh, nhưng với người mới:
+
+- Cần hiểu flow: action → reducer → dispatch
+- Phải xài thêm Redux Toolkit nếu không muốn viết nhiều
+
+Zustand: **hook đơn giản**. Dễ hiểu ngay từ lần đầu tiên.
+
+## 5. Vẫn scale tốt nếu cần
+
+Nhiều người nghĩ Zustand chỉ hợp với app nhỏ. Nhưng thực ra:
+
+- Bạn có thể **chia nhiều slice** để tách logic.
+- Dùng middleware `persist`, `subscribe`, `immer`, `devtools` như Redux.
+- Dễ test, dễ tổ chức folder.
+
+👉 Zustand không phải để thay Redux trong mọi app, nhưng lại **vừa đủ dùng cho 90% use case frontend** hiện nay.
+
+## Vậy có đáng để chuyển sang Zustand?
+
+Nếu app bạn:
+
+- Không cần strict global state tracking
+- Muốn giảm file, tăng tốc độ phát triển
+- Có team size nhỏ hoặc trung bình
+- Muốn dev mới onboard nhanh
+
+Vậy Zustand là lựa chọn đáng cân nhắc. Redux vẫn mạnh, nhưng khi đơn giản là đủ, thì tại sao không?
