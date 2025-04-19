@@ -1,0 +1,119 @@
+---
+title: Phân biệt shallow compare và deep compare trong React
+description: Nếu bạn từng xài React memo, useMemo hay useEffect mà vẫn thấy component re-render lung tung thì 90% là do bạn chưa hiểu rõ sự khác nhau giữa shallow compare và deep compare
+tags: React
+author: Trọng Dương Đức
+publishAt: 2025-04-20T00:00:00.000Z
+createdAt: 2025-04-20T00:00:00.000Z
+updatedAt: 2025-04-20T00:00:00.000Z
+views: 2937
+slug: phan-biet-shallow-compare-va-deep-compare-trong-react
+---
+
+Nếu bạn từng xài `React.memo`, `useMemo` hay `useEffect` mà vẫn thấy component re-render lung tung, thì 90% là do bạn **chưa hiểu rõ sự khác nhau giữa shallow compare và deep compare**.
+
+Bài viết này sẽ giúp bạn hiểu một cách đơn giản và dễ nhớ nhất về hai khái niệm này, cũng như cách áp dụng đúng trong React để tránh rơi vào “bẫy re-render” không đáng có.
+
+## 1. Shallow compare là gì?
+
+Shallow compare (so sánh nông) nghĩa là **so sánh chỉ ở cấp độ 1** của object hoặc array. React dùng nó để kiểm tra xem prop hoặc state có “thay đổi” không.
+
+Ví dụ:
+
+```js
+const a = { name: "Trong" }
+const b = { name: "Trong" }
+
+console.log(a === b) // false ❌
+```
+
+Mặc dù `a` và `b` có nội dung giống nhau, nhưng vì chúng **khác tham chiếu**, nên shallow compare sẽ trả về `false`.
+
+Shallow compare trong React được dùng ở:
+
+- `React.memo()`
+- `shouldComponentUpdate()`
+- `PureComponent`
+- `useMemo`, `useCallback` phụ thuộc vào dependencies
+- `useEffect` phụ thuộc vào dependency array
+
+Nghĩa là nếu bạn truyền một object hoặc array mới vào component con, **nó sẽ luôn được xem là “khác”**, trừ khi bạn dùng memoization.
+
+## 2. Deep compare là gì?
+
+Deep compare (so sánh sâu) sẽ **đi từng cấp trong object hoặc array** để kiểm tra xem nội dung có thay đổi không.
+
+Ví dụ:
+
+```js
+import _ from "lodash"
+
+const a = { name: "Trong", info: { age: 25 } }
+const b = { name: "Trong", info: { age: 25 } }
+
+_.isEqual(a, b) // true ✅
+```
+
+Thư viện như Lodash có sẵn `isEqual` để giúp bạn thực hiện deep compare. Tuy nhiên, **deep compare tốn hiệu năng** hơn rất nhiều, đặc biệt khi bạn xử lý object lớn.
+
+## 3. React dùng shallow compare ở đâu?
+
+React mặc định dùng shallow compare trong nhiều hook và hàm tối ưu, ví dụ:
+
+```js
+const Child = React.memo(({ user }) => {
+  console.log("render")
+  return <div>{user.name}</div>
+})
+```
+
+```js
+const parent = () => {
+  const [count, setCount] = useState(0)
+  const user = { name: "Trong" }
+
+  return (
+    <>
+      <button onClick={() => setCount(count + 1)}>+</button>
+      <Child user={user} />
+    </>
+  )
+}
+```
+
+Kết quả: mỗi lần bấm nút, `Child` sẽ **vẫn render lại** dù `user` "nhìn như không đổi", vì object `user` được tạo mới mỗi lần render → shallow compare thấy khác → re-render.
+
+✅ Fix:
+
+```js
+const user = useMemo(() => ({ name: "Trong" }), [])
+```
+
+Hoặc với `useCallback` cũng vậy:
+
+```js
+const handleClick = useCallback(() => {
+  console.log("clicked")
+}, [])
+```
+
+## 4. Vậy khi nào nên dùng shallow, khi nào nên dùng deep?
+
+| Tình huống                                                    | Nên dùng                                       |
+| ------------------------------------------------------------- | ---------------------------------------------- |
+| Tối ưu component nhỏ, nhận prop là primitive (string, number) | Shallow                                        |
+| Prop là object/array thay đổi liên tục                        | Dùng `useMemo`, `useCallback` để giữ reference |
+| Cần kiểm tra object lớn có thay đổi hay không                 | Deep compare (`_.isEqual`) nhưng cần cẩn trọng |
+| So sánh trước khi cập nhật state để tránh loop                | Deep compare nếu state là nested object        |
+
+## 5. Một số lưu ý khi dùng trong thực tế
+
+- **Shallow compare đủ dùng trong 90% use case** nếu bạn tổ chức state tốt và sử dụng `useMemo`, `useCallback` đúng cách.
+- **Deep compare** chỉ nên dùng khi thật sự cần thiết, vì có thể gây ảnh hưởng đến performance.
+- Nếu bạn xài Zustand, Redux, hoặc các state manager khác, hãy kiểm tra xem họ có cung cấp selector với shallow compare hay không (nhiều thư viện như Zustand cho phép chọn `shallow` compare để tối ưu render).
+
+## Kết luận
+
+Hiểu rõ sự khác biệt giữa shallow compare và deep compare không chỉ giúp bạn tối ưu hiệu năng app React, mà còn giúp bạn **code ít bug, dễ kiểm soát hơn**. React không tự động làm phép màu, chính bạn phải hiểu state và prop hoạt động ra sao.
+
+Và nhớ: **Không phải lúc nào object giống nhau là bằng nhau đâu nhé!**

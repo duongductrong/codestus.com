@@ -23,11 +23,14 @@ export async function generateMetadata(
   { params: { id } }: PostDetailProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
+  const now = dayjs()
   // const post = await postService.detail(id)
 
   const post = allPosts.find((p) => p.slug === id)
 
-  if (!post) notFound()
+  const unpublishYet = post?.publishAt && dayjs(post.publishAt).isAfter(now)
+
+  if (!post || unpublishYet) notFound()
 
   const url = generateUrlFormSlug(post?.slug)
 
@@ -67,7 +70,9 @@ const PostDetail = async ({ params: { id } }: PostDetailProps) => {
 
   const post = allPosts.find((p) => p.slug === id)
 
-  if (!post) notFound()
+  const unpublishYet = post?.publishAt && dayjs(post.publishAt).isAfter(dayjs())
+
+  if (!post || unpublishYet) notFound()
 
   const url = generateUrlFormSlug(post.slug)
 
