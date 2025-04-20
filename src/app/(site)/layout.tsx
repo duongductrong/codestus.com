@@ -4,7 +4,7 @@ import { LayoutProps } from "@/types/utilities"
 
 const isProduction = process.env.APP_ENV === "production"
 
-export interface SiteLayoutProps extends LayoutProps<"header"> {}
+export interface SiteLayoutProps extends LayoutProps<"sidebar" | "header"> {}
 
 const SiteLayout = ({ children, header }: SiteLayoutProps) => (
   <main className="max-w-[800px] mx-auto">
