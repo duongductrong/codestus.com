@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Link } from "@/components/ui/router"
 import { PAGE_URLS } from "@/constants/urls"
-import { LayoutProps } from "@/types/utilities"
+import { LayoutProps as NextLayoutProps } from "@/types/utilities"
 import { ArrowLeft } from "lucide-react"
 
-export interface PostsLayoutProps extends LayoutProps<"related"> {}
+export interface LayoutProps extends NextLayoutProps<"related"> {}
 
-const PostsLayout = ({ related, children }: PostsLayoutProps) => (
+const Layout = ({ related, children }: LayoutProps) => (
   <section className="p-6">
     <div className="flex items-center gap-2">
       <Button as={Link} href={PAGE_URLS.HOME} variant="muted" size="icon" className="rounded-full">
@@ -19,4 +19,4 @@ const PostsLayout = ({ related, children }: PostsLayoutProps) => (
   </section>
 )
 
-export default PostsLayout
+export default Layout
