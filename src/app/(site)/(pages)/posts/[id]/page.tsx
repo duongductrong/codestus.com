@@ -4,9 +4,9 @@ import Icon from "@/components/ui/icon"
 import { Text } from "@/components/ui/text"
 import { PAGE_URLS } from "@/constants/urls"
 import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
+import { getPostBySlug } from "@/queries/post"
 import { ParamsProps, SearchParamsProps } from "@/types/utilities"
 import { getSpeedReading } from "@/utils/speed-reading"
-import { allPosts } from "content-collections"
 import dayjs from "dayjs"
 import compact from "lodash/compact"
 import { Metadata, ResolvingMetadata } from "next"
@@ -24,11 +24,11 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const now = dayjs()
-  // const post = await postService.detail(id)
+  const post = await getPostBySlug(id)
 
-  const post = allPosts.find((p) => p.slug === id)
-
-  const unpublishYet = post?.publishAt && dayjs(post.publishAt).isAfter(now)
+  const unpublishYet = post?.publishAt
+    ? post?.publishAt && dayjs(post.publishAt).isAfter(now)
+    : false
 
   if (!post || unpublishYet) notFound()
 
@@ -49,9 +49,9 @@ export async function generateMetadata(
       locale: "vi",
       siteName: "Codestus.com",
       images: compact([post?.thumbnail, OpenGraphImage.src]),
-      publishedTime: post?.publishAt,
+      publishedTime: post?.publishAt?.toISOString(),
       emails: ["duongductrong06@gmail.com"],
-      modifiedTime: post?.updatedAt,
+      modifiedTime: post?.updatedAt?.toISOString(),
       authors: ["Duong Duc Trong"],
     },
     twitter: {
@@ -66,9 +66,7 @@ export async function generateMetadata(
 }
 
 const PostDetail = async ({ params: { id } }: PostDetailProps) => {
-  // const post = await postService.detail(id)
-
-  const post = allPosts.find((p) => p.slug === id)
+  const post = await getPostBySlug(id)
 
   const unpublishYet = post?.publishAt && dayjs(post.publishAt).isAfter(dayjs())
 

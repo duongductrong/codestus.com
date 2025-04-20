@@ -1,0 +1,1 @@
+ALTER TABLE "posts" ALTER COLUMN "topic_id" DROP NOT NULL;
