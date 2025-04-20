@@ -1,8 +1,6 @@
 import { withContentCollections } from "@content-collections/next"
 import nextMDX from "@next/mdx"
 
-import { withDrizzle } from "@drizzle/next"
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -26,4 +24,4 @@ const withMDX = nextMDX({
   extension: /\.mdx?$/,
 })
 
-export default withContentCollections(withMDX(withDrizzle(nextConfig)))
+export default withContentCollections(withMDX(nextConfig))
