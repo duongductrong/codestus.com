@@ -4,9 +4,9 @@ import { PAGE_URLS } from "@/constants/urls"
 import { LayoutProps as NextLayoutProps } from "@/types/utilities"
 import { ArrowLeft } from "lucide-react"
 
-export interface LayoutProps extends NextLayoutProps<"related"> {}
+interface LayoutProps extends NextLayoutProps {}
 
-const Layout = ({ related, children }: LayoutProps) => (
+const Layout = ({ children }: LayoutProps) => (
   <section className="p-6">
     <div className="flex items-center gap-2">
       <Button as={Link} href={PAGE_URLS.HOME} variant="muted" size="icon" className="rounded-full">
@@ -15,7 +15,6 @@ const Layout = ({ related, children }: LayoutProps) => (
       <p className="text-muted-foreground">Go back</p>
     </div>
     {children}
-    {related}
   </section>
 )
 
