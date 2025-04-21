@@ -11,6 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Label } from "@/components/ui/label"
+import {
+  ActivityIcon,
+  CodeIcon,
+  DownloadIcon,
+  GlobeIcon,
+  HomeIcon,
+  ImageIcon,
+  RefreshCwIcon,
+  ZapIcon,
+} from "lucide-react"
 
 interface Props {
   className?: string
@@ -32,6 +44,59 @@ const AdminOverview: React.FC<Props> = ({ className }) => {
     value: Math.floor(Math.random() * 40),
   }))
 
+  const tabs = [
+    {
+      label: "Overview",
+      value: "overview",
+      icon: HomeIcon,
+    },
+    {
+      label: "COMPUTE",
+      value: "compute",
+      type: "header",
+    },
+    {
+      label: "Vercel Functions",
+      value: "vercel-functions",
+      icon: CodeIcon,
+    },
+    {
+      label: "Edge Functions",
+      value: "edge-functions",
+      icon: ZapIcon,
+    },
+    {
+      label: "External APIs",
+      value: "external-apis",
+      icon: GlobeIcon,
+    },
+    {
+      label: "EDGE NETWORK",
+      value: "edge-network",
+      type: "header",
+    },
+    {
+      label: "Edge Requests",
+      value: "edge-requests",
+      icon: ActivityIcon,
+    },
+    {
+      label: "Fast Data Transfer",
+      value: "fast-data-transfer",
+      icon: DownloadIcon,
+    },
+    {
+      label: "Image Optimization",
+      value: "image-optimization",
+      icon: ImageIcon,
+    },
+    {
+      label: "ISR",
+      value: "isr",
+      icon: RefreshCwIcon,
+    },
+  ]
+
   return (
     <div
       className={cn(
@@ -42,11 +107,42 @@ const AdminOverview: React.FC<Props> = ({ className }) => {
     >
       <div className="w-[350px] shrink-0 ">
         <div className="p-4">
-          <h2 className="text-lg font-semibold mb-2">Project Overview</h2>
+          {/* <h2 className="text-lg font-semibold mb-2">Project Overview</h2>
 
           <p className="text-sm text-muted-foreground">
             This is a summary of the project&apos;s performance and usage.
-          </p>
+          </p> */}
+
+          <div className="">
+            <Tabs defaultValue="overview">
+              <TabsList className="flex-col bg-transparent w-full h-full items-start">
+                {tabs.map((tab) => {
+                  if (tab.type === "header") {
+                    return (
+                      <Label className="text-xs font-medium mt-6 mb-3" key={tab.value}>
+                        {tab.label}
+                      </Label>
+                    )
+                  }
+
+                  return (
+                    <TabsTrigger
+                      className={cn(
+                        "px-3 py-2 data-[state=active]:bg-secondary",
+                        "data-[state=active]:text-foreground",
+                        "data-[state=active]:font-medium w-full justify-start"
+                      )}
+                      key={tab.value}
+                      value={tab.value}
+                    >
+                      {tab.icon ? <tab.icon className="w-4 h-4 mr-2" /> : null}
+                      {tab.label}
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
       </div>
       <div className="flex-1 grow">
