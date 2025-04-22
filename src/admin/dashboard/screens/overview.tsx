@@ -128,7 +128,9 @@ const AdminOverview: React.FC<Props> = ({ className }) => {
                   return (
                     <TabsTrigger
                       className={cn(
-                        "px-3 py-2 data-[state=active]:bg-secondary",
+                        "px-3 py-2",
+                        "hover:bg-secondary/50 text-foreground/60",
+                        "data-[state=active]:bg-secondary",
                         "data-[state=active]:text-foreground",
                         "data-[state=active]:font-medium w-full justify-start"
                       )}
