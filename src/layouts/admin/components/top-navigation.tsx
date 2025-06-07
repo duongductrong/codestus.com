@@ -22,16 +22,15 @@ export function TopNavigation() {
           <Triangle size={16} className="fill-primary-foreground stroke-none" />
         </Button>
 
-        <Button variant="ghost" className="text-sm font-medium flex items-center gap-2 h-8">
+        <Button variant="outline" className="text-sm font-medium flex items-center gap-2 h-8">
           <span className="flex items-center gap-2">
-            <Avatar className="h-5 w-5">
+            {/* <Avatar className="h-5 w-5">
               <AvatarImage src="/user-avatar.png" />
               <AvatarFallback className="text-[10px]">DT</AvatarFallback>
-            </Avatar>
-            <span>Dng Dc Trng&apos;s projects</span>
+            </Avatar> */}
+            <span>Codestus</span>
           </span>
           <span className="text-xs px-2 py-0.5 rounded-full bg-muted">Hobby</span>
-          <ChevronDown size={16} />
         </Button>
       </div>
 

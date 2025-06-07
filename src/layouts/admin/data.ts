@@ -58,17 +58,16 @@ export const currentUser: User = {
 
 export const mainNavigation = [
   { name: "Overview", href: ADMIN_URLS.OVERVIEW, active: true },
-  { name: "Projects", href: ADMIN_URLS.POSTS.INDEX },
-  { name: "Activity", href: "#" },
-  { name: "Domains", href: "#" },
-  { name: "Usage", href: "#" },
-  { name: "Monitoring", href: "#" },
-  { name: "Observability", href: "#", hasNotification: true },
-  { name: "Storage", href: "#" },
-  { name: "Flags", href: "#" },
-  { name: "AI", href: "#" },
-  { name: "Support", href: "#" },
-  { name: "Settings", href: "#" },
+  { name: "Posts", href: ADMIN_URLS.POSTS.INDEX },
+  // { name: "Domains", href: "#" },
+  // { name: "Usage", href: "#" },
+  // { name: "Monitoring", href: "#" },
+  // { name: "Observability", href: "#", hasNotification: true },
+  // { name: "Storage", href: "#" },
+  // { name: "Flags", href: "#" },
+  // { name: "AI", href: "#" },
+  // { name: "Support", href: "#" },
+  // { name: "Settings", href: "#" },
 ]
 
 export const topNavLinks = [

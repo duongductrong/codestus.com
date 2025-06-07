@@ -36,9 +36,9 @@ export const metadata: Metadata = {
   verification: {
     google: "eXhMtN2gkr5bkyhvyTamHYNwGBBEQRkdPu5t7cgXqss",
   },
-  themeColor: {
-    color: "#ffffff",
-  },
+  // themeColor: {
+  //   color: "#ffffff",
+  // },
   openGraph: {
     type: "website",
     url: "/",
