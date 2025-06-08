@@ -1,12 +1,14 @@
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
+import { usePostsQueryStates } from "../hooks/use-posts-querystate"
 
 export interface SearchBarProps {
   actions?: React.ReactNode
 }
 
 export function SearchBar({ actions }: SearchBarProps) {
+  const [queryStates, setQueryStates] = usePostsQueryStates()
+
   return (
     <div className="flex flex-col sm:flex-row gap-3 w-full">
       <div className="relative flex-1">
@@ -16,6 +18,8 @@ export function SearchBar({ actions }: SearchBarProps) {
         <Input
           placeholder="Search Repositories and Projects..."
           className="pl-10 h-10 bg-background rounded-md"
+          value={queryStates.search}
+          onChange={(e) => setQueryStates({ search: e.target.value })}
         />
       </div>
 

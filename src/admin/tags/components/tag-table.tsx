@@ -18,9 +18,9 @@ import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { TagFormDialog } from "./tag-form-dialog"
 
-interface TagListProps {}
+interface TagTableProps {}
 
-export function TagList(props: TagListProps) {
+export function TagTable(props: TagTableProps) {
   const queryClient = useQueryClient()
   const { data: tags = [] } = useTags()
 
@@ -57,13 +57,18 @@ export function TagList(props: TagListProps) {
       {
         accessorKey: "name",
         header: "Name",
-        cell: ({ row }) => <div>{row.original.name}</div>,
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-2">
+            <p>{row.original.name}</p>
+            <p className="text-xs text-muted-foreground">{row.original.slug}</p>
+          </div>
+        ),
       },
       {
         accessorKey: "description",
         header: "Description",
         cell: ({ row }) => (
-          <div className="line-clamp-2 text-sm">{row.original.description || "No description"}</div>
+          <div className="line-clamp-2">{row.original.description || "No description"}</div>
         ),
       },
       {

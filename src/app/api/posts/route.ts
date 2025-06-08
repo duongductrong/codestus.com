@@ -1,6 +1,6 @@
 import { db } from "@/db"
 import { postTable, postTagsTable } from "@/db/schema"
-import { desc, eq } from "drizzle-orm"
+import { and, desc, eq, ilike, SQL } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth, isAdmin } from "../../../lib/auth"
@@ -17,10 +17,20 @@ const createPostSchema = z.object({
 })
 
 // GET /api/posts
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = request.nextUrl
+
+    const search = searchParams.get("search")
+
+    const where: SQL[] = []
+    if (search) {
+      where.push(ilike(postTable.title, `%${search}%`))
+    }
+
     const posts = await db.query.postTable.findMany({
       orderBy: [desc(postTable.createdAt)],
+      where: where.length > 0 ? and(...where) : undefined,
       with: {
         tags: {
           with: {

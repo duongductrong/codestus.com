@@ -12,6 +12,7 @@ import "@/styles/globals.scss"
 import { cn } from "@/utils/tailwind-utils"
 import type { Metadata } from "next"
 import { Suspense } from "react"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 import Favicon from "./favicon.ico"
 
 export const metadata: Metadata = {
@@ -69,7 +70,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             <PreferredThemeProvider>
               <RouterProvider>
-                <Suspense>{children}</Suspense>
+                <NuqsAdapter>
+                  <Suspense>{children}</Suspense>
+                </NuqsAdapter>
                 <Toaster position="bottom-center" />
               </RouterProvider>
             </PreferredThemeProvider>
