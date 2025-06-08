@@ -1,10 +1,11 @@
 "use client"
 
-import { useGetPost, useUpdatePost } from "@/api/posts"
-import { useRouter, notFound } from "next/navigation"
+import { useGetPost, useGetPosts, useUpdatePost } from "@/api/posts"
+import { useQueryClient } from "@tanstack/react-query"
+import { notFound, useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { PostFormValues } from "../schema/post-form"
 import { PostForm } from "../components/post-form"
+import { PostFormValues } from "../schema/post-form"
 
 export interface EditPostScreenProps {
   id: number
@@ -12,8 +13,13 @@ export interface EditPostScreenProps {
 
 const EditPostScreen = ({ id }: EditPostScreenProps) => {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: post, isLoading } = useGetPost({ variables: { id } })
-  const { mutateAsync: updatePost, isPending } = useUpdatePost()
+  const { mutateAsync: updatePost, isPending } = useUpdatePost({
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: useGetPosts.getKey() })
+    },
+  })
 
   if (isLoading) {
     return (

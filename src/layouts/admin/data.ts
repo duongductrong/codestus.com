@@ -59,6 +59,7 @@ export const currentUser: User = {
 export const mainNavigation = [
   { name: "Overview", href: ADMIN_URLS.OVERVIEW, active: true },
   { name: "Posts", href: ADMIN_URLS.POSTS.INDEX },
+  { name: "Tags", href: ADMIN_URLS.TAGS.INDEX },
   // { name: "Domains", href: "#" },
   // { name: "Usage", href: "#" },
   // { name: "Monitoring", href: "#" },

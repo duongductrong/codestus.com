@@ -1,6 +1,7 @@
 "use client"
 
-import { useCreatePost } from "@/api/posts"
+import { useCreatePost, useGetPosts } from "@/api/posts"
+import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { PostForm } from "../components/post-form"
@@ -10,7 +11,12 @@ export interface CreatePostScreenProps {}
 
 const CreatePostScreen = (props: CreatePostScreenProps) => {
   const router = useRouter()
-  const { mutateAsync: createPost, isPending } = useCreatePost()
+  const queryClient = useQueryClient()
+  const { mutateAsync: createPost, isPending } = useCreatePost({
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: useGetPosts.getKey() })
+    },
+  })
 
   const handleSubmit = async (data: PostFormValues) => {
     try {

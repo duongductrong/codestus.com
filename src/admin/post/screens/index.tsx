@@ -2,26 +2,29 @@
 
 import { SearchBar } from "@/admin/post/components/search-bar"
 import { useDeletePost, useGetPosts } from "@/api/posts"
-import { useQueryClient } from "@tanstack/react-query"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import { PostTable } from "../components/post-table"
 
-export interface AdminPostListProps {}
+export interface PostListProps {}
 
-const AdminPostList = (props: AdminPostListProps) => {
+const PostList = (props: PostListProps) => {
   const queryClient = useQueryClient()
   const router = useRouter()
   const { data: posts, isLoading } = useGetPosts()
-  const { mutate: deletePost } = useDeletePost()
+  const { mutateAsync: deletePost } = useDeletePost({
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: useGetPosts.getKey() })
+    },
+  })
 
   const handleDeletePost = async (id: number) => {
     try {
       await deletePost(id)
-      queryClient.invalidateQueries({ queryKey: ["posts"] })
       toast.success("Post deleted successfully")
     } catch (error) {
       toast.error("Failed to delete post")
@@ -53,4 +56,4 @@ const AdminPostList = (props: AdminPostListProps) => {
   )
 }
 
-export default AdminPostList
+export default PostList
