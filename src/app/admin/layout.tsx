@@ -1,10 +1,19 @@
+"use client"
+
 import AdminLayout from "@/layouts/admin/layout"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import React from "react"
 
 export interface AdminLayoutProps {
   children: React.ReactNode
 }
 
-const Layout = ({ children }: AdminLayoutProps) => <AdminLayout>{children}</AdminLayout>
+const queryClient = new QueryClient()
+
+const Layout = ({ children }: AdminLayoutProps) => (
+  <QueryClientProvider client={queryClient}>
+    <AdminLayout>{children}</AdminLayout>
+  </QueryClientProvider>
+)
 
 export default Layout

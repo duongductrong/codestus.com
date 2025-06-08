@@ -1,30 +1,37 @@
 "use client"
 
-import { ArticleSection } from "@/admin/post/components/article-section"
-import { PreviewSection } from "@/admin/post/components/preview-section"
-import { ProjectSection } from "@/admin/post/components/project-section"
 import { SearchBar } from "@/admin/post/components/search-bar"
-import { mainNavigation, mockArticles, mockPreviews, mockProjects } from "@/layouts/admin/data"
-import { useState } from "react"
+import { useDeletePost, useGetPosts } from "@/api/posts"
+import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { PostTable } from "../components/post-table"
 
 export interface AdminPostListProps {}
 
 const AdminPostList = (props: AdminPostListProps) => {
-  const [view, setView] = useState<"grid" | "list">("grid")
-  const currentSection = mainNavigation.find((item) => item.active)?.name
+  const queryClient = useQueryClient()
+  const { data: posts, isLoading } = useGetPosts()
+  const { mutate: deletePost } = useDeletePost()
+
+  const handleDeletePost = async (id: number) => {
+    try {
+      await deletePost(id)
+      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      toast.success("Post deleted successfully")
+    } catch (error) {
+      toast.error("Failed to delete post")
+    }
+  }
 
   return (
     <main className="flex-1 px-4 py-6 md:px-6 max-w-screen-2xl mx-auto w-full">
       <div className="mb-6">
-        <SearchBar onViewChange={setView} currentView={view} />
+        <SearchBar />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
-        {currentSection === "Overview" && <ProjectSection projects={mockProjects} view={view} />}
-        {currentSection === "Articles" && <ArticleSection articles={mockArticles} />}
-        <PreviewSection previews={mockPreviews} />
-      </div>
+      <PostTable loading={isLoading} data={posts || []} onDeleteItem={handleDeletePost} />
     </main>
   )
 }
+
 export default AdminPostList
