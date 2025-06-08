@@ -1,8 +1,8 @@
 "use client"
 
-import { useAuth } from "../contexts/auth-context"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { useAuth } from "../contexts/auth-context"
 
 interface RequireAuthProps {
   children: React.ReactNode
@@ -15,17 +15,18 @@ export function RequireAuth({ children, requireAdmin = false }: RequireAuthProps
   const pathname = usePathname()
 
   useEffect(() => {
-    if (isLoading) return
+    ;(() => {
+      if (isLoading) return
 
-    if (!user) {
-      router.push(`/auth/sign-in?redirect=${pathname}`)
-      return
-    }
+      if (!user) {
+        router.push(`/auth/sign-in?redirect=${pathname}`)
+        return
+      }
 
-    if (requireAdmin && user.role !== "admin") {
-      router.push("/")
-      return
-    }
+      if (requireAdmin && user.role !== "admin") {
+        router.push("/")
+      }
+    })()
   }, [user, isLoading, router, pathname, requireAdmin])
 
   if (isLoading) {
@@ -36,5 +37,5 @@ export function RequireAuth({ children, requireAdmin = false }: RequireAuthProps
     return null
   }
 
-  return <>{children}</>
-} 
+  return children
+}

@@ -12,6 +12,7 @@
     "@typescript-eslint/no-nested-ternary": "off",
     "@typescript-eslint/no-case-declarations": "off",
 
+    "no-console": "off",
     "no-undef": "off",
     "no-unused-vars": "off",
     "no-param-reassign": "off",

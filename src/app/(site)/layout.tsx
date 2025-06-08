@@ -3,7 +3,7 @@ import { LayoutProps } from "@/types/utilities"
 
 const isProduction = process.env.APP_ENV === "production"
 
-export interface SiteLayoutProps extends LayoutProps<"sidebar" | "header"> {}
+interface SiteLayoutProps extends LayoutProps<"header"> {}
 
 const Layout = ({ children, header }: SiteLayoutProps) => (
   <SiteLayout isActiveAnalytics={!!isProduction}>

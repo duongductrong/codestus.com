@@ -14,6 +14,6 @@ const queryClient = new QueryClient({
   },
 })
 
-export const QueryClientProvider = ({ children }: PropsWithChildren) => {
-  return <QueryClientProviderTanstack client={queryClient}>{children}</QueryClientProviderTanstack>
-}
+export const QueryClientProvider = ({ children }: PropsWithChildren) => (
+  <QueryClientProviderTanstack client={queryClient}>{children}</QueryClientProviderTanstack>
+)

@@ -6,14 +6,12 @@ import { inter } from "@/lib/fonts"
 import "@/styles/globals.scss"
 import { cn } from "@/utils/tailwind-utils"
 import type { Metadata } from "next"
-
 import OpenGraphImage from "@/assets/images/open-graph-image.png"
-import Favicon from "./favicon.ico"
-
 import { QueryClientProvider } from "@/components/custom-providers/query-client"
 import "@/lib/bigint"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthProvider } from "@/features/auth/contexts/auth-context"
+import Favicon from "./favicon.ico"
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || ""),
