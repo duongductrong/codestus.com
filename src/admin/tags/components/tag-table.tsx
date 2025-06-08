@@ -22,7 +22,7 @@ interface TagTableProps {}
 
 export function TagTable(props: TagTableProps) {
   const queryClient = useQueryClient()
-  const { data: tags = [] } = useTags()
+  const { data: tags = [], isLoading: isLoadingTags, isFetching: isFetchingTags } = useTags()
 
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
 
@@ -104,6 +104,8 @@ export function TagTable(props: TagTableProps) {
     []
   )
 
+  const isLoading = isLoadingTags || isFetchingTags
+
   return (
     <div>
       <div className="rounded-md border">
@@ -113,7 +115,7 @@ export function TagTable(props: TagTableProps) {
           onRowClick={(data) => {
             setEditingTag(data)
           }}
-          loading={isUpdating || isDeleting}
+          loading={isLoading || isUpdating || isDeleting}
         />
       </div>
 
