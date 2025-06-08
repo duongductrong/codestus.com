@@ -3,6 +3,7 @@
 import { ADMIN_URLS } from "@/constants/admin"
 import { mainNavigation, NavigationItem } from "@/layouts/admin/data"
 import { cn } from "@/utils/tailwind-utils"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 export function SecondaryNavigation() {
@@ -25,7 +26,7 @@ export function SecondaryNavigation() {
 
 function NavItem({ item, active }: { item: NavigationItem; active?: boolean }) {
   return (
-    <a
+    <Link
       href={item.href}
       className={cn(
         "px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors relative",
@@ -41,6 +42,6 @@ function NavItem({ item, active }: { item: NavigationItem; active?: boolean }) {
           aria-hidden="true"
         />
       )}
-    </a>
+    </Link>
   )
 }
