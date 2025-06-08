@@ -1,11 +1,12 @@
 import { db } from "@/db"
 import { userTable } from "@/db/schema"
-import { eq } from "drizzle-orm"
-import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
 import { verifyPassword } from "@/utils/auth"
+import { eq } from "drizzle-orm"
 import { sign } from "jsonwebtoken"
 import { cookies } from "next/headers"
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { AUTH_TOKEN_KEY } from "../../auth"
 
 const signInSchema = z.object({
   email: z.string().email(),
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
     )
 
     // Set cookie
-    cookies().set("auth-token", token, {
+    cookies().set(AUTH_TOKEN_KEY, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -57,4 +58,4 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ error: "Failed to sign in" }, { status: 500 })
   }
-} 
+}

@@ -104,6 +104,12 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.80.6
         version: 5.80.6(react@18.3.1)
+      '@tanstack/react-query-devtools':
+        specifier: ^5.80.6
+        version: 5.80.6(@tanstack/react-query@5.80.6(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-query-next-experimental':
+        specifier: ^5.80.6
+        version: 5.80.6(@tanstack/react-query@5.80.6(react@18.3.1))(next@14.2.13(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.79.3))(react@18.3.1)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2604,6 +2610,22 @@ packages:
 
   '@tanstack/query-core@5.80.6':
     resolution: {integrity: sha512-nl7YxT/TAU+VTf+e2zTkObGTyY8YZBMnbgeA1ee66lIVqzKlYursAII6z5t0e6rXgwUMJSV4dshBTNacNpZHbQ==}
+
+  '@tanstack/query-devtools@5.80.0':
+    resolution: {integrity: sha512-D6gH4asyjaoXrCOt5vG5Og/YSj0D/TxwNQgtLJIgWbhbWCC/emu2E92EFoVHh4ppVWg1qT2gKHvKyQBEFZhCuA==}
+
+  '@tanstack/react-query-devtools@5.80.6':
+    resolution: {integrity: sha512-y7Es0OJ4RYQxrPYsuuQP0jxjgJ40a03UbEPmJ6vwf/ERVMRoRIMkpjtvPxf1D+n9nwPfWmGdD0jW8Wxd+TxeEw==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.80.6
+      react: ^18 || ^19
+
+  '@tanstack/react-query-next-experimental@5.80.6':
+    resolution: {integrity: sha512-TjtwtZlvPXFfqovZErXffvL4cwVibTx0xPjfx5v2pZoYX0papIV6RnCom+UdoqT8UscG3YzUqXKVcn5txX8iBA==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.80.6
+      next: ^13 || ^14 || ^15
+      react: ^18 || ^19
 
   '@tanstack/react-query@5.80.6':
     resolution: {integrity: sha512-izX+5CnkpON3NQGcEm3/d7LfFQNo9ZpFtX2QsINgCYK9LT2VCIdi8D3bMaMSNhrAJCznRoAkFic76uvLroALBw==}
@@ -8814,6 +8836,20 @@ snapshots:
       tailwindcss: 3.4.12
 
   '@tanstack/query-core@5.80.6': {}
+
+  '@tanstack/query-devtools@5.80.0': {}
+
+  '@tanstack/react-query-devtools@5.80.6(@tanstack/react-query@5.80.6(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-devtools': 5.80.0
+      '@tanstack/react-query': 5.80.6(react@18.3.1)
+      react: 18.3.1
+
+  '@tanstack/react-query-next-experimental@5.80.6(@tanstack/react-query@5.80.6(react@18.3.1))(next@14.2.13(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.79.3))(react@18.3.1)':
+    dependencies:
+      '@tanstack/react-query': 5.80.6(react@18.3.1)
+      next: 14.2.13(@babel/core@7.25.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.79.3)
+      react: 18.3.1
 
   '@tanstack/react-query@5.80.6(react@18.3.1)':
     dependencies:

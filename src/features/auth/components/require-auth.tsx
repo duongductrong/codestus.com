@@ -1,5 +1,6 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { useAuth } from "../contexts/auth-context"
@@ -30,7 +31,14 @@ export function RequireAuth({ children, requireAdmin = false }: RequireAuthProps
   }, [user, isLoading, router, pathname, requireAdmin])
 
   if (isLoading) {
-    return <div>Loading...</div> // You can replace this with a proper loading component
+    return (
+      <section className="flex flex-col items-center justify-center gap-4 h-dvh">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="size-4 animate-spin" />
+          <span>Loading</span>
+        </div>
+      </section>
+    )
   }
 
   if (!user || (requireAdmin && user.role !== "admin")) {

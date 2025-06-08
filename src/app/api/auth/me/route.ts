@@ -1,12 +1,12 @@
 import { db } from "@/db"
-import { userTable } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { NextRequest, NextResponse } from "next/server"
 import { verify } from "jsonwebtoken"
+import { NextRequest, NextResponse } from "next/server"
+import { AUTH_TOKEN_KEY } from "../../auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth-token")?.value
+    const token = request.cookies.get(AUTH_TOKEN_KEY)?.value
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -35,4 +35,4 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching user:", error)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-} 
+}

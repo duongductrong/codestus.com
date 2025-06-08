@@ -35,27 +35,21 @@ export const PostTable = ({ data, loading, onDeleteItem, onSelectItem }: PostTab
             <span className="flex gap-2 text-xs text-muted-foreground">
               Visits: {row.original.views}
             </span>
+            <span className="flex gap-2 text-xs text-muted-foreground">
+              {dayjs(row.original.createdAt).format("DD/MM/YYYY HH:mm")}
+            </span>
+            <span className="flex gap-2 text-xs text-muted-foreground">
+              {dayjs(row.original.updatedAt).format("DD/MM/YYYY HH:mm")}
+            </span>
           </div>
         </div>
       ),
     },
     {
-      accessorKey: "slug",
-      cell: ({ row }) => <div className="line-clamp-1 whitespace-nowrap">{row.original.slug}</div>,
-    },
-    {
-      accessorKey: "publishAt",
-      cell: ({ row }) => dayjs(row.original.publishAt).format("DD/MM/YYYY"),
-    },
-    {
-      accessorKey: "updatedAt",
-      cell: ({ row }) => dayjs(row.original.updatedAt).format("DD/MM/YYYY"),
-    },
-    {
       id: "actions",
       cell: ({ row }) =>
         onDeleteItem && (
-          <div className="text-right">
+          <div role="presentation" className="text-right" onClick={(evt) => evt.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <EllipsisVertical className="size-4" />

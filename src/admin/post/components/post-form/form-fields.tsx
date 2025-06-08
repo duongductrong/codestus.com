@@ -113,7 +113,7 @@ export function FormFields({
                     </TiptapDropdown>
                     <TiptapDivider />
                   </TiptapToolbar>
-                  <TiptapContent className="prose dark:prose-invert max-w-full min-h-[500px]" />
+                  <TiptapContent className="prose dark:prose-invert max-w-full min-h-[500px] [&>.tiptap]:pb-52" />
                 </TiptapEditor>
               </FormControl>
               <FormMessage />

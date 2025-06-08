@@ -3,6 +3,7 @@ import { postTable, postTagsTable } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
+import { auth, isAdmin } from "../auth"
 
 const createPostSchema = z.object({
   title: z.string().min(1),
@@ -39,8 +40,16 @@ export async function GET() {
 // POST /api/posts
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const [user, body] = await Promise.all([auth(request), request.json()])
     const validatedData = createPostSchema.parse(body)
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!isAdmin(user)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
 
     const post = await db.transaction(async (tx) => {
       const [newPost] = await tx
@@ -81,16 +90,28 @@ export async function POST(request: NextRequest) {
 // PUT /api/posts/:id
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
+    const [user, body] = await Promise.all([auth(request), request.json()])
     const id = Number(request.nextUrl.searchParams.get("id"))
 
-    if (!id) {
-      return NextResponse.json({ error: "Post ID is required" }, { status: 400 })
+    const post = await db.query.postTable.findFirst({
+      where: eq(postTable.id, id),
+    })
+
+    if (!post) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    const post = await db.update(postTable).set(body).where(eq(postTable.id, id)).returning()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-    return NextResponse.json(post[0])
+    if (!isAdmin(user)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const postUpdated = await db.update(postTable).set(body).where(eq(postTable.id, id)).returning()
+
+    return NextResponse.json(postUpdated[0])
   } catch (error) {
     console.error("Error updating post:", error)
     return NextResponse.json({ error: "Failed to update post" }, { status: 500 })
@@ -100,10 +121,21 @@ export async function PUT(request: NextRequest) {
 // DELETE /api/posts/:id
 export async function DELETE(request: NextRequest) {
   try {
-    const id = Number(request.nextUrl.searchParams.get("id"))
+    const [user, id] = await Promise.all([
+      auth(request),
+      Number(request.nextUrl.searchParams.get("id")),
+    ])
 
-    if (!id) {
-      return NextResponse.json({ error: "Post ID is required" }, { status: 400 })
+    const post = await db.query.postTable.findFirst({
+      where: eq(postTable.id, id),
+    })
+
+    if (!post) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
+
+    if (!isAdmin(user)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     await db.delete(postTable).where(eq(postTable.id, id))
