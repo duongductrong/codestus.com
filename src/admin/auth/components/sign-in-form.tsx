@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/features/auth/contexts/auth-context"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -32,17 +33,17 @@ export type SignInValues = z.infer<typeof signInSchema>
 
 export interface SignInFormProps {
   onSubmit: SubmitHandler<SignInValues>
-  loading?: boolean
-
-  initialValues?: SignInValues
+  loading: boolean
 }
 
-export function SignInForm({ onSubmit, loading, initialValues }: SignInFormProps) {
+export function SignInForm({ onSubmit, loading }: SignInFormProps) {
+  const { signIn, isLoading } = useAuth()
+
   const form = useForm<SignInValues>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: initialValues?.email ?? "",
-      password: initialValues?.password ?? "",
+      email: "",
+      password: "",
     },
   })
 
@@ -50,7 +51,7 @@ export function SignInForm({ onSubmit, loading, initialValues }: SignInFormProps
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>Sign in to access your admin dashboard</CardDescription>
+        <CardDescription>Sign in to access your account</CardDescription>
       </CardHeader>
 
       <Form {...form}>
@@ -67,7 +68,7 @@ export function SignInForm({ onSubmit, loading, initialValues }: SignInFormProps
                       type="email"
                       placeholder="Enter your email"
                       {...field}
-                      disabled={loading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -85,7 +86,7 @@ export function SignInForm({ onSubmit, loading, initialValues }: SignInFormProps
                       type="password"
                       placeholder="Enter your password"
                       {...field}
-                      disabled={loading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -94,8 +95,8 @@ export function SignInForm({ onSubmit, loading, initialValues }: SignInFormProps
             />
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Don&apos;t have an account?{" "}

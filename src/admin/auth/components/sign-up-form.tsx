@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/features/auth/contexts/auth-context"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -33,17 +34,18 @@ export type SignUpValues = z.infer<typeof signUpSchema>
 
 export interface SignUpFormProps {
   onSubmit: SubmitHandler<SignUpValues>
-  loading?: boolean
-  initialValues?: SignUpValues
+  loading: boolean
 }
 
-export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps) {
+export function SignUpForm({ onSubmit, loading }: SignUpFormProps) {
+  const { signUp, isLoading } = useAuth()
+
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      name: initialValues?.name ?? "",
-      email: initialValues?.email ?? "",
-      password: initialValues?.password ?? "",
+      name: "",
+      email: "",
+      password: "",
     },
   })
 
@@ -64,11 +66,7 @@ export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter your name"
-                      {...field}
-                      disabled={loading}
-                    />
+                    <Input placeholder="Enter your name" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,7 +83,7 @@ export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps
                       type="email"
                       placeholder="Enter your email"
                       {...field}
-                      disabled={loading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -103,7 +101,7 @@ export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps
                       type="password"
                       placeholder="Enter your password"
                       {...field}
-                      disabled={loading}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -112,8 +110,8 @@ export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps
             />
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing up..." : "Sign Up"}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing up..." : "Sign Up"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Already have an account?{" "}
@@ -126,4 +124,4 @@ export function SignUpForm({ onSubmit, loading, initialValues }: SignUpFormProps
       </Form>
     </Card>
   )
-} 
+}

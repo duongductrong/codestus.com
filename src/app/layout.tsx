@@ -13,6 +13,7 @@ import Favicon from "./favicon.ico"
 import { QueryClientProvider } from "@/components/custom-providers/query-client"
 import "@/lib/bigint"
 import { Toaster } from "@/components/ui/sonner"
+import { AuthProvider } from "@/features/auth/contexts/auth-context"
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || ""),
@@ -66,12 +67,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <PreferredHTML lang="vi" className={cn(inter.variable, "font-inter")}>
       <PreferredBody ifRegexMatch="" then={{ className: "" }} otherwise={{ className: "" }}>
         <QueryClientProvider>
-          <PreferredThemeProvider>
-            <RouterProvider>
-              {children}
-              <Toaster position="bottom-center" />
-            </RouterProvider>
-          </PreferredThemeProvider>
+          <AuthProvider>
+            <PreferredThemeProvider>
+              <RouterProvider>
+                {children}
+                <Toaster position="bottom-center" />
+              </RouterProvider>
+            </PreferredThemeProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </PreferredBody>
     </PreferredHTML>

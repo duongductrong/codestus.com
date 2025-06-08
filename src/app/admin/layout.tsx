@@ -1,12 +1,12 @@
 "use client"
 
+import { RequireAuth } from "@/features/auth/components/require-auth"
 import AdminLayout from "@/layouts/admin/layout"
-import React from "react"
 
-export interface AdminLayoutProps {
-  children: React.ReactNode
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <RequireAuth requireAdmin>
+      <AdminLayout>{children}</AdminLayout>
+    </RequireAuth>
+  )
 }
-
-const Layout = ({ children }: AdminLayoutProps) => <AdminLayout>{children}</AdminLayout>
-
-export default Layout
