@@ -10,14 +10,14 @@ export interface PostWithRelations extends Post {
 export interface CreatePostPayload {
   title: string
   slug: string
-  description?: string
-  thumbnail?: string
-  content?: string
+  description?: string | null
+  thumbnail?: string | null
+  content?: string | null
   status?: "draft" | "published"
-  topicId?: number
+  topicId?: number | null
 }
 
 export interface UpdatePostPayload extends Partial<CreatePostPayload> {
   views?: number
-  publishAt?: Date
+  publishAt?: Date | null
 } 

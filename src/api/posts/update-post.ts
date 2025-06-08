@@ -1,26 +1,37 @@
 import { createMutation } from "react-query-kit"
-import { PostWithRelations, UpdatePostPayload } from "./types"
+import { PostWithRelations } from "./types"
 
-interface UpdatePostVariables {
+type Response = PostWithRelations
+type Variables = {
   id: number
-  data: UpdatePostPayload
+  data: {
+    title?: string
+    slug?: string
+    description?: string | null
+    thumbnail?: string | null
+    content?: string | null
+    status?: "draft" | "published"
+    topicId?: number | null
+    tags?: number[]
+  }
 }
 
-async function updatePost({ id, data }: UpdatePostVariables): Promise<PostWithRelations> {
-  const response = await fetch(`/api/posts?id=${id}`, {
-    method: "PUT",
+async function updatePost({ id, data }: Variables): Promise<Response> {
+  const response = await fetch(`/api/posts/${id}`, {
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   })
+
   if (!response.ok) {
     throw new Error("Failed to update post")
   }
+
   return response.json()
 }
 
-export const useUpdatePost = createMutation<PostWithRelations, UpdatePostVariables>({
-  mutationKey: ["updatePost"],
+export const useUpdatePost = createMutation({
   mutationFn: updatePost,
 }) 

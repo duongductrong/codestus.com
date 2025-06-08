@@ -1,7 +1,19 @@
 import { createMutation } from "react-query-kit"
-import { CreatePostPayload, PostWithRelations } from "./types"
+import { PostWithRelations } from "./types"
 
-async function createPost(variables: CreatePostPayload): Promise<PostWithRelations> {
+type Response = PostWithRelations
+type Variables = {
+  title: string
+  slug: string
+  description?: string | null
+  thumbnail?: string | null
+  content?: string | null
+  status?: "draft" | "published"
+  topicId?: number | null
+  tags?: number[]
+}
+
+async function createPost(variables: Variables): Promise<Response> {
   const response = await fetch("/api/posts", {
     method: "POST",
     headers: {
@@ -9,13 +21,14 @@ async function createPost(variables: CreatePostPayload): Promise<PostWithRelatio
     },
     body: JSON.stringify(variables),
   })
+
   if (!response.ok) {
     throw new Error("Failed to create post")
   }
+
   return response.json()
 }
 
-export const useCreatePost = createMutation<PostWithRelations, CreatePostPayload>({
-  mutationKey: ["createPost"],
+export const useCreatePost = createMutation({
   mutationFn: createPost,
 }) 

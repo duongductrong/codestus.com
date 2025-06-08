@@ -12,6 +12,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import dayjs from "dayjs"
 import capitalize from "lodash/capitalize"
 import { EllipsisVertical } from "lucide-react"
+import Link from "next/link"
 
 export interface PostTableProps {
   data: PostWithRelations[]
@@ -60,7 +61,9 @@ export const PostTable = ({ data, loading, onDeleteItem, onSelectItem }: PostTab
                 <EllipsisVertical className="size-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem>Edit</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/posts/${row.original.id}`}>Edit</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDeleteItem?.(row.original.id)}>
                   Delete
                 </DropdownMenuItem>
@@ -71,5 +74,5 @@ export const PostTable = ({ data, loading, onDeleteItem, onSelectItem }: PostTab
     },
   ]
 
-  return <MinimalTable data={data} columns={columns} loading={loading} />
+  return <MinimalTable onRowClick={onSelectItem} data={data} columns={columns} loading={loading} />
 }

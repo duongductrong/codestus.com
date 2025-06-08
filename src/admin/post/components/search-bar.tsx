@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 
-interface SearchBarProps {}
+export interface SearchBarProps {
+  actions?: React.ReactNode
+}
 
-export function SearchBar(props: SearchBarProps) {
+export function SearchBar({ actions }: SearchBarProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 w-full">
       <div className="relative flex-1">
@@ -17,12 +19,7 @@ export function SearchBar(props: SearchBarProps) {
         />
       </div>
 
-      <div className="flex gap-2 items-center shrink-0">
-        <Button className="text-sm h-10 rounded-md">
-          Add New...
-          <span className="sr-only">Add new</span>
-        </Button>
-      </div>
+      {actions ? <div className="flex gap-2 items-center shrink-0">{actions}</div> : null}
     </div>
   )
 }
