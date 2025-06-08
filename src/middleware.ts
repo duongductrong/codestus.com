@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
-import { AUTH_TOKEN_KEY } from "./app/api/auth"
+import { AUTH_TOKEN_KEY } from "./lib/auth"
 
 export const runtime = "nodejs"
 

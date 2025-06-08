@@ -6,7 +6,7 @@ import { sign } from "jsonwebtoken"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { AUTH_TOKEN_KEY } from "../../auth"
+import { AUTH_TOKEN_KEY } from "../../../../lib/auth"
 
 const signInSchema = z.object({
   email: z.string().email(),

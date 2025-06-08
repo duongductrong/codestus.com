@@ -2,7 +2,7 @@ import { db } from "@/db"
 import { eq } from "drizzle-orm"
 import { verify } from "jsonwebtoken"
 import { NextRequest, NextResponse } from "next/server"
-import { AUTH_TOKEN_KEY } from "../../auth"
+import { AUTH_TOKEN_KEY } from "../../../../lib/auth"
 
 export async function GET(request: NextRequest) {
   try {

@@ -1,4 +1,4 @@
-import { auth, isAdmin } from "@/app/api/auth"
+import { auth, isAdmin } from "@/lib/auth"
 import { db } from "@/db"
 import { tagTable } from "@/db/schema"
 import { desc, eq } from "drizzle-orm"

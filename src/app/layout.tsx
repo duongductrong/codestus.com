@@ -11,6 +11,7 @@ import { QueryClientProvider } from "@/lib/react-query"
 import "@/styles/globals.scss"
 import { cn } from "@/utils/tailwind-utils"
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import Favicon from "./favicon.ico"
 
 export const metadata: Metadata = {
@@ -68,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>
             <PreferredThemeProvider>
               <RouterProvider>
-                {children}
+                <Suspense>{children}</Suspense>
                 <Toaster position="bottom-center" />
               </RouterProvider>
             </PreferredThemeProvider>
