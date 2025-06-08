@@ -14,7 +14,7 @@ const createTagSchema = z.object({
 export async function GET() {
   try {
     const tags = await db.query.tagTable.findMany({
-      orderBy: [desc(tagTable.created_at)],
+      orderBy: [desc(tagTable.id)],
     })
 
     return NextResponse.json(tags)

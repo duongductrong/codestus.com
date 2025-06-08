@@ -1,5 +1,6 @@
 "use client"
 
+import { useDeleteTag, useTags, useUpdateTag } from "@/api/tags"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -7,95 +8,108 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { MinimalTable } from "@/components/ui/minimal-table"
 import { Tag } from "@/db/schema"
-import { MoreHorizontal, Pencil, Trash } from "lucide-react"
-import { useState } from "react"
+import { getErrorMessage } from "@/lib/error"
+import { useQueryClient } from "@tanstack/react-query"
+import { ColumnDef } from "@tanstack/react-table"
+import { MoreHorizontal, Trash } from "lucide-react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 import { TagFormDialog } from "./tag-form-dialog"
 
-interface TagListProps {
-  tags: Tag[]
-  onUpdate: (id: number, data: { name: string; description?: string }) => Promise<void>
-  onDelete: (id: number) => Promise<void>
-  loading?: boolean
-}
+interface TagListProps {}
 
-export function TagList({ tags, onUpdate, onDelete, loading }: TagListProps) {
+export function TagList(props: TagListProps) {
+  const queryClient = useQueryClient()
+  const { data: tags = [] } = useTags()
+
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
+
+  const { mutateAsync: updateTag, isPending: isUpdating } = useUpdateTag({
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: useTags.getKey() })
+
+      toast.success("Tag updated successfully")
+    },
+    onError(error) {
+      toast.error(getErrorMessage(error))
+    },
+  })
+  const { mutateAsync: deleteTag, isPending: isDeleting } = useDeleteTag({
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: useTags.getKey() })
+      toast.success("Tag deleted successfully")
+    },
+    onError(error) {
+      toast.error(getErrorMessage(error))
+    },
+  })
 
   const handleUpdate = async (data: { name: string; description?: string }) => {
     if (!editingTag) return
-    await onUpdate(editingTag.id, data)
+    await updateTag({ id: editingTag.id, ...data })
     setEditingTag(null)
   }
+
+  const columns = useMemo<ColumnDef<Tag>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => <div>{row.original.name}</div>,
+      },
+      {
+        accessorKey: "description",
+        header: "Description",
+        cell: ({ row }) => (
+          <div className="line-clamp-2 text-sm">{row.original.description || "No description"}</div>
+        ),
+      },
+      {
+        accessorKey: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <div role="presentation" className="text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem
+                  onClick={() => {
+                    // eslint-disable-next-line no-alert
+                    if (window.confirm("Are you sure you want to delete this tag?")) {
+                      deleteTag(row.original.id)
+                    }
+                  }}
+                  disabled={isDeleting}
+                >
+                  <Trash />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    []
+  )
 
   return (
     <div>
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead className="w-[70px]" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tags.map((tag) => (
-              <TableRow key={tag.id}>
-                <TableCell className="font-medium">{tag.name}</TableCell>
-                <TableCell>{tag.description || "-"}</TableCell>
-                <TableCell>{tag.slug}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-8 p-0"
-                        disabled={loading}
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => setEditingTag(tag)}
-                        disabled={loading}
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onDelete(tag.id)}
-                        className="text-destructive"
-                        disabled={loading}
-                      >
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-            {tags.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center">
-                  No tags found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <MinimalTable
+          columns={columns}
+          data={tags}
+          onRowClick={(data) => {
+            setEditingTag(data)
+          }}
+          loading={isUpdating || isDeleting}
+        />
       </div>
 
       <TagFormDialog
@@ -104,8 +118,8 @@ export function TagList({ tags, onUpdate, onDelete, loading }: TagListProps) {
         onSubmit={handleUpdate}
         defaultValues={editingTag || undefined}
         mode="edit"
-        loading={loading}
+        loading={isUpdating}
       />
     </div>
   )
-} 
+}

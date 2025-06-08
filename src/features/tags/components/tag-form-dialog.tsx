@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Tag } from "@/db/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useUpdateEffect } from "react-use"
 import { z } from "zod"
 
 const tagFormSchema = z.object({
@@ -66,13 +67,18 @@ export function TagFormDialog({
     }
   }
 
+  useUpdateEffect(() => {
+    form.reset({
+      name: defaultValues?.name ?? "",
+      description: defaultValues?.description ?? "",
+    })
+  }, [mode, defaultValues])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {mode === "create" ? "Create Tag" : "Edit Tag"}
-          </DialogTitle>
+          <DialogTitle>{mode === "create" ? "Create Tag" : "Edit Tag"}</DialogTitle>
           <DialogDescription>
             {mode === "create"
               ? "Create a new tag to organize your content"
@@ -138,4 +144,4 @@ export function TagFormDialog({
       </DialogContent>
     </Dialog>
   )
-} 
+}
