@@ -10,7 +10,9 @@ import type { Metadata } from "next"
 import OpenGraphImage from "@/assets/images/open-graph-image.png"
 import Favicon from "./favicon.ico"
 
+import { QueryClientProvider } from "@/components/custom-providers/query-client"
 import "@/lib/bigint"
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL || ""),
@@ -63,9 +65,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <PreferredHTML lang="vi" className={cn(inter.variable, "font-inter")}>
       <PreferredBody ifRegexMatch="" then={{ className: "" }} otherwise={{ className: "" }}>
-        <PreferredThemeProvider>
-          <RouterProvider>{children}</RouterProvider>
-        </PreferredThemeProvider>
+        <QueryClientProvider>
+          <PreferredThemeProvider>
+            <RouterProvider>
+              {children}
+              <Toaster position="bottom-center" />
+            </RouterProvider>
+          </PreferredThemeProvider>
+        </QueryClientProvider>
       </PreferredBody>
     </PreferredHTML>
   )
