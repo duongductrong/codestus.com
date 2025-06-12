@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/text"
 import { PAGE_URLS } from "@/constants/urls"
 import { generateHtmlFromMarkdownVFile, processMarkdown } from "@/lib/markdown"
 import { getPostBySlug } from "@/queries/post"
+import { hitViews } from "@/queries/post/hit-views"
 import { getSpeedReading } from "@/utils/speed-reading"
 import dayjs from "dayjs"
 import { notFound } from "next/navigation"
@@ -23,6 +24,7 @@ const BlogDetailed = async ({ id }: BlogDetailedProps) => {
 
   if (!post || unpublishYet) notFound()
 
+  hitViews(post.id)
   const url = generateUrlFormSlug(post.slug)
 
   const structuredData = {
